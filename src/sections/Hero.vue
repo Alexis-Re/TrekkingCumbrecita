@@ -1,14 +1,4 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-
-const isVisible = ref(false)
-
-onMounted(() => {
-  setTimeout(() => {
-    isVisible.value = true
-  }, 100)
-})
-
 const scrollToTours = () => {
   document.getElementById('tours')?.scrollIntoView({ behavior: 'smooth' })
 }
@@ -19,52 +9,47 @@ const scrollToContact = () => {
 </script>
 
 <template>
-  <section class="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
+  <section class="relative h-[75vh] md:h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
     <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('/assets/hero/hero.webp')"></div>
-    <div class="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/60 to-primary"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-brand-dark/80 via-brand-dark/60 to-brand-dark"></div>
 
-    <div class="relative z-10 text-center px-6 max-w-4xl mx-auto">
-      <h1
-        :class="[
-          'font-heading text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 transition-all duration-1000',
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        ]"
-      >
-        Trekking Cumbrecita
-      </h1>
+    <div class="relative z-10 flex flex-col md:flex-row items-center justify-between px-6 lg:px-16 max-w-7xl mx-auto gap-12 md:gap-16">
+      <div class="text-center md:text-left">
+        <p class="font-sans text-base md:text-lg tracking-[0.35em] uppercase text-brand-cream/90 [text-shadow:0_2px_10px_rgba(255,255,255,0.3)] mb-2">
+          Trekking
+        </p>
+        <h1 class="font-heading text-6xl md:text-7xl lg:text-8xl font-bold text-brand-white leading-none uppercase">
+          Cumbrecita
+        </h1>
 
-      <p
-        :class="[
-          'text-lg md:text-xl text-cream mb-10 max-w-2xl mx-auto transition-all duration-1000 delay-300',
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        ]"
-      >
-        Explorá los senderos más hermosos del Valle de Calamuchita
-      </p>
+        <div class="w-24 h-px bg-brand-cream/60 my-8 mx-auto md:mx-0"></div>
 
-      <div
-        :class="[
-          'flex flex-col sm:flex-row gap-4 justify-center transition-all duration-1000 delay-500',
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        ]"
-      >
+        <p class="text-base md:text-lg text-brand-cream/90 max-w-lg leading-relaxed mx-auto md:mx-0">
+          Descubrí senderos, paisajes y aventuras en Cumbrecita, en el corazón del Valle de Calamuchita.
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-4 min-w-[220px]">
         <button
           @click="scrollToTours"
-          class="px-8 py-4 bg-yellow text-primary font-semibold rounded-lg hover:bg-gold transition-colors duration-300 text-lg"
+          class="px-12 py-7 border-2 border-brand-cream text-brand-cream font-semibold rounded-lg hover:bg-brand-cream hover:text-brand-dark transition-colors duration-300 text-base flex items-center justify-center gap-2"
         >
-          Explorar Tours
+          Ver Experiencias
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
         </button>
         <button
           @click="scrollToContact"
-          class="px-8 py-4 border-2 border-cream text-cream font-semibold rounded-lg hover:bg-cream hover:text-primary transition-colors duration-300 text-lg"
+          class="px-12 py-7 border-2 border-brand-cream text-brand-cream font-semibold rounded-lg hover:bg-brand-cream hover:text-brand-dark transition-colors duration-300 text-base"
         >
-          Reservar Ahora
+          Reservar
         </button>
       </div>
     </div>
 
     <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-      <svg class="w-6 h-6 text-cream" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="w-6 h-6 text-brand-cream" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
       </svg>
     </div>
