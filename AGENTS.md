@@ -23,19 +23,19 @@ There are no lint, typecheck, or test commands configured.
 ```
 src/
   main.js              # app entry
-  App.vue              # root component (renders Hero + Identidad)
+  App.vue              # root component (renders Hero, Tours, Identity)
   style.css            # Tailwind import + custom theme tokens
-  sections/            # page-level layout sections (Hero.vue, Identidad.vue)
+  sections/            # page-level layout sections (Hero.vue, Tours.vue, Identity.vue)
   components/          # reusable components (empty)
   composables/         # Vue composables (empty)
   data/                # static data (empty)
-  assets/              # source assets (images, styles/)
+  assets/              # source assets (unused, scaffold leftovers)
 public/
   assets/              # static assets served as-is
-    hero/              # hero background images
-    tours/             # per-tour images (e.g. pueblo-escondido/)
-    gallery/           # gallery images (empty)
-    brand/             # brand assets (cascada-rober.jpg)
+    hero/              # hero background images (hero.webp)
+    brand/             # brand assets (robertomolina.jpg)
+    navbar/            # navbar assets (logoTC.webp)
+    tours/             # per-tour images (champaqui/)
   favicon.svg
   icons.svg
 ```
@@ -43,8 +43,8 @@ public/
 ## Conventions
 
 - Site language is **Spanish** (`index.html` has `lang="es"`)
-- Section IDs referenced in scroll navigation: `#tours`, `#contacto`, `#identity`
+- Section IDs referenced in scroll navigation: `#tours`, `#identity`
 - Hero background image loaded via CSS `background-image` from `public/assets/hero/hero.webp`
-- Animations use Tailwind utility classes with `transition-all duration-1000`
+- Animations use Tailwind utility classes with `transition-all duration-300`, `duration-500`
 - Font families: `font-sans` (Inter) for body, `font-heading` (Bebas Neue) for headings
 - Empty directories (`components/`, `composables/`, `data/`) are scaffolding — populate as the landing page grows

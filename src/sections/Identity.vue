@@ -19,11 +19,7 @@ const valores = [
 </script>
 
 <template>
-  <section id="identity" class="relative bg-brand-dark py-24 md:py-32 overflow-hidden">
-    <div class="absolute top-1/2 -translate-y-1/2 -right-20 font-heading text-[250px] leading-none text-brand-white/[0.03] select-none pointer-events-none">
-      15+
-    </div>
-
+  <section id="identity" class="relative bg-brand-dark py-40 md:py-52 mt-12 md:mt-20 overflow-hidden">
     <div class="relative z-10 max-w-7xl mx-auto px-10 lg:px-20">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
 

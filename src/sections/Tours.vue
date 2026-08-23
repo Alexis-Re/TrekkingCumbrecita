@@ -1,8 +1,4 @@
 <script setup>
-import { ref } from 'vue'
-
-const scrollContainer = ref(null)
-
 const tours = [
   {
     nombre: 'Ascenso al Cerro Tradicional Champaqui',
@@ -95,60 +91,21 @@ const tours = [
     itinerario: []
   }
 ]
-
-function getScrollAmount() {
-  const card = scrollContainer.value?.firstElementChild
-  if (!card) return 320
-  return card.offsetWidth + 24
-}
-
-function scrollLeft() {
-  scrollContainer.value?.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' })
-}
-
-function scrollRight() {
-  scrollContainer.value?.scrollBy({ left: getScrollAmount(), behavior: 'smooth' })
-}
 </script>
 
 <template>
-  <section id="tours" class="relative bg-brand-dark py-24 md:py-32 overflow-hidden">
+  <section id="tours" class="relative bg-brand-dark py-40 md:py-52 mt-12 md:mt-20 overflow-hidden">
     <div class="max-w-7xl mx-auto px-10 lg:px-20">
       <!-- Header -->
-      <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-12">
-        <div>
-          <h2 class="font-heading text-4xl md:text-5xl text-brand-white mb-4">
-            Nuestros Trekking
-          </h2>
-          <div class="h-1 w-24 bg-gradient-to-r from-brand-orange to-brand-gold"></div>
-        </div>
-
-        <!-- Navigation arrows -->
-        <div class="flex gap-3 mt-6 md:mt-0">
-          <button
-            @click="scrollLeft"
-            class="w-10 h-10 rounded-full border-2 border-brand-cream/30 text-brand-cream flex items-center justify-center hover:bg-brand-orange hover:border-brand-orange transition-all duration-300"
-            aria-label="Anterior"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-            </svg>
-          </button>
-          <button
-            @click="scrollRight"
-            class="w-10 h-10 rounded-full border-2 border-brand-cream/30 text-brand-cream flex items-center justify-center hover:bg-brand-orange hover:border-brand-orange transition-all duration-300"
-            aria-label="Siguiente"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-            </svg>
-          </button>
-        </div>
+      <div class="mb-12">
+        <h2 class="font-heading text-4xl md:text-5xl text-brand-white mb-4">
+          Nuestros Trekking
+        </h2>
+        <div class="h-1 w-24 bg-gradient-to-r from-brand-orange to-brand-gold"></div>
       </div>
 
       <!-- Horizontal scroll container -->
       <div
-        ref="scrollContainer"
         class="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-6 scrollbar-hide"
       >
         <article
