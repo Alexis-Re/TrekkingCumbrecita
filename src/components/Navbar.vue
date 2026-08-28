@@ -8,13 +8,14 @@ const activeSection = ref('')
 const links = [
   { label: 'Experiencias', href: '#tours' },
   { label: 'Identidad', href: '#identity' },
-  { label: 'Contacto', href: 'https://www.instagram.com/trekking_cumbrecita/', external: true }
+  { label: 'Galería', href: '#gallery' },
+  { label: 'Contacto', href: '#contacto' }
 ]
 
 function handleScroll() {
   scrolled.value = window.scrollY > 50
 
-  const sections = ['tours', 'identity']
+  const sections = ['tours', 'identity', 'gallery', 'contacto']
   for (const id of sections.reverse()) {
     const el = document.getElementById(id)
     if (el && el.getBoundingClientRect().top <= 150) {
