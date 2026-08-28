@@ -73,7 +73,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
           appear
         >
           <div
-            class="relative bg-brand-secondary rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden border border-brand-cream/10 shadow-2xl"
+            class="relative bg-brand-card rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden border border-brand-cream/10 shadow-2xl"
           >
             <!-- Close button -->
             <button

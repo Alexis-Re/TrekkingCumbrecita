@@ -1,4 +1,4 @@
-export const tours = [
+﻿export const tours = [
   {
     nombre: 'Ascenso al Cerro Tradicional Champaqui',
     duracion: '3 días / 2 noches',
@@ -141,9 +141,9 @@ export const tours = [
   },
   {
     nombre: 'Cumbrecita: Río subterráneo y Cascada escondida',
-    duracion: 'Definir',
-    dificultad: 'Definir',
-    precio: 'Definir',
+    duracion: '1 día',
+    dificultad: 'Media – Baja',
+    precio: '$50.000',
     imagen: '/assets/tours/Cumbrecitariosubtecascada/grupo-saltando.webp',
     slug: 'rio-subterraneo-cascada-escondida',
     imagenes: [
@@ -160,10 +160,30 @@ export const tours = [
       '/assets/tours/Cumbrecitariosubtecascada/pasiaje-grupo.webp',
       '/assets/tours/Cumbrecitariosubtecascada/Robert.webp'
     ],
-    horarios: 'Definir',
-    incluye: [],
-    itinerario: [],
-    reunion: 'Definir',
+    horarios: 'Sábados, Domingos y Feriados – 9:00 a.m.',
+    incluye: [
+      'Guía habilitado',
+      'Seguro médico',
+      'Vianda de marcha',
+      'Comunicación por radio VHF'
+    ],
+    itinerario: [
+      {
+        dia: 1,
+        titulo: 'Río Subterráneo y Cascada Escondida',
+        horas: [
+          { hora: '09:00', evento: 'Encuentro en Panadería de La Cumbrecita' },
+          { hora: '09:15', evento: 'Inicio del trekking hacia el Río Subterráneo' },
+          { hora: '11:00', evento: 'Ingreso al Río Subterráneo (primer tramo)' },
+          { hora: '12:30', evento: 'Descanso y vianda de marcha' },
+          { hora: '13:00', evento: 'Continuación hacia la Cascada Escondida (segundo tramo)' },
+          { hora: '14:30', evento: 'Llegada a la Cascada Escondida – baño y descanso' },
+          { hora: '15:30', evento: 'Regreso' },
+          { hora: '16:00', evento: 'Fin de la actividad' }
+        ]
+      }
+    ],
+    reunion: 'Panadería de La Cumbrecita',
     pago: { alias: '', banco: '', titular: '' }
   },
   {
@@ -171,7 +191,7 @@ export const tours = [
     duracion: 'Definir',
     dificultad: 'Definir',
     precio: 'Definir',
-    imagen: '/assets/tours/default.webp',
+    imagen: '/assets/tours/default.svg',
     slug: 'garganta-del-diablo-cerro-corona-pozo-cabras',
     imagenes: [],
     horarios: 'Definir',
@@ -185,7 +205,7 @@ export const tours = [
     duracion: 'Definir',
     dificultad: 'Definir',
     precio: 'Definir',
-    imagen: '/assets/tours/default.webp',
+    imagen: '/assets/tours/default.svg',
     slug: 'cascadas-salvajes-rio-subterraneo',
     imagenes: [],
     horarios: 'Definir',
@@ -199,7 +219,7 @@ export const tours = [
     duracion: 'Definir',
     dificultad: 'Definir',
     precio: 'Definir',
-    imagen: '/assets/tours/default.webp',
+    imagen: '/assets/tours/default.svg',
     slug: 'casita-de-cristal-cinco-saltos',
     imagenes: [],
     horarios: 'Definir',
@@ -213,7 +233,7 @@ export const tours = [
     duracion: 'Definir',
     dificultad: 'Definir',
     precio: 'Definir',
-    imagen: '/assets/tours/default.webp',
+    imagen: '/assets/tours/default.svg',
     slug: 'paraiso-guanacos-casita-de-cristal',
     imagenes: [],
     horarios: 'Definir',
@@ -227,22 +247,8 @@ export const tours = [
     duracion: 'Definir',
     dificultad: 'Definir',
     precio: 'Definir',
-    imagen: '/assets/tours/default.webp',
+    imagen: '/assets/tours/default.svg',
     slug: 'los-gigantes-cerro-mogote-cajones',
-    imagenes: [],
-    horarios: 'Definir',
-    incluye: [],
-    itinerario: [],
-    reunion: 'Definir',
-    pago: { alias: '', banco: '', titular: '' }
-  },
-  {
-    nombre: 'Pueblo Escondido + Velo de la Novia',
-    duracion: 'Definir',
-    dificultad: 'Definir',
-    precio: 'Definir',
-    imagen: '/assets/tours/default.webp',
-    slug: 'pueblo-escondido-velo-novia',
     imagenes: [],
     horarios: 'Definir',
     incluye: [],
@@ -255,7 +261,7 @@ export const tours = [
     duracion: 'Definir',
     dificultad: 'Definir',
     precio: 'Definir',
-    imagen: '/assets/tours/default.webp',
+    imagen: '/assets/tours/default.svg',
     slug: 'quebrada-yatan',
     imagenes: [],
     horarios: 'Definir',
@@ -269,7 +275,7 @@ export const tours = [
     duracion: 'Definir',
     dificultad: 'Definir',
     precio: 'Definir',
-    imagen: '/assets/tours/default.webp',
+    imagen: '/assets/tours/default.svg',
     slug: 'circuito-cumbrecita-lagunita-corona-garganta',
     imagenes: [],
     horarios: 'Definir',
@@ -283,7 +289,7 @@ export const tours = [
     duracion: 'Definir',
     dificultad: 'Definir',
     precio: 'Definir',
-    imagen: '/assets/tours/default.webp',
+    imagen: '/assets/tours/default.svg',
     slug: 'dos-gigantes-champaqui-totora',
     imagenes: [],
     horarios: 'Definir',
@@ -297,7 +303,7 @@ export const tours = [
     duracion: 'Definir',
     dificultad: 'Definir',
     precio: 'Definir',
-    imagen: '/assets/tours/default.webp',
+    imagen: '/assets/tours/default.svg',
     slug: 'circuito-cumbrecita-lagunita-ventana-garganta',
     imagenes: [],
     horarios: 'Definir',
@@ -311,7 +317,7 @@ export const tours = [
     duracion: 'Definir',
     dificultad: 'Definir',
     precio: 'Definir',
-    imagen: '/assets/tours/default.webp',
+    imagen: '/assets/tours/default.svg',
     slug: 'altas-cumbres-nacientes-mina-clavero',
     imagenes: [],
     horarios: 'Definir',

@@ -16,7 +16,7 @@ function handleScroll() {
   scrolled.value = window.scrollY > 50
 
   const sections = ['tours', 'identity', 'gallery', 'contacto']
-  for (const id of sections.reverse()) {
+  for (const id of [...sections].reverse()) {
     const el = document.getElementById(id)
     if (el && el.getBoundingClientRect().top <= 150) {
       activeSection.value = id

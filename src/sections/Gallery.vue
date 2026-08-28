@@ -2,13 +2,13 @@
 import { ref } from 'vue'
 
 const galeria = [
-  '/assets/tours/champaqui/gente-cuevas.webp',
-  '/assets/tours/champaqui/hombre-cascada-hielo.webp',
+  '/assets/tours/champaqui/caminandogrupo-rocas-reflejo2.webp',
+  '/assets/tours/champaqui/rober-nieve.webp',
   '/assets/tours/pueblo-escondido/gente-cuevas.webp',
   '/assets/tours/pueblo-escondido/rober-casa_antigua-bandera.webp',
   '/assets/tours/pueblo-escondido/gente-bandera-cruz.webp',
-  '/assets/tours/champaqui/gente-bandera-casa.webp',
-  '/assets/tours/champaqui/gente-subiendojpg.webp',
+  '/assets/tours/champaqui/grupo-nieve-altura.webp',
+  '/assets/tours/champaqui/puente-arroyo-rober.webp',
   '/assets/tours/pueblo-escondido/gente-cascada-bandera.webp'
 ]
 

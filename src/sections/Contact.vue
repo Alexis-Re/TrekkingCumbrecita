@@ -3,10 +3,10 @@ import { ref, computed } from 'vue'
 import emailjs from '@emailjs/browser'
 import { tours } from '../data/tours.js'
 
-// Configuración EmailJS - completar con tus IDs reales
-const SERVICE_ID = 'TU_SERVICE_ID'
-const TEMPLATE_ID = 'TU_TEMPLATE_ID'
-const PUBLIC_KEY = 'TU_PUBLIC_KEY'
+// Configuración EmailJS
+const SERVICE_ID = 'service_nvrwspv'
+const TEMPLATE_ID = 'template_qoh1udn'
+const PUBLIC_KEY = 'mAOUk3yOWFd69Jyw4'
 
 const form = ref({
   nombre: '',
@@ -266,6 +266,7 @@ async function enviarFormulario() {
               </p>
             </div>
           </div>
+        </div>
 
       </div>
     </div>

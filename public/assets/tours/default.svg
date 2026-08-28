@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3D2B1F"/>
+      <stop offset="1" stop-color="#2D1810"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg)"/>
+  <g fill="none" stroke="#C9A96E" stroke-width="3" opacity="0.35">
+    <path d="M140 320 L300 130 L410 250 L520 110 L660 320 Z"/>
+    <path d="M300 130 L300 320"/>
+  </g>
+  <circle cx="545" cy="150" r="42" fill="#E8751A" opacity="0.9"/>
+  <text x="400" y="250" text-anchor="middle" fill="#C9A96E" font-family="Arial, sans-serif" font-size="34" letter-spacing="8" font-weight="700">PRÓXIMAMENTE</text>
+  <text x="400" y="292" text-anchor="middle" fill="#C9A96E" font-family="Arial, sans-serif" font-size="16" letter-spacing="4" opacity="0.7">TREKKING CUMBRECITA</text>
+</svg>
