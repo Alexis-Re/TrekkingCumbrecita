@@ -1,24 +1,71 @@
 ﻿export const tours = [
   {
-    nombre: 'Ascenso al Cerro Tradicional Champaqui',
+    nombre: 'Cumbrecita: Río Subterráneo y Cascada Escondida',
+    duracion: '1 día',
+    dificultad: 'Media-baja',
+    precio: '$50.000',
+    precioDetalle: 'Efectivo o transferencia · $60.000 en 3 cuotas sin interés',
+    imagen: '/assets/tours/Cumbrecitariosubtecascada/grupo-saltando.webp',
+    slug: 'rio-subterraneo-cascada-escondida',
+    imagenes: [
+      '/assets/tours/Cumbrecitariosubtecascada/grupo-saltando.webp',
+      '/assets/tours/Cumbrecitariosubtecascada/cascada.webp',
+      '/assets/tours/Cumbrecitariosubtecascada/gente-cascada.webp',
+      '/assets/tours/Cumbrecitariosubtecascada/grupo-altura-paisaje.webp',
+      '/assets/tours/Cumbrecitariosubtecascada/grupo-bañandose.webp',
+      '/assets/tours/Cumbrecitariosubtecascada/grupo-enorme.webp',
+      '/assets/tours/Cumbrecitariosubtecascada/grupo-montaña.webp',
+      '/assets/tours/Cumbrecitariosubtecascada/grupo-paisaje.altura.webp',
+      '/assets/tours/Cumbrecitariosubtecascada/grupo-piedras-baño.webp',
+      '/assets/tours/Cumbrecitariosubtecascada/grupo-subiendo-vininedo.webp',
+      '/assets/tours/Cumbrecitariosubtecascada/pasiaje-grupo.webp'
+    ],
+    horarios: 'Sábados, domingos y feriados · 09:00',
+    incluye: [
+      'Guía habilitado',
+      'Seguro médico',
+      'Vianda de marcha',
+      'Comunicación por radio VHF'
+    ],
+    itinerario: [
+      {
+        dia: 1,
+        titulo: 'Río Subterráneo y Cascada Escondida',
+        horas: [
+          { hora: '09:00', evento: 'Encuentro en Panadería de La Cumbrecita' },
+          { hora: '09:15', evento: 'Inicio del trekking hacia el Río Subterráneo' },
+          { hora: '11:00', evento: 'Ingreso al Río Subterráneo (primer tramo)' },
+          { hora: '12:30', evento: 'Descanso y vianda de marcha' },
+          { hora: '13:00', evento: 'Continuación hacia la Cascada Escondida (segundo tramo)' },
+          { hora: '14:30', evento: 'Llegada a la Cascada Escondida – baño y descanso' },
+          { hora: '15:30', evento: 'Regreso' },
+          { hora: '16:00', evento: 'Fin de la actividad' }
+        ]
+      }
+    ],
+    reunion: 'Panadería de La Cumbrecita',
+    pago: { alias: '', banco: '', titular: '' }
+  },
+  {
+    nombre: 'Ascenso al Cerro Tradicional Champaquí',
     duracion: '3 días / 2 noches',
     dificultad: 'Alta',
     precio: '$350.000',
-    imagen: '/assets/tours/champaqui/grupo-bandera-champa.webp',
+    imagen: '/assets/tours/champaqui/rober-paisajaso.webp',
     slug: 'champaqui',
     imagenes: [
       '/assets/tours/champaqui/grupo-bandera-champa.webp',
       '/assets/tours/champaqui/grupo-bandera-champa (2).webp',
-      '/assets/tours/champaqui/grupogrande-montaña-casa.webp',
+      '/assets/tours/champaqui/grupogrande-montaña-casarotada.webp',
       '/assets/tours/champaqui/colegio-champa.webp',
       '/assets/tours/champaqui/grupo-nieve-altura.webp',
       '/assets/tours/champaqui/grupo.champa-nieve.webp',
       '/assets/tours/champaqui/champa -nievegrupo.webp',
       '/assets/tours/champaqui/rober-nieve.webp',
-      '/assets/tours/champaqui/rober-pasisajaso.webp',
       '/assets/tours/champaqui/caminandogrupo-rocas-reflejo2.webp',
-      '/assets/tours/champaqui/puente-arroyo-rober.webp',
-      '/assets/tours/champaqui/grupoespalkdas.webp'
+      '/assets/tours/champaqui/puente-arroyo-roberrotada.webp',
+      '/assets/tours/champaqui/grupoespalkdas.webp',
+      '/assets/tours/champaqui/rober-paisajaso.webp'
     ],
     horarios: 'Viernes, Sábado, Domingo y Feriados',
     incluye: [
@@ -51,7 +98,7 @@
           { hora: '12:30', evento: 'Llegada a la cima – fotos, descanso y almuerzo con vianda de marcha' },
           { hora: '14:00', evento: 'Regreso a refugios' },
           { hora: '18:30', evento: 'Merienda' },
-          { hora: '21:30', evento: 'Cena: empanadas carne al horno y ensalada' }
+          { hora: '21:30', evento: 'Cena: empanadas de carne al horno y ensalada' }
         ]
       },
       {
@@ -66,11 +113,7 @@
       }
     ],
     reunion: 'Villa Alpina',
-    pago: {
-      alias: 'Trekking.cumbrecita',
-      banco: 'Banco de Córdoba',
-      titular: 'Roberto Carlos Molina'
-    }
+    pago: { alias: '', banco: '', titular: '' }
   },
   {
     nombre: 'Travesía Velo de la Novia + Pueblo Escondido',
@@ -86,14 +129,13 @@
       '/assets/tours/pueblo-escondido/cascada.webp',
       '/assets/tours/pueblo-escondido/cascada-hielo.webp',
       '/assets/tours/pueblo-escondido/gente-cascada-bandera.webp',
-      '/assets/tours/pueblo-escondido/gente-subiendojpg.webp',
+      '/assets/tours/pueblo-escondido/gente-subiendorotada.webp',
       '/assets/tours/pueblo-escondido/gente-cuevas.webp',
       '/assets/tours/pueblo-escondido/hombre-cascada-hielo.webp',
-      '/assets/tours/pueblo-escondido/rober-casa_antigua-bandera.webp',
-      '/assets/tours/pueblo-escondido/vista-monte-montañña.webp',
+      '/assets/tours/pueblo-escondido/rober-casa_antigua-bandera-rotada.webp',
       '/assets/tours/pueblo-escondido/gente-bandera-puebloescondido.webp'
     ],
-    horarios: 'Definir',
+    horarios: 'Consultar fechas y horarios',
     incluye: [
       'Vianda de marcha Día 1',
       'Merienda',
@@ -139,53 +181,7 @@
     reunion: 'La Cruz',
     pago: { alias: '', banco: '', titular: '' }
   },
-  {
-    nombre: 'Cumbrecita: Río subterráneo y Cascada escondida',
-    duracion: '1 día',
-    dificultad: 'Media – Baja',
-    precio: '$50.000',
-    imagen: '/assets/tours/Cumbrecitariosubtecascada/grupo-saltando.webp',
-    slug: 'rio-subterraneo-cascada-escondida',
-    imagenes: [
-      '/assets/tours/Cumbrecitariosubtecascada/grupo-saltando.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/cascada.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/gente-cascada.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/grupo-altura-paisaje.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/grupo-bañandose.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/grupo-enorme.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/grupo-montaña.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/grupo-paisaje.altura.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/grupo-piedras-baño.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/grupo-subiendo-vininedo.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/pasiaje-grupo.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/Robert.webp'
-    ],
-    horarios: 'Sábados, Domingos y Feriados – 9:00 a.m.',
-    incluye: [
-      'Guía habilitado',
-      'Seguro médico',
-      'Vianda de marcha',
-      'Comunicación por radio VHF'
-    ],
-    itinerario: [
-      {
-        dia: 1,
-        titulo: 'Río Subterráneo y Cascada Escondida',
-        horas: [
-          { hora: '09:00', evento: 'Encuentro en Panadería de La Cumbrecita' },
-          { hora: '09:15', evento: 'Inicio del trekking hacia el Río Subterráneo' },
-          { hora: '11:00', evento: 'Ingreso al Río Subterráneo (primer tramo)' },
-          { hora: '12:30', evento: 'Descanso y vianda de marcha' },
-          { hora: '13:00', evento: 'Continuación hacia la Cascada Escondida (segundo tramo)' },
-          { hora: '14:30', evento: 'Llegada a la Cascada Escondida – baño y descanso' },
-          { hora: '15:30', evento: 'Regreso' },
-          { hora: '16:00', evento: 'Fin de la actividad' }
-        ]
-      }
-    ],
-    reunion: 'Panadería de La Cumbrecita',
-    pago: { alias: '', banco: '', titular: '' }
-  },
+
   {
     nombre: 'Garganta del Diablo + Cerro Corona + Pozo de las Cabras',
     duracion: 'Definir',

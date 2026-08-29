@@ -9,44 +9,74 @@ const scrollToContact = () => {
 </script>
 
 <template>
-  <section class="relative min-h-[420px] h-[60vh] md:h-screen flex items-center justify-center overflow-hidden">
-    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('/assets/hero/hero.webp')"></div>
+  <section class="relative min-h-[520px] h-[70svh] md:h-screen flex items-center justify-center overflow-hidden">
+    <img
+      src="/assets/hero/hero.webp"
+      alt=""
+      fetchpriority="high"
+      decoding="async"
+      class="absolute inset-0 w-full h-full object-cover"
+    />
     <div class="absolute inset-0 bg-gradient-to-b from-brand-dark/80 via-brand-dark/60 to-brand-dark"></div>
 
-    <div class="relative z-10 flex flex-col items-center text-center px-6 lg:px-16 max-w-3xl mx-auto pt-12 md:pt-0">
-      <p class="font-sans text-sm md:text-lg tracking-[0.35em] uppercase text-brand-cream/90 [text-shadow:0_2px_16px_rgba(0,0,0,0.8)] mb-2">
-        Trekking en Córdoba
+    <div class="relative z-10 flex flex-col items-center text-center px-6 lg:px-16 max-w-3xl mx-auto pt-16 md:pt-0">
+      <p class="font-sans text-xs sm:text-sm md:text-lg tracking-[0.2em] sm:tracking-[0.35em] uppercase text-brand-cream/90 [text-shadow:0_2px_16px_rgba(0,0,0,0.8)] mb-2">
+        Trekking Cumbrecita
       </p>
       <h1 class="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-brand-white leading-tight uppercase tracking-wide">
-          Desconectá de la rutina para vivir algo diferente
+        Viví la montaña desde adentro
       </h1>
 
       <div class="w-16 h-px bg-brand-cream/40 my-4 md:my-5"></div>
 
       <p class="text-sm md:text-base lg:text-lg text-brand-cream/90 max-w-lg leading-relaxed [text-shadow:0_2px_12px_rgba(0,0,0,0.6)]">
-        Tu aventura comienza aquí. Con nosotros. Descubrí paisajes y recorridos naturales en nuestra provincia.
+        Desde La Cumbrecita, te acompaño a descubrir ríos, cascadas y senderos de las sierras de Córdoba.
       </p>
 
       <div class="flex flex-col gap-3 mt-8 md:mt-10 min-w-[200px]">
         <button
           @click="scrollToTours"
-          class="px-8 py-4 md:px-10 md:py-5 border-2 border-brand-cream text-brand-cream font-semibold rounded-lg hover:bg-brand-cream hover:text-brand-dark transition-colors duration-300 text-sm md:text-base flex items-center justify-center gap-2"
+          class="min-h-12 px-8 py-4 md:px-10 md:py-5 border-2 border-brand-cream text-brand-cream font-semibold rounded-lg hover:bg-brand-cream hover:text-brand-dark transition-colors duration-300 text-lg flex items-center justify-center gap-2"
         >
-          Ver Experiencias
+          Ver experiencias
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
           </svg>
         </button>
         <button
           @click="scrollToContact"
-          class="px-8 py-4 md:px-10 md:py-5 border-2 border-brand-cream text-brand-cream font-semibold rounded-lg hover:bg-brand-cream hover:text-brand-dark transition-colors duration-300 text-sm md:text-base"
+          class="min-h-12 px-8 py-4 md:px-10 md:py-5 bg-brand-orange/85 text-brand-white font-semibold rounded-lg shadow-lg shadow-brand-orange/25 hover:bg-brand-orange hover:shadow-brand-orange/40 transition-all duration-300 text-lg"
         >
-          Reservar
+          Consultar disponibilidad
         </button>
+      </div>
+
+      <!-- Redes sociales -->
+      <div class="flex justify-center gap-4 mt-6">
+        <a
+          href="https://www.instagram.com/trekking_cumbrecita/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="w-10 h-10 rounded-full border border-brand-cream/30 flex items-center justify-center hover:bg-brand-orange/20 hover:border-brand-orange/50 transition-all duration-300"
+        >
+          <svg class="w-5 h-5 text-brand-cream" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+          </svg>
+        </a>
+        <a
+          href="https://www.facebook.com/rober.molina.16"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="w-10 h-10 rounded-full border border-brand-cream/30 flex items-center justify-center hover:bg-brand-orange/20 hover:border-brand-orange/50 transition-all duration-300"
+        >
+          <svg class="w-5 h-5 text-brand-cream" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+        </a>
       </div>
     </div>
 
-    <div class="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+    <div class="absolute bottom-8 md:bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
       <svg class="w-5 h-5 md:w-6 md:h-6 text-brand-cream/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
       </svg>

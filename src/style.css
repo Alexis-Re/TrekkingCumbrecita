@@ -15,12 +15,16 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  scrollbar-color: var(--color-brand-orange) var(--color-brand-dark);
 }
 
 body {
   font-family: var(--font-sans);
   background-color: var(--color-brand-dark);
   color: var(--color-brand-white);
+  overflow-x: hidden;
+  width: 100%;
 }
 
 ::-webkit-scrollbar {

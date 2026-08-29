@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps({
   tour: { type: Object, default: null },
@@ -9,13 +9,20 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 const currentIndex = ref(0)
+const modalRef = ref(null)
+let touchStartX = 0
+let previousActiveElement = null
 
 watch(() => props.open, (val) => {
   if (val) {
     currentIndex.value = 0
     document.body.style.overflow = 'hidden'
+    previousActiveElement = document.activeElement
+    nextTick(() => modalRef.value?.querySelector('button')?.focus())
   } else {
     document.body.style.overflow = ''
+    previousActiveElement?.focus()
+    previousActiveElement = null
   }
 })
 
@@ -33,9 +40,31 @@ function next() {
     : currentIndex.value + 1
 }
 
+function onTouchStart(e) {
+  touchStartX = e.touches[0].clientX
+}
+
+function onTouchEnd(e) {
+  const distance = e.changedTouches[0].clientX - touchStartX
+  if (Math.abs(distance) > 50) distance > 0 ? prev() : next()
+}
+
 function onKeydown(e) {
   if (!props.open) return
   if (e.key === 'Escape') emit('close')
+  if (e.key === 'Tab') {
+    const focusable = [...modalRef.value?.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])') || []]
+    if (!focusable.length) return
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault()
+      last.focus()
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault()
+      first.focus()
+    }
+  }
   if (e.key === 'ArrowLeft') prev()
   if (e.key === 'ArrowRight') next()
 }
@@ -57,10 +86,13 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
       <div
         v-if="open && tour"
         class="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="`Detalles de ${tour.nombre}`"
         @click.self="emit('close')"
       >
         <!-- Overlay -->
-        <div class="absolute inset-0 bg-brand-dark/80 backdrop-blur-sm"></div>
+        <div class="absolute inset-0 bg-brand-dark/80 backdrop-blur-sm" @click="emit('close')"></div>
 
         <!-- Modal -->
         <Transition
@@ -73,12 +105,15 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
           appear
         >
           <div
+            ref="modalRef"
             class="relative bg-brand-card rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden border border-brand-cream/10 shadow-2xl"
+            @click.stop
           >
             <!-- Close button -->
             <button
               @click="emit('close')"
-              class="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-brand-dark/60 backdrop-blur-sm text-brand-cream flex items-center justify-center hover:bg-brand-orange transition-colors duration-200"
+              class="absolute top-4 right-4 z-10 w-11 h-11 rounded-full bg-brand-dark/60 backdrop-blur-sm text-brand-cream flex items-center justify-center hover:bg-brand-orange transition-colors duration-200"
+              aria-label="Cerrar detalles"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -90,19 +125,22 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
               <!-- Gallery carousel -->
               <div
                 v-if="tour.imagenes && tour.imagenes.length > 0"
-                class="relative aspect-video bg-brand-dark overflow-hidden"
+                class="relative bg-brand-dark overflow-hidden [touch-action:pan-y] flex items-center justify-center min-h-[300px] md:min-h-[400px] max-h-[55vh] md:max-h-[60vh]"
+                @touchstart="onTouchStart"
+                @touchend="onTouchEnd"
               >
                 <img
                   :src="tour.imagenes[currentIndex]"
-                  :alt="`${tour.nombre} - ${currentIndex + 1}`"
-                  class="w-full h-full object-cover"
+                  :alt="`${tour.nombre} - imagen ${currentIndex + 1} de ${tour.imagenes.length}`"
+                  class="max-w-full max-h-[55vh] md:max-h-[60vh] object-contain"
                 />
 
                 <!-- Arrows -->
                 <button
                   v-if="tour.imagenes.length > 1"
                   @click.stop="prev"
-                  class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-brand-dark/50 backdrop-blur-sm text-brand-cream flex items-center justify-center hover:bg-brand-orange transition-colors duration-200"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-brand-dark/50 backdrop-blur-sm text-brand-cream flex items-center justify-center hover:bg-brand-orange transition-colors duration-200"
+                  aria-label="Imagen anterior"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -111,7 +149,8 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
                 <button
                   v-if="tour.imagenes.length > 1"
                   @click.stop="next"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-brand-dark/50 backdrop-blur-sm text-brand-cream flex items-center justify-center hover:bg-brand-orange transition-colors duration-200"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-brand-dark/50 backdrop-blur-sm text-brand-cream flex items-center justify-center hover:bg-brand-orange transition-colors duration-200"
+                  aria-label="Imagen siguiente"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -126,7 +165,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
                   <span
                     v-for="(_, i) in tour.imagenes"
                     :key="i"
-                    class="w-2 h-2 rounded-full transition-colors duration-200"
+                    class="w-2.5 h-2.5 rounded-full transition-colors duration-200"
                     :class="i === currentIndex ? 'bg-brand-orange' : 'bg-brand-cream/30'"
                   ></span>
                 </div>
@@ -145,17 +184,17 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
                 </h2>
 
                 <div class="flex flex-wrap gap-3 mb-6">
-                  <span class="flex items-center gap-1.5 text-sm text-brand-cream/70 font-sans bg-brand-dark/40 px-3 py-1.5 rounded-full">
+                  <span v-if="tour.duracion !== 'Definir'" class="flex items-center gap-1.5 text-sm text-brand-cream/70 font-sans bg-brand-dark/40 px-3 py-1.5 rounded-full">
                     <svg class="w-4 h-4 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                     </svg>
                     {{ tour.duracion }}
                   </span>
-                  <span class="flex items-center gap-1.5 text-sm font-sans bg-brand-dark/40 px-3 py-1.5 rounded-full"
+                  <span v-if="tour.dificultad !== 'Definir'" class="flex items-center gap-1.5 text-sm font-sans bg-brand-dark/40 px-3 py-1.5 rounded-full"
                         :class="tour.dificultad === 'Alta' ? 'text-red-400' : tour.dificultad === 'Moderada' ? 'text-brand-gold' : 'text-green-400'">
                     {{ tour.dificultad }}
                   </span>
-                  <span class="flex items-center gap-1.5 text-sm text-brand-cream/70 font-sans bg-brand-dark/40 px-3 py-1.5 rounded-full">
+                  <span v-if="tour.horarios !== 'Definir'" class="flex items-center gap-1.5 text-sm text-brand-cream/70 font-sans bg-brand-dark/40 px-3 py-1.5 rounded-full">
                     <svg class="w-4 h-4 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                     </svg>
@@ -163,9 +202,14 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
                   </span>
                 </div>
 
-                <div class="flex items-baseline gap-2 mb-8">
-                  <span class="text-brand-orange font-heading text-3xl">{{ tour.precio }}</span>
-                  <span class="text-brand-cream/50 text-sm font-sans">por persona</span>
+                <div class="mb-8">
+                  <div class="flex items-baseline gap-2">
+                    <span class="text-brand-orange font-heading text-3xl">{{ tour.precio }}</span>
+                    <span class="text-brand-cream/50 text-sm font-sans">por persona</span>
+                  </div>
+                  <p v-if="tour.precioDetalle" class="text-brand-cream/55 text-sm font-sans mt-1">
+                    {{ tour.precioDetalle }}
+                  </p>
                 </div>
 
                 <!-- Itinerary -->

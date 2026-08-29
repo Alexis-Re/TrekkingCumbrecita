@@ -1,99 +1,74 @@
 <script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
+
+const sectionRef = ref(null)
+const isVisible = ref(false)
+let observer = null
+
+onMounted(() => {
+  observer = new IntersectionObserver(
+    ([entry]) => {
+      if (entry.isIntersecting) {
+        isVisible.value = true
+        observer.disconnect()
+      }
+    },
+    { threshold: 0.15 }
+  )
+  if (sectionRef.value) observer.observe(sectionRef.value)
+})
+
+onUnmounted(() => observer?.disconnect())
+
 const stats = [
   { number: '15+', label: 'Años de experiencia' },
-  { number: '200+', label: 'Tours guiados' },
+  { number: '200+', label: 'Experiencias guiadas' },
   { number: '500+', label: 'Clientes satisfechos' },
-  { number: '1500+', label: 'Km recorridos' }
+  { number: '1500+', label: 'Km de senderos recorridos' }
 ]
 
 const valores = [
   {
     nombre: 'Naturaleza',
-    descripcion: 'Conectamos con el bosque, los ríos y las cumbres del Valle de Calamuchita.',
+    descripcion: 'Te acompaño a conectar con el bosque, los ríos y las cumbres del Valle de Calamuchita.',
     icono: 'hoja'
   },
   {
     nombre: 'Aventura',
-    descripcion: 'Cada sendero es una oportunidad para descubrir algo nuevo.',
+    descripcion: 'Ríos, cascadas y cumbres: cada sendero propone una forma nueva de vivir las sierras.',
     icono: 'montana'
   },
   {
     nombre: 'Seguridad',
-    descripcion: 'Guías capacitados y equipamiento profesional en cada excursión.',
+    descripcion: 'Guía habilitado y equipamiento profesional para que disfrutes cada salida con tranquilidad.',
     icono: 'escudo'
   }
 ]
 
-const testimonios = [
-  {
-    texto: 'Una experiencia inolvidable. Roberto te hace sentir seguro en cada paso y conocés lugares que no encontrarías solo.',
-    nombre: 'María L.',
-    trekking: 'Cerro Champaqui'
-  },
-  {
-    texto: 'El mejor guía de la zona. Conoce cada rincón de las sierras y te cuenta la historia de cada place.',
-    nombre: 'Carlos R.',
-    trekking: 'Pueblo Escondido'
-  },
-  {
-    texto: 'Volví a hacer otro trekking gracias a la buena experiencia. Totalmente recomendable para todos los niveles.',
-    nombre: 'Ana G.',
-    trekking: 'Velo de la Novia'
-  }
-]
 </script>
 
 <template>
-  <section id="identity" class="relative bg-brand-dark overflow-hidden">
+  <section id="identity" ref="sectionRef" class="relative bg-brand-dark overflow-hidden">
 
-    <!-- BLOQUE 1: Header -->
-    <div class="relative py-20 md:py-28">
-      <div class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40" style="background-image: url('/assets/brand/pasiaje-grupo.webp')"></div>
-      <div class="absolute inset-0 bg-gradient-to-b from-brand-dark/70 via-brand-dark/60 to-brand-dark"></div>
-      <div class="relative max-w-7xl mx-auto px-5 md:px-10 lg:px-20 text-center">
-        <p class="font-sans text-sm tracking-[0.3em] uppercase text-brand-orange mb-4">
-          Sobre nosotros
-        </p>
-        <h2 class="font-heading text-5xl md:text-6xl lg:text-7xl text-brand-white uppercase leading-none mb-6">
-          Conocé al guía
-        </h2>
-        <div class="h-1 w-24 bg-gradient-to-r from-brand-orange to-brand-gold mx-auto mb-8"></div>
-        <p class="text-brand-cream/75 font-sans text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
-          Soy guía de trekking y apasionado conocedor de los paisajes de Córdoba. Desde Cumbrecita, acompaño a quienes buscan explorar la montaña, descubrir nuevos senderos y vivir experiencias auténticas en contacto con la naturaleza.
-        </p>
-      </div>
-    </div>
-
-    <!-- BLOQUE 2: Estadísticas -->
-    <div class="border-y border-brand-cream/10 bg-brand-orange/5">
-      <div class="max-w-7xl mx-auto px-5 md:px-10 lg:px-20">
-        <div class="grid grid-cols-2 md:grid-cols-4 divide-x divide-brand-cream/10">
-          <div
-            v-for="stat in stats"
-            :key="stat.label"
-            class="py-8 md:py-10 px-4 text-center"
-          >
-            <span class="block font-heading text-4xl md:text-5xl text-brand-orange mb-1">
-              {{ stat.number }}
-            </span>
-            <span class="text-brand-cream/60 text-xs md:text-sm font-sans">
-              {{ stat.label }}
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- BLOQUE 3: Sobre mí -->
-    <div class="relative py-20 md:py-28">
-      <div class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-45" style="background-image: url('/assets/brand/cascada.webp')"></div>
+    <!-- BLOQUE 1: Sobre mí -->
+    <div class="relative py-12 md:py-16">
+      <img
+        src="/assets/brand/pasiaje-grupo.webp"
+        alt=""
+        loading="lazy"
+        decoding="async"
+        class="absolute inset-0 w-full h-full object-cover opacity-40"
+      />
       <div class="absolute inset-0 bg-gradient-to-b from-brand-dark/70 via-brand-dark/60 to-brand-dark"></div>
       <div class="relative max-w-7xl mx-auto px-5 md:px-10 lg:px-20">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
 
           <!-- Mosaico de fotos -->
-          <div class="grid grid-cols-3 grid-rows-3 gap-3 h-[350px] md:h-[450px]">
-            <div class="col-span-2 row-span-3 rounded-xl overflow-hidden">
+          <div
+            class="grid grid-cols-2 grid-rows-3 gap-3 h-[420px] md:grid-cols-3 md:grid-rows-3 md:h-[450px] transition-all duration-700"
+            :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
+          >
+            <div class="col-span-1 row-span-2 md:col-span-2 md:row-span-3 rounded-xl overflow-hidden">
               <img
                 src="/assets/brand/robertomolina.jpg"
                 alt="Roberto Molina - Guía de trekking"
@@ -103,21 +78,21 @@ const testimonios = [
             <div class="rounded-xl overflow-hidden">
               <img
                 src="/assets/tours/pueblo-escondido/gente-cascada-bandera.webp"
-                alt="Trekking en Champaqui"
+                alt="Grupo junto a una cascada en las sierras"
                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
               />
             </div>
             <div class="rounded-xl overflow-hidden">
               <img
                 src="/assets/tours/champaqui/colegio-champa.webp"
-                alt="Grupo de colegio en Champaqui"
+                alt="Grupo de estudiantes en el Cerro Champaquí"
                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
               />
             </div>
-            <div class="rounded-xl overflow-hidden">
+            <div class="col-span-2 md:col-span-1 rounded-xl overflow-hidden">
               <img
                 src="/assets/tours/champaqui/grupoespalkdas.webp"
-                alt="Grupo de trekking"
+                alt="Grupo de trekking en la montaña"
                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
               />
             </div>
@@ -125,24 +100,34 @@ const testimonios = [
 
           <!-- Texto + Valores -->
           <div>
-            <h3 class="font-heading text-3xl md:text-4xl text-brand-white uppercase mb-4">
-              Mi historia
-            </h3>
-            <div class="h-1 w-16 bg-gradient-to-r from-brand-orange to-brand-gold mb-6"></div>
+            <div
+              class="transition-all duration-700"
+              :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
+            >
+              <p class="font-sans text-sm tracking-[0.3em] uppercase text-brand-orange mb-3">
+                Quién te acompaña
+              </p>
+              <h3 class="font-heading text-3xl md:text-4xl text-brand-white uppercase mb-4">
+                Conocé a Roberto
+              </h3>
+              <div class="h-1 w-16 bg-gradient-to-r from-brand-orange to-brand-gold mb-6"></div>
 
-            <p class="text-brand-cream/80 font-sans text-sm md:text-base leading-relaxed mb-4">
-              Desde chico me enamoré de las sierras cordobesas. Cada sendero, cada cumbre y cada atardecer me enseñaron que la montaña es el mejor lugar para encontrarse a uno mismo.
-            </p>
-            <p class="text-brand-cream/80 font-sans text-sm md:text-base leading-relaxed mb-10">
-              Hoy, con más de 15 años de experiencia, mi objetivo es compartir esa pasión con otros. Cada trekking es una oportunidad para crear recuerdos inolvidables y conectar con la naturaleza de forma segura y respetuosa.
-            </p>
+              <p class="text-brand-cream/80 font-sans text-sm md:text-base leading-relaxed mb-4">
+                Soy guía de trekking y apasionado conocedor de los paisajes de Córdoba. Desde La Cumbrecita, acompaño a quienes buscan explorar la montaña, descubrir nuevos senderos y vivir experiencias auténticas en contacto con la naturaleza.
+              </p>
+              <p class="text-brand-cream/80 font-sans text-sm md:text-base leading-relaxed mb-10">
+                Hoy, con más de 15 años de experiencia, mi objetivo es compartir esa pasión con otros. Cada trekking es una oportunidad para crear recuerdos inolvidables y conectar con la naturaleza de forma segura y respetuosa.
+              </p>
+            </div>
 
             <!-- Valores -->
             <div class="space-y-6">
               <div
-                v-for="valor in valores"
+                v-for="(valor, index) in valores"
                 :key="valor.nombre"
-                class="flex items-start gap-4 group"
+                class="flex items-start gap-4 group transition-all duration-500"
+                :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
+                :style="{ transitionDelay: `${200 + index * 150}ms` }"
               >
                 <div class="flex-shrink-0 w-11 h-11 rounded-full bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center transition-all duration-300 group-hover:bg-brand-orange/20 group-hover:border-brand-orange/40">
                   <svg v-if="valor.icono === 'hoja'" class="w-5 h-5 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
@@ -175,38 +160,23 @@ const testimonios = [
       </div>
     </div>
 
-    <!-- BLOQUE 5: Testimonios -->
-    <div class="py-16 md:py-20 border-t border-brand-cream/10">
+    <!-- BLOQUE 2: Estadísticas -->
+    <div class="border-y border-brand-cream/10 bg-brand-orange/5">
       <div class="max-w-7xl mx-auto px-5 md:px-10 lg:px-20">
-        <div class="text-center mb-12">
-          <p class="font-sans text-sm tracking-[0.3em] uppercase text-brand-orange mb-2">
-            Testimonios
-          </p>
-          <h3 class="font-heading text-3xl md:text-4xl text-brand-white uppercase">
-            Lo que dicen
-          </h3>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 divide-x divide-brand-cream/10">
           <div
-            v-for="testimonio in testimonios"
-            :key="testimonio.nombre"
-            class="bg-brand-secondary/50 border border-brand-cream/10 rounded-xl p-6 relative"
+            v-for="(stat, index) in stats"
+            :key="stat.label"
+            class="py-5 md:py-7 px-3 md:px-4 text-center transition-all duration-500"
+            :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
+            :style="{ transitionDelay: `${200 + index * 150}ms` }"
           >
-            <svg class="w-8 h-8 text-brand-orange/20 mb-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151C7.546 6.068 5.983 8.789 5.983 11H10v10H0z" />
-            </svg>
-            <p class="text-brand-cream/75 text-sm leading-relaxed mb-6 italic">
-              "{{ testimonio.texto }}"
-            </p>
-            <div class="border-t border-brand-cream/10 pt-4">
-              <span class="block font-sans font-semibold text-brand-white text-sm">
-                {{ testimonio.nombre }}
-              </span>
-              <span class="block font-sans text-brand-orange text-xs mt-0.5">
-                {{ testimonio.trekking }}
-              </span>
-            </div>
+            <span class="block font-heading text-3xl md:text-5xl text-brand-orange mb-1">
+              {{ stat.number }}
+            </span>
+            <span class="text-brand-cream/60 text-sm font-sans">
+              {{ stat.label }}
+            </span>
           </div>
         </div>
       </div>
