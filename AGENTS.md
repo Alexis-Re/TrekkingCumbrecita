@@ -30,7 +30,7 @@ src/
   components/          # reusable components (Navbar.vue, Footer.vue, TourModal.vue, Lightbox.vue, ScrollToTop.vue)
   composables/         # Vue composables (scaffold — empty)
   data/                # static data (tours.js, testimonios.js)
-  assets/              # scaffold leftovers (vite.svg, hero.png) — unused by the site
+  assets/              # empty (scaffold leftovers removed)
 public/
   assets/              # static assets served as-is
     hero/              # hero background image

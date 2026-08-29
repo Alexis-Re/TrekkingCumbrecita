@@ -61,9 +61,9 @@ const abrirLightbox = (i) => {
           <p class="font-sans text-sm tracking-[0.3em] uppercase text-brand-orange mb-2">
             Galería
           </p>
-          <h3 class="font-heading text-3xl md:text-4xl text-brand-white uppercase">
+          <h2 class="font-heading text-3xl md:text-4xl text-brand-white uppercase">
             Así se vive la montaña
-          </h3>
+          </h2>
           <div class="h-1 w-16 bg-gradient-to-r from-brand-gold to-brand-cream/50 mt-4"></div>
         </div>
 
@@ -106,9 +106,9 @@ const abrirLightbox = (i) => {
             <span class="text-brand-cream/70 text-xs font-sans uppercase tracking-[0.12em] md:tracking-[0.2em]">
               {{ img.lugar }}
             </span>
-            <h4 class="font-heading text-lg text-brand-white uppercase leading-tight">
+            <h3 class="font-heading text-lg text-brand-white uppercase leading-tight">
               {{ img.titulo }}
-            </h4>
+            </h3>
           </div>
 
           <span class="absolute top-3 right-3 w-8 h-8 rounded-full bg-brand-dark/60 backdrop-blur-sm flex items-center justify-center text-brand-cream opacity-70 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true">

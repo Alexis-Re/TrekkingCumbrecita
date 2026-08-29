@@ -3,6 +3,10 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "description": "Landing page de Trekking Cumbrecita — senderos y trekking en el Valle de Calamuchita, Córdoba.",
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

@@ -107,9 +107,9 @@ const valores = [
               <p class="font-sans text-sm tracking-[0.3em] uppercase text-brand-orange mb-3">
                 Quién te acompaña
               </p>
-              <h3 class="font-heading text-3xl md:text-4xl text-brand-white uppercase mb-4">
+              <h2 class="font-heading text-3xl md:text-4xl text-brand-white uppercase mb-4">
                 Conocé a Roberto
-              </h3>
+              </h2>
               <div class="h-1 w-16 bg-gradient-to-r from-brand-orange to-brand-gold mb-6"></div>
 
               <p class="text-brand-cream/80 font-sans text-sm md:text-base leading-relaxed mb-4">
@@ -146,9 +146,9 @@ const valores = [
                   </svg>
                 </div>
                 <div>
-                  <h4 class="font-heading text-lg text-brand-white uppercase tracking-wide mb-0.5">
+                  <h3 class="font-heading text-lg text-brand-white uppercase tracking-wide mb-0.5">
                     {{ valor.nombre }}
-                  </h4>
+                  </h3>
                   <p class="text-brand-cream/65 text-sm leading-relaxed">
                     {{ valor.descripcion }}
                   </p>
