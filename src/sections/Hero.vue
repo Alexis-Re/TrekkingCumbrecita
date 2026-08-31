@@ -9,7 +9,7 @@ const scrollToContact = () => {
 </script>
 
 <template>
-  <section class="relative min-h-[520px] h-[70svh] md:h-screen flex items-center justify-center overflow-hidden">
+  <section class="relative min-h-svh h-svh md:h-screen flex items-center justify-center overflow-hidden">
     <img
       src="/assets/hero/hero.webp"
       alt=""
@@ -19,24 +19,24 @@ const scrollToContact = () => {
     />
     <div class="absolute inset-0 bg-gradient-to-b from-brand-dark/80 via-brand-dark/60 to-brand-dark"></div>
 
-    <div class="relative z-10 flex flex-col items-center text-center px-6 lg:px-16 max-w-3xl mx-auto pt-16 md:pt-0">
+    <div class="relative z-10 flex flex-col items-center text-center px-6 lg:px-16 max-w-3xl mx-auto pt-20 pb-14 md:py-0">
       <p class="font-sans text-xs sm:text-sm md:text-lg tracking-[0.2em] sm:tracking-[0.35em] uppercase text-brand-cream/90 [text-shadow:0_2px_16px_rgba(0,0,0,0.8)] mb-2">
         Trekking Cumbrecita
       </p>
-      <h1 class="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-brand-white leading-tight uppercase tracking-wide">
+      <h1 class="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-brand-white leading-tight uppercase tracking-wide">
         Viví la montaña desde adentro
       </h1>
 
-      <div class="w-16 h-px bg-brand-cream/40 my-4 md:my-5"></div>
+      <div class="w-16 h-px bg-brand-cream/40 my-3 md:my-5"></div>
 
       <p class="text-sm md:text-base lg:text-lg text-brand-cream/90 max-w-lg leading-relaxed [text-shadow:0_2px_12px_rgba(0,0,0,0.6)]">
         Desde La Cumbrecita, te acompaño a descubrir ríos, cascadas y senderos de las sierras de Córdoba.
       </p>
 
-      <div class="flex flex-col gap-3 mt-8 md:mt-10 min-w-[200px]">
+      <div class="flex flex-col gap-3 mt-6 md:mt-10 min-w-[200px]">
         <button
           @click="scrollToTours"
-          class="min-h-12 px-8 py-4 md:px-10 md:py-5 border-2 border-brand-cream text-brand-cream font-semibold rounded-lg hover:bg-brand-cream hover:text-brand-dark transition-colors duration-300 text-lg flex items-center justify-center gap-2"
+          class="min-h-12 px-8 py-3.5 md:px-10 md:py-5 border-2 border-brand-cream text-brand-cream font-semibold rounded-lg hover:bg-brand-cream hover:text-brand-dark transition-colors duration-300 text-base md:text-lg flex items-center justify-center gap-2"
         >
           Ver experiencias
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,14 +45,14 @@ const scrollToContact = () => {
         </button>
         <button
           @click="scrollToContact"
-          class="min-h-12 px-8 py-4 md:px-10 md:py-5 bg-brand-orange/85 text-brand-white font-semibold rounded-lg shadow-lg shadow-brand-orange/25 hover:bg-brand-orange hover:shadow-brand-orange/40 transition-all duration-300 text-lg"
+          class="min-h-12 px-8 py-3.5 md:px-10 md:py-5 bg-brand-orange/85 text-brand-white font-semibold rounded-lg shadow-lg shadow-brand-orange/25 hover:bg-brand-orange hover:shadow-brand-orange/40 transition-all duration-300 text-base md:text-lg"
         >
           Consultar disponibilidad
         </button>
       </div>
 
       <!-- Redes sociales -->
-      <div class="flex justify-center gap-4 mt-6">
+      <div class="flex justify-center gap-4 mt-5 md:mt-6">
         <a
           href="https://www.instagram.com/trekking_cumbrecita/"
           target="_blank"
@@ -76,7 +76,7 @@ const scrollToContact = () => {
       </div>
     </div>
 
-    <div class="absolute bottom-8 md:bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+    <div class="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
       <svg class="w-5 h-5 md:w-6 md:h-6 text-brand-cream/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
       </svg>

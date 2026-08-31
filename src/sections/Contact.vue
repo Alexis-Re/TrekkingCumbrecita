@@ -23,7 +23,7 @@ const cargando = ref(false)
 
 const tourOptions = computed(() =>
   tours
-    .filter(t => t.precio !== 'Definir')
+    .filter(t => t.disponible)
     .map(t => ({ value: t.nombre, label: t.nombre }))
 )
 

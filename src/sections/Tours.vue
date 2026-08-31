@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { tours } from '../data/tours.js'
+import { formatPrecio } from '../utils/format.js'
 import TourModal from '../components/TourModal.vue'
 
 const scrollContainer = ref(null)
@@ -25,7 +26,14 @@ onMounted(() => {
 
 onUnmounted(() => observer?.disconnect())
 
-const esDefinir = (tour) => tour.precio === 'Definir'
+const esDefinir = (tour) => !tour.disponible
+
+const dificultadClass = (tour) =>
+  tour.dificultad === 'Alta'
+    ? 'text-red-400'
+    : tour.dificultad === 'Media'
+      ? 'text-brand-gold'
+      : 'text-green-400'
 
 const scroll = (direction) => {
   if (!scrollContainer.value) return
@@ -109,8 +117,13 @@ const scroll = (direction) => {
                 Próximamente
               </span>
               <template v-else>
-                <span class="absolute top-3 right-3 bg-brand-dark/60 backdrop-blur-sm border border-brand-cream/10 text-brand-cream/90 text-xs font-bold px-3 py-1 rounded-full font-sans">
-                  {{ tour.dificultad }}
+                <span class="absolute top-3 right-3 bg-brand-dark/60 backdrop-blur-sm border border-brand-cream/10 text-xs font-bold px-3 py-1 rounded-full font-sans" :class="dificultadClass(tour)">
+                  <template v-if="tour.terreno || tour.distancia">
+                    Terreno: {{ tour.terreno }} · Distancia: {{ tour.distancia }}
+                  </template>
+                  <template v-else>
+                    {{ tour.dificultad }}
+                  </template>
                 </span>
                 <span class="absolute bottom-3 left-3 text-brand-white text-xs font-sans bg-brand-dark/60 backdrop-blur-sm px-2 py-1 rounded">
                   {{ tour.duracion }}
@@ -134,7 +147,7 @@ const scroll = (direction) => {
               <div v-if="!esDefinir(tour)" class="mb-5">
                 <div class="flex items-baseline gap-2">
                   <span class="text-brand-cream/90 font-heading text-2xl">
-                    {{ tour.precio }}
+                    {{ formatPrecio(tour.precio) }}
                   </span>
                   <span class="text-brand-cream/50 text-xs font-sans">por persona</span>
                 </div>
