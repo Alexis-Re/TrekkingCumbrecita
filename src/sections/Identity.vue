@@ -1,8 +1,9 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 
 const sectionRef = ref(null)
 const isVisible = ref(false)
+const statsVisible = ref(false)
 let observer = null
 
 onMounted(() => {
@@ -21,11 +22,41 @@ onMounted(() => {
 onUnmounted(() => observer?.disconnect())
 
 const stats = [
-  { number: '15+', label: 'Años de experiencia' },
-  { number: '200+', label: 'Experiencias guiadas' },
-  { number: '500+', label: 'Clientes satisfechos' },
-  { number: '1500+', label: 'Km de senderos recorridos' }
+  { target: 15, suffix: '+', label: 'Años de experiencia' },
+  { target: 200, suffix: '+', label: 'Experiencias guiadas' },
+  { target: 500, suffix: '+', label: 'Clientes satisfechos' },
+  { target: 1500, suffix: '+', label: 'Km de senderos recorridos' }
 ]
+
+const animatedStats = ref(stats.map(() => ({ current: 0, started: false })))
+
+function animateCount(index) {
+  const stat = stats[index]
+  const duration = 1800
+  const startTime = performance.now()
+
+  function update(currentTime) {
+    const elapsed = currentTime - startTime
+    const progress = Math.min(elapsed / duration, 1)
+    const eased = 1 - Math.pow(1 - progress, 3)
+    animatedStats.value[index].current = Math.round(eased * stat.target)
+
+    if (progress < 1) {
+      requestAnimationFrame(update)
+    }
+  }
+
+  requestAnimationFrame(update)
+}
+
+watch(isVisible, (val) => {
+  if (val) {
+    statsVisible.value = true
+    stats.forEach((_, i) => {
+      setTimeout(() => animateCount(i), 400 + i * 200)
+    })
+  }
+})
 
 const valores = [
   {
@@ -70,7 +101,7 @@ const valores = [
           >
             <div class="col-span-1 row-span-2 md:col-span-2 md:row-span-3 rounded-xl overflow-hidden">
               <img
-                src="/assets/brand/robertomolina.jpg"
+                src="/assets/brand/robertomolina.webp"
                 alt="Roberto Molina - Guía de trekking"
                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
               />
@@ -172,7 +203,7 @@ const valores = [
             :style="{ transitionDelay: `${200 + index * 150}ms` }"
           >
             <span class="block font-heading text-3xl md:text-5xl text-brand-orange mb-1">
-              {{ stat.number }}
+              {{ animatedStats[index].current }}{{ stat.suffix }}
             </span>
             <span class="text-brand-cream/60 text-sm font-sans">
               {{ stat.label }}

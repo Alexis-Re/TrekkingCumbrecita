@@ -8,6 +8,7 @@ import Gallery from './sections/Gallery.vue'
 import Contact from './sections/Contact.vue'
 import Footer from './components/Footer.vue'
 import ScrollToTop from './components/ScrollToTop.vue'
+import MountainDivider from './components/MountainDivider.vue'
 </script>
 
 <template>
@@ -15,8 +16,11 @@ import ScrollToTop from './components/ScrollToTop.vue'
     <Navbar />
     <Hero />
     <Tours />
+    <MountainDivider color="brand-dark" />
     <Identity />
+    <MountainDivider color="brand-dark" flip />
     <Testimonials />
+    <MountainDivider color="brand-dark" />
     <Gallery />
     <Contact />
     <Footer />

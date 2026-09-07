@@ -1,8 +1,9 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { tours } from '../data/tours.js'
 import { formatPrecio } from '../utils/format.js'
 import TourModal from '../components/TourModal.vue'
+import TourPlaceholder from '../components/TourPlaceholder.vue'
 
 const scrollContainer = ref(null)
 const selectedTour = ref(null)
@@ -27,13 +28,20 @@ onMounted(() => {
 onUnmounted(() => observer?.disconnect())
 
 const esDefinir = (tour) => !tour.disponible
+const esPlaceholder = (tour) => tour.imagen === '/assets/tours/default.svg'
+
+// 1° con fotos, 2° con info pero sin fotos, 3° sin nada (Próximamente)
+const jerarquiaTour = (tour) => (!esPlaceholder(tour) ? 0 : tour.disponible ? 1 : 2)
+const toursOrdenados = computed(() =>
+  [...tours].sort((a, b) => jerarquiaTour(a) - jerarquiaTour(b))
+)
 
 const dificultadClass = (tour) =>
   tour.dificultad === 'Alta'
-    ? 'text-red-400'
+    ? 'text-brand-orange'
     : tour.dificultad === 'Media'
       ? 'text-brand-gold'
-      : 'text-green-400'
+      : 'text-brand-green'
 
 const scroll = (direction) => {
   if (!scrollContainer.value) return
@@ -96,18 +104,24 @@ const scroll = (direction) => {
           class="flex gap-5 md:gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-6 scrollbar-hide"
         >
           <article
-            v-for="tour in tours"
+            v-for="tour in toursOrdenados"
             :key="tour.slug"
-            class="w-[85vw] sm:w-[80vw] md:w-[calc((100%-2rem)/3)] snap-start flex-shrink-0 bg-brand-card rounded-2xl overflow-hidden group transition-all duration-300 border border-brand-cream/15 hover:border-brand-cream/25"
+            class="w-[85vw] sm:w-[80vw] md:w-[calc((100%-2rem)/3)] snap-start flex-shrink-0 bg-brand-card rounded-2xl overflow-hidden group transition-all duration-300 border border-brand-cream/15 hover:border-brand-cream/25 hover:shadow-lg hover:shadow-brand-orange/10"
           >
             <!-- Image -->
             <div class="relative aspect-video overflow-hidden">
+              <TourPlaceholder
+                v-if="esPlaceholder(tour)"
+                :tour="tour"
+                class="w-full h-full group-hover:scale-105 group-hover:brightness-110 group-hover:saturate-110 transition-all duration-500"
+              />
               <img
+                v-else
                 :src="tour.imagen"
                 :alt="tour.nombre"
-                :loading="tour === tours[0] ? 'eager' : 'lazy'"
+                :loading="tour === toursOrdenados[0] ? 'eager' : 'lazy'"
                 decoding="async"
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                class="w-full h-full object-cover group-hover:scale-105 group-hover:brightness-110 group-hover:saturate-110 transition-all duration-500"
               />
               <div class="absolute inset-0 bg-gradient-to-t from-brand-dark/70 via-brand-dark/10 to-transparent"></div>
               <span
@@ -118,11 +132,12 @@ const scroll = (direction) => {
               </span>
               <template v-else>
                 <span class="absolute top-3 right-3 bg-brand-dark/60 backdrop-blur-sm border border-brand-cream/10 text-xs font-bold px-3 py-1 rounded-full font-sans" :class="dificultadClass(tour)">
-                  <template v-if="tour.terreno || tour.distancia">
-                    Terreno: {{ tour.terreno }} · Distancia: {{ tour.distancia }}
+                  {{ tour.dificultad }}
+                  <template v-if="tour.terreno && tour.terreno !== tour.dificultad">
+                    · Terreno: {{ tour.terreno }}
                   </template>
-                  <template v-else>
-                    {{ tour.dificultad }}
+                  <template v-if="tour.distancia && tour.distancia !== tour.dificultad">
+                    · Dist: {{ tour.distancia }}
                   </template>
                 </span>
                 <span class="absolute bottom-3 left-3 text-brand-white text-xs font-sans bg-brand-dark/60 backdrop-blur-sm px-2 py-1 rounded">
@@ -159,7 +174,7 @@ const scroll = (direction) => {
               <button
                 v-if="!esDefinir(tour)"
                 @click="selectedTour = tour"
-                class="w-full min-h-11 border-2 border-brand-cream/20 text-brand-cream/80 rounded-lg py-3.5 font-sans font-semibold hover:bg-brand-cream/10 transition-colors duration-300 text-sm"
+                class="w-full min-h-11 border-2 border-brand-cream/20 text-brand-cream/80 rounded-lg py-3.5 font-sans font-semibold hover:bg-brand-orange hover:border-brand-orange hover:text-brand-white hover:shadow-md hover:shadow-brand-orange/20 transition-all duration-300 text-sm"
               >
                 Conocer la experiencia
               </button>

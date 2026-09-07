@@ -54,6 +54,24 @@ public/
 - Contact/social links are hardcoded, not centralized: WhatsApp number, email, and Instagram are in `Contact.vue`; Instagram and Facebook are in `Hero.vue`
 - `composables/` is scaffolding — populate only as the landing page grows
 
+## Contact form security conventions
+
+- `Contact.vue` sends via `emailjs.send()` with an explicit sanitized payload (NOT `sendForm()` — never reintroduce it, it sends raw form fields)
+- Anti-spam layers (keep all three if editing the form): honeypot field `empresa` (fake success if filled), timing check (<2s submit = bot), 60s rate limit via `sessionStorage` key `ultimoEnvioContacto`
+- Sanitize user input before sending: trim + collapse spaces; `nombre` ≤60 chars and must reject `\r`/`\n` (header injection); `telefono` ≤25 chars; `mensaje` ≤500 enforced in JS too; `tourInteres` must match a value from `tourOptions`
+- Privacy checkbox (`aceptaPrivacidad`) is required and part of `formularioValido` — do not remove (PII collection, Ley 25.326)
+- Security headers + CSP live in `vercel.json`; CSP allows `api.emailjs.com` (connect), Google Fonts (style/font). If adding a new external service, update CSP accordingly
+
+## Pending external config (EmailJS)
+
+- Current setup: EmailJS service is connected to the site owner's PERSONAL Gmail; the template uses "Redirect Email" to forward submissions to `cascadaelchorrillo.2018@gmail.com` (business inbox). Works, but sends from the personal address and depends on that account
+- Desired migration (when business Gmail access is available):
+  1. Email Services → Add Gmail service authorized with the BUSINESS account (`cascadaelchorrillo.2018@gmail.com`), note the new Service ID
+  2. Template settings: To Email = business address, Reply-To = `{{email}}`, remove the Redirect Email
+  3. Update `VITE_EMAILJS_SERVICE_ID` in `.env` (template id + public key unchanged)
+  4. Delete/pause the old personal-Gmail service
+- Domain Allowlist (done): vercel domain + localhost already restricted in dashboard → Account → Security
+
 ## EmailJS contact form
 
 - Contact form in `src/sections/Contact.vue` sends via `emailjs.sendForm()`

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Lightbox from '../components/Lightbox.vue'
 
 const sectionRef = ref(null)
@@ -36,11 +36,21 @@ const galeria = [
   { src: '/assets/tours/pueblo-escondido/gente-bandera-puebloescondido.webp', titulo: 'Pueblo Escondido', lugar: 'Pueblo Escondido' }
 ]
 
+const categorias = ['Todos', 'Cerro Champaquí', 'Pueblo Escondido', 'La Cumbrecita']
+const filtroActivo = ref('Todos')
+
+const galeriaFiltrada = computed(() => {
+  if (filtroActivo.value === 'Todos') return galeria
+  return galeria.filter(img => img.lugar === filtroActivo.value)
+})
+
 const lightboxOpen = ref(false)
 const lightboxIndex = ref(0)
 
 const abrirLightbox = (i) => {
-  lightboxIndex.value = i
+  const filteredSrc = galeriaFiltrada.value[i].src
+  const originalIndex = galeria.findIndex(img => img.src === filteredSrc)
+  lightboxIndex.value = originalIndex >= 0 ? originalIndex : i
   lightboxOpen.value = true
 }
 </script>
@@ -56,7 +66,7 @@ const abrirLightbox = (i) => {
     />
     <div class="absolute inset-0 bg-gradient-to-b from-brand-dark/80 via-brand-dark/70 to-brand-dark"></div>
     <div class="relative max-w-7xl mx-auto px-5 md:px-10 lg:px-20">
-      <div class="flex items-end justify-between gap-6 mb-10 md:mb-12">
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 md:mb-12">
         <div class="transition-all duration-700" :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'">
           <p class="font-sans text-sm tracking-[0.3em] uppercase text-brand-orange mb-2">
             Galería
@@ -82,11 +92,29 @@ const abrirLightbox = (i) => {
         </a>
       </div>
 
+      <!-- Filtros -->
+      <div
+        class="flex flex-wrap gap-2 mb-8 transition-all duration-700 delay-100"
+        :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"
+      >
+        <button
+          v-for="cat in categorias"
+          :key="cat"
+          @click="filtroActivo = cat"
+          class="px-4 py-2 rounded-full text-xs font-sans font-semibold transition-all duration-300"
+          :class="filtroActivo === cat
+            ? 'bg-brand-orange text-brand-white shadow-md shadow-brand-orange/25'
+            : 'bg-brand-card border border-brand-cream/15 text-brand-cream/70 hover:border-brand-orange/40 hover:text-brand-cream'"
+        >
+          {{ cat }}
+        </button>
+      </div>
+
       <div class="columns-2 md:columns-3 gap-4">
         <figure
-          v-for="(img, i) in galeria"
+          v-for="(img, i) in galeriaFiltrada"
           :key="img.src"
-          class="group relative mb-4 break-inside-avoid rounded-xl overflow-hidden cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange"
+          class="group relative mb-4 break-inside-avoid rounded-xl overflow-hidden cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange transition-all duration-500"
           tabindex="0"
           role="button"
           :aria-label="`Abrir imagen: ${img.titulo}`"
@@ -99,11 +127,11 @@ const abrirLightbox = (i) => {
             :alt="img.titulo"
             loading="lazy"
             decoding="async"
-            class="w-full h-auto block group-hover:scale-105 transition-transform duration-500"
+            class="w-full h-auto block group-hover:scale-110 group-hover:brightness-110 transition-all duration-500"
           />
 
-          <div class="absolute inset-0 bg-gradient-to-t from-brand-dark/85 via-brand-dark/20 to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-            <span class="text-brand-cream/70 text-xs font-sans uppercase tracking-[0.12em] md:tracking-[0.2em]">
+          <div class="absolute inset-0 bg-gradient-to-t from-brand-dark/90 via-brand-dark/30 to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+            <span class="text-brand-orange text-xs font-sans uppercase tracking-[0.12em] md:tracking-[0.2em] mb-0.5">
               {{ img.lugar }}
             </span>
             <h3 class="font-heading text-lg text-brand-white uppercase leading-tight">
@@ -111,7 +139,7 @@ const abrirLightbox = (i) => {
             </h3>
           </div>
 
-          <span class="absolute top-3 right-3 w-8 h-8 rounded-full bg-brand-dark/60 backdrop-blur-sm flex items-center justify-center text-brand-cream opacity-70 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true">
+          <span class="absolute top-3 right-3 w-9 h-9 rounded-full bg-brand-orange/80 backdrop-blur-sm flex items-center justify-center text-brand-white opacity-80 md:opacity-0 md:group-hover:opacity-100 md:group-hover:scale-110 transition-all duration-300 shadow-lg shadow-brand-orange/30" aria-hidden="true">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h6m0 0v6m0-6l-9 9M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4" />
             </svg>

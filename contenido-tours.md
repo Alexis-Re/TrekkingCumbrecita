@@ -6,7 +6,10 @@ Checklist de contenido para completar `src/data/tours.js`. Cuando un tour tenga 
 
 ```
 incluye:      lista de ítems (base: ver tours similares de la misma duración)
-itinerario:   por día → título + lista de "hora + evento"
+itinerario:   por día → título + [distancia opcional] + lista de "hora + evento"
+requisitos:   opcional — condiciones para participar (edad, peso, entrenamiento)
+equipamiento: opcional — equipo que lleva cada participante
+cupoMax:      opcional — cupo máximo de personas por salida (Number)
 imagen:       public/assets/tours/<slug>/portada.webp (mínimo 1)
 imagenes:     galería opcional en la misma carpeta
 ```
@@ -31,6 +34,10 @@ imagenes:     galería opcional en la misma carpeta
 ### Definir (no disponibles)
 - [ ] `casita-de-cristal-cinco-saltos` — falta: duración, dificultad, terreno/distancia, precio, horarios, reunión, incluye, itinerario, imágenes
 - [ ] `circuito-cumbrecita-lagunita-ventana-garganta` — falta: ídem anterior
+
+### Cargados (solo falta imagen/galería)
+- [~] `salida-del-cruce` — La Salida del Cruce · 7 días / 6 noches · $650.000 — completo en contenido, falta portada y galería en `public/assets/tours/salida-del-cruce/`
+- [~] `running-camp-montana` — Running Camp en la Montaña · 3 días / 2 noches · $360.000 — falta: portada/galería, punto de encuentro real, precio de la opción cabañas, horarios de los entrenamientos (días 1 y 2)
 
 ## Bases para copiar estructura (ya completos)
 

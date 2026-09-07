@@ -5,7 +5,7 @@ import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const DURACIONES = ['1 día', '6 hs', '7 hs', '2 días / 1 noche', '3 días / 2 noches', 'Definir']
+const DURACIONES = ['1 día', '6 hs', '7 hs', '2 días / 1 noche', '3 días / 2 noches', '7 días / 6 noches', 'Definir']
 const NIVELES = ['Baja', 'Media', 'Alta', null]
 
 const errores = []
@@ -67,6 +67,10 @@ for (const t of tours) {
       break
     }
   }
+  for (const campo of ['requisitos', 'equipamiento']) {
+    if (campo in t && !Array.isArray(t[campo])) errores.push(`${id}: ${campo} debe ser array`)
+  }
+  if ('cupoMax' in t && (typeof t.cupoMax !== 'number' || t.cupoMax < 1)) errores.push(`${id}: cupoMax debe ser número positivo`)
 }
 
 console.log(`Tours: ${tours.length} | disponibles: ${tours.filter((t) => t.disponible).length}`)

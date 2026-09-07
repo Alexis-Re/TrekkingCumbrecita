@@ -16,10 +16,29 @@ const form = ref({
   mensaje: ''
 })
 
+// Honeypot: campo señuelo invisible para humanos, los bots lo rellenan
+const honeypot = ref('')
+
+// Timing check: los bots envían el formulario demasiado rápido
+const formMountedAt = Date.now()
+
+// Rate limit: 1 envío cada 60s por pestaña
+const RATE_LIMIT_MS = 60000
+const ultimoEnvio = () => Number(sessionStorage.getItem('ultimoEnvioContacto') || 0)
+
 const enviado = ref(false)
 const errorEnvio = ref(false)
 const errorValidacion = ref('')
 const cargando = ref(false)
+const aceptaPrivacidad = ref(false)
+const RATE_LIMIT_MSG = 'Esperá un momento antes de enviar otra consulta.'
+
+// Estados de touched para validación visual
+const touched = ref({
+  nombre: false,
+  email: false,
+  telefono: false
+})
 
 const tourOptions = computed(() =>
   tours
@@ -29,25 +48,71 @@ const tourOptions = computed(() =>
 
 const mensajeLength = computed(() => form.value.mensaje.length)
 
+const nombreValido = computed(() => {
+  const n = form.value.nombre.trim()
+  return n.length >= 2 && n.length <= 60 && !/[\r\n]/.test(n)
+})
+
 const emailValido = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email.trim()))
 
 const telefonoValido = computed(() => {
   const tel = form.value.telefono.trim()
-  return tel === '' || /^[\d\s\+\-\(\)]{7,}$/.test(tel)
+  return tel === '' || (/^[\d\s\+\-\(\)]{7,25}$/.test(tel) && !/[\r\n]/.test(tel))
 })
 
 const formularioValido = computed(() =>
-  form.value.nombre.trim().length >= 2 &&
+  nombreValido.value &&
   emailValido.value &&
-  telefonoValido.value
+  telefonoValido.value &&
+  aceptaPrivacidad.value
 )
 
-const formRef = ref(null)
+// Trim + colapso de espacios múltiples
+const sanitizar = (str) => str.trim().replace(/\s+/g, ' ')
+
+// Clases de validación por campo
+const nombreClass = computed(() => {
+  if (!touched.value.nombre) return ''
+  return nombreValido.value ? 'border-brand-green/50 focus:border-brand-green/70' : 'border-brand-orange/50 focus:border-brand-orange/70'
+})
+
+const emailClass = computed(() => {
+  if (!touched.value.email || !form.value.email) return ''
+  return emailValido.value ? 'border-brand-green/50 focus:border-brand-green/70' : 'border-brand-orange/50 focus:border-brand-orange/70'
+})
+
+const telefonoClass = computed(() => {
+  if (!touched.value.telefono || !form.value.telefono) return ''
+  return telefonoValido.value ? 'border-brand-green/50 focus:border-brand-green/70' : 'border-brand-orange/50 focus:border-brand-orange/70'
+})
+
+function onBlur(field) {
+  touched.value[field] = true
+}
 
 async function enviarFormulario() {
   errorValidacion.value = ''
+  touched.value = { nombre: true, email: true, telefono: true }
 
-  if (!form.value.nombre.trim()) {
+  // Honeypot: si un bot lo rellena, fingimos éxito sin enviar nada
+  if (honeypot.value !== '') {
+    enviado.value = true
+    return
+  }
+
+  // Bots envían en menos de 2 segundos
+  if (Date.now() - formMountedAt < 2000) {
+    enviado.value = true
+    return
+  }
+
+  // Rate limit por pestaña
+  if (Date.now() - ultimoEnvio() < RATE_LIMIT_MS) {
+    errorValidacion.value = RATE_LIMIT_MSG
+    return
+  }
+
+  if (!nombreValido.value) {
     errorValidacion.value = 'Ingresá tu nombre.'
     return
   }
@@ -62,13 +127,37 @@ async function enviarFormulario() {
     return
   }
 
+  if (!aceptaPrivacidad.value) {
+    errorValidacion.value = 'Aceptá el uso de tus datos para responder la consulta.'
+    return
+  }
+
   cargando.value = true
   errorEnvio.value = false
 
+  // Sanitización: valores limpios antes de armar el submit
+  const nombre = sanitizar(form.value.nombre)
+  const email = form.value.email.trim()
+  const telefono = sanitizar(form.value.telefono)
+  const mensaje = form.value.mensaje.trim().slice(0, 500)
+  // tourInteres solo acepta valores de la lista
+  const tourInteres = tourOptions.value.some(t => t.value === form.value.tourInteres)
+    ? form.value.tourInteres
+    : ''
+
   try {
-    await emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, formRef.value, PUBLIC_KEY)
+    await emailjs.send(
+      SERVICE_ID,
+      TEMPLATE_ID,
+      { nombre, email, telefono, tour: tourInteres, mensaje },
+      PUBLIC_KEY
+    )
+    sessionStorage.setItem('ultimoEnvioContacto', String(Date.now()))
     enviado.value = true
     form.value = { nombre: '', email: '', telefono: '', tourInteres: '', mensaje: '' }
+    honeypot.value = ''
+    touched.value = { nombre: false, email: false, telefono: false }
+    aceptaPrivacidad.value = false
   } catch {
     errorEnvio.value = true
   } finally {
@@ -110,24 +199,45 @@ async function enviarFormulario() {
         <div class="lg:col-span-3">
           <form
             v-if="!enviado"
-            ref="formRef"
             @submit.prevent="enviarFormulario"
             class="space-y-5"
           >
+            <!-- Honeypot: invisible para humanos -->
+            <input
+              v-model="honeypot"
+              type="text"
+              name="empresa"
+              tabindex="-1"
+              autocomplete="off"
+              aria-hidden="true"
+              class="absolute -left-[9999px] top-auto h-px w-px overflow-hidden opacity-0"
+            />
             <!-- Nombre -->
             <div>
               <label for="nombre" class="block text-brand-cream/80 text-sm font-sans mb-1.5">
                 Nombre completo
               </label>
-              <input
-                id="nombre"
-                v-model="form.nombre"
-                type="text"
-                name="nombre"
-                required
-                placeholder="Tu nombre"
-                class="w-full min-h-11 px-4 py-3.5 bg-brand-card border border-brand-cream/15 rounded-lg text-base text-brand-cream placeholder-brand-cream/30 font-sans focus:outline-none focus:border-brand-orange/50 focus:ring-1 focus:ring-brand-orange/30 transition-colors"
-              />
+              <div class="relative">
+                <input
+                  id="nombre"
+                  v-model="form.nombre"
+                  type="text"
+                  name="nombre"
+                  required
+                  maxlength="60"
+                  autocomplete="name"
+                  placeholder="Tu nombre"
+                  @blur="onBlur('nombre')"
+                  class="w-full min-h-11 px-4 py-3.5 pr-10 bg-brand-card border rounded-lg text-base text-brand-cream placeholder-brand-cream/30 font-sans focus:outline-none focus:ring-1 transition-colors"
+                  :class="nombreClass || 'border-brand-cream/15 focus:border-brand-orange/50 focus:ring-brand-orange/30'"
+                />
+                <span v-if="touched.nombre && nombreValido" class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-green">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                </span>
+                <span v-else-if="touched.nombre && form.nombre" class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-orange">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </span>
+              </div>
             </div>
 
             <!-- Email + Teléfono -->
@@ -136,28 +246,51 @@ async function enviarFormulario() {
                 <label for="email" class="block text-brand-cream/80 text-sm font-sans mb-1.5">
                   Email
                 </label>
-                <input
-                  id="email"
-                  v-model="form.email"
-                  type="email"
-                  name="email"
-                  required
-                  placeholder="tu@email.com"
-                  class="w-full min-h-11 px-4 py-3.5 bg-brand-card border border-brand-cream/15 rounded-lg text-base text-brand-cream placeholder-brand-cream/30 font-sans focus:outline-none focus:border-brand-orange/50 focus:ring-1 focus:ring-brand-orange/30 transition-colors"
-                />
+                <div class="relative">
+                  <input
+                    id="email"
+                    v-model="form.email"
+                    type="email"
+                    name="email"
+                    required
+                    autocomplete="email"
+                    placeholder="tu@email.com"
+                    @blur="onBlur('email')"
+                    class="w-full min-h-11 px-4 py-3.5 pr-10 bg-brand-card border rounded-lg text-base text-brand-cream placeholder-brand-cream/30 font-sans focus:outline-none focus:ring-1 transition-colors"
+                    :class="emailClass || 'border-brand-cream/15 focus:border-brand-orange/50 focus:ring-brand-orange/30'"
+                  />
+                  <span v-if="touched.email && form.email && emailValido" class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-green">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  </span>
+                  <span v-else-if="touched.email && form.email && !emailValido" class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-orange">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                  </span>
+                </div>
               </div>
               <div>
                 <label for="telefono" class="block text-brand-cream/80 text-sm font-sans mb-1.5">
                   Teléfono <span class="text-brand-cream/40">(opcional)</span>
                 </label>
-                <input
-                  id="telefono"
-                  v-model="form.telefono"
-                  type="tel"
-                  name="telefono"
-                  placeholder="+54 9 351 123-4567"
-                  class="w-full min-h-11 px-4 py-3.5 bg-brand-card border border-brand-cream/15 rounded-lg text-base text-brand-cream placeholder-brand-cream/30 font-sans focus:outline-none focus:border-brand-orange/50 focus:ring-1 focus:ring-brand-orange/30 transition-colors"
-                />
+                <div class="relative">
+                  <input
+                    id="telefono"
+                    v-model="form.telefono"
+                    type="tel"
+                    name="telefono"
+                    maxlength="25"
+                    autocomplete="tel"
+                    placeholder="+54 9 351 123-4567"
+                    @blur="onBlur('telefono')"
+                    class="w-full min-h-11 px-4 py-3.5 pr-10 bg-brand-card border rounded-lg text-base text-brand-cream placeholder-brand-cream/30 font-sans focus:outline-none focus:ring-1 transition-colors"
+                    :class="telefonoClass || 'border-brand-cream/15 focus:border-brand-orange/50 focus:ring-brand-orange/30'"
+                  />
+                  <span v-if="touched.telefono && form.telefono && telefonoValido" class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-green">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  </span>
+                  <span v-else-if="touched.telefono && form.telefono && !telefonoValido" class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-orange">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -210,12 +343,29 @@ async function enviarFormulario() {
             </div>
 
             <!-- Error -->
-            <p v-if="errorValidacion" class="text-red-400 text-sm font-sans">
+            <p v-if="errorValidacion" class="text-brand-orange text-sm font-sans">
               {{ errorValidacion }}
             </p>
-            <p v-if="errorEnvio" class="text-red-400 text-sm font-sans">
+            <p v-if="errorEnvio" class="text-brand-orange text-sm font-sans">
               Hubo un error al enviar. Intentá nuevamente o escribime por WhatsApp.
             </p>
+
+            <!-- Privacidad -->
+            <div>
+              <label class="flex items-start gap-3 cursor-pointer select-none" for="privacidad">
+                <input
+                  id="privacidad"
+                  v-model="aceptaPrivacidad"
+                  type="checkbox"
+                  required
+                  class="mt-0.5 w-4 h-4 shrink-0 accent-brand-orange"
+                />
+                <span class="text-brand-cream/60 text-xs font-sans leading-relaxed">
+                  Acepto que mis datos personales (nombre, email y teléfono) sean utilizados
+                  únicamente para responder esta consulta. No se comparten con terceros.
+                </span>
+              </label>
+            </div>
 
             <!-- Botón enviar -->
             <button

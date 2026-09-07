@@ -4,6 +4,8 @@ import { testimonios } from '../data/testimonios.js'
 
 const sectionRef = ref(null)
 const isVisible = ref(false)
+const scrollContainer = ref(null)
+const activeIndex = ref(0)
 let observer = null
 
 onMounted(() => {
@@ -20,6 +22,15 @@ onMounted(() => {
 })
 
 onUnmounted(() => observer?.disconnect())
+
+function onScroll() {
+  if (!scrollContainer.value) return
+  const container = scrollContainer.value
+  const scrollLeft = container.scrollLeft
+  const cardWidth = container.querySelector('div')?.offsetWidth || 300
+  const gap = 24
+  activeIndex.value = Math.round(scrollLeft / (cardWidth + gap))
+}
 </script>
 
 <template>
@@ -50,7 +61,61 @@ onUnmounted(() => observer?.disconnect())
         <div class="h-1 w-20 bg-gradient-to-r from-brand-orange to-brand-gold mx-auto"></div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+      <!-- Mobile: carrusel horizontal -->
+      <div class="md:hidden">
+        <div
+          ref="scrollContainer"
+          class="flex gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-6 scrollbar-hide"
+          @scroll="onScroll"
+        >
+          <div
+            v-for="(testimonio, index) in testimonios"
+            :key="testimonio.nombre"
+            class="w-[85vw] snap-start flex-shrink-0 bg-brand-secondary/60 border border-brand-cream/10 rounded-2xl p-7 relative"
+            :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
+            :style="{ transitionDelay: `${200 + index * 150}ms` }"
+          >
+            <div class="absolute -top-4 left-7 w-8 h-8 rounded-full bg-brand-orange flex items-center justify-center shadow-md shadow-brand-orange/30">
+              <svg class="w-4 h-4 text-brand-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151C7.546 6.068 5.983 8.789 5.983 11H10v10H0z" />
+              </svg>
+            </div>
+
+            <p class="text-brand-cream/80 text-sm leading-relaxed mb-6 italic mt-2">
+              "{{ testimonio.texto }}"
+            </p>
+
+            <div class="border-t border-brand-cream/10 pt-4 flex items-center gap-3">
+              <img
+                :src="testimonio.foto"
+                :alt="testimonio.nombre"
+                class="w-10 h-10 rounded-full object-cover border-2 border-brand-orange/30"
+              />
+              <div>
+                <span class="block font-sans font-semibold text-brand-white text-sm">
+                  {{ testimonio.nombre }}
+                </span>
+                <span class="block font-sans text-brand-orange text-xs mt-0.5">
+                  {{ testimonio.trekking }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dots -->
+        <div class="flex justify-center gap-2 mt-2">
+          <span
+            v-for="(_, i) in testimonios"
+            :key="i"
+            class="w-2 h-2 rounded-full transition-colors duration-300"
+            :class="i === activeIndex ? 'bg-brand-orange' : 'bg-brand-cream/30'"
+          ></span>
+        </div>
+      </div>
+
+      <!-- Desktop: grid -->
+      <div class="hidden md:grid md:grid-cols-3 gap-6 lg:gap-8">
         <div
           v-for="(testimonio, index) in testimonios"
           :key="testimonio.nombre"
@@ -90,3 +155,13 @@ onUnmounted(() => observer?.disconnect())
     </div>
   </section>
 </template>
+
+<style scoped>
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+</style>

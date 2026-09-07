@@ -69,7 +69,7 @@ onUnmounted(() => {
   <nav
     class="fixed inset-x-0 top-0 z-50 transition-all duration-300"
     :class="scrolled
-      ? 'bg-brand-dark/80 backdrop-blur-sm shadow-lg'
+      ? 'bg-brand-dark/80 backdrop-blur-sm shadow-lg shadow-brand-dark/50 border-b border-brand-orange/10'
       : 'bg-transparent'"
   >
     <div class="max-w-7xl mx-auto pl-3 pr-3 lg:pl-12 lg:pr-10 flex items-center justify-between h-16 md:h-[80px]">
@@ -91,7 +91,7 @@ onUnmounted(() => {
           :href="link.href"
           :target="link.external ? '_blank' : undefined"
           :rel="link.external ? 'noopener noreferrer' : undefined"
-          class="font-sans text-sm tracking-wide uppercase transition-colors duration-300"
+          class="relative font-sans text-sm tracking-wide uppercase transition-colors duration-300 py-1"
           :class="[
             !link.external && activeSection === link.href?.slice(1)
               ? 'text-brand-orange font-semibold'
@@ -100,6 +100,10 @@ onUnmounted(() => {
           @click.prevent="!link.external && scrollTo(link.href)"
         >
           {{ link.label }}
+          <span
+            v-if="!link.external && activeSection === link.href?.slice(1)"
+            class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-orange to-brand-gold rounded-full"
+          ></span>
         </a>
       </div>
 
