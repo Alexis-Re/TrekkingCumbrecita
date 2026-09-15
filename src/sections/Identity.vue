@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { acreditacion } from '../data/acreditacion.js'
 
 const sectionRef = ref(null)
 const isVisible = ref(false)
@@ -22,10 +23,9 @@ onMounted(() => {
 onUnmounted(() => observer?.disconnect())
 
 const stats = [
-  { target: 15, suffix: '+', label: 'Años de experiencia' },
-  { target: 200, suffix: '+', label: 'Experiencias guiadas' },
-  { target: 500, suffix: '+', label: 'Clientes satisfechos' },
-  { target: 1500, suffix: '+', label: 'Km de senderos recorridos' }
+  { target: 27, suffix: '+', label: 'Años de experiencia guiando' },
+  { target: 5000, suffix: '+', label: 'Personas acompañadas en la montaña' },
+  { target: 14, suffix: '', label: 'Experiencias desde 1 hasta 7 días' }
 ]
 
 const animatedStats = ref(stats.map(() => ({ current: 0, started: false })))
@@ -57,24 +57,6 @@ watch(isVisible, (val) => {
     })
   }
 })
-
-const valores = [
-  {
-    nombre: 'Naturaleza',
-    descripcion: 'Te acompaño a conectar con el bosque, los ríos y las cumbres del Valle de Calamuchita.',
-    icono: 'hoja'
-  },
-  {
-    nombre: 'Aventura',
-    descripcion: 'Ríos, cascadas y cumbres: cada sendero propone una forma nueva de vivir las sierras.',
-    icono: 'montana'
-  },
-  {
-    nombre: 'Seguridad',
-    descripcion: 'Guía habilitado y equipamiento profesional para que disfrutes cada salida con tranquilidad.',
-    icono: 'escudo'
-  }
-]
 
 </script>
 
@@ -146,55 +128,61 @@ const valores = [
               <p class="text-brand-cream/80 font-sans text-sm md:text-base leading-relaxed mb-4">
                 Soy guía de trekking y apasionado conocedor de los paisajes de Córdoba. Desde La Cumbrecita, acompaño a quienes buscan explorar la montaña, descubrir nuevos senderos y vivir experiencias auténticas en contacto con la naturaleza.
               </p>
-              <p class="text-brand-cream/80 font-sans text-sm md:text-base leading-relaxed mb-10">
-                Hoy, con más de 15 años de experiencia, mi objetivo es compartir esa pasión con otros. Cada trekking es una oportunidad para crear recuerdos inolvidables y conectar con la naturaleza de forma segura y respetuosa.
-              </p>
-            </div>
+               <p class="text-brand-cream/80 font-sans text-sm md:text-base leading-relaxed mb-8">
+                 Hoy, con más de 27 años de experiencia, mi objetivo es compartir esa pasión con otros. Cada trekking es una oportunidad para crear recuerdos inolvidables y conectar con la naturaleza de forma segura y respetuosa.
+               </p>
 
-            <!-- Valores -->
-            <div class="space-y-6">
-              <div
-                v-for="(valor, index) in valores"
-                :key="valor.nombre"
-                class="flex items-start gap-4 group transition-all duration-500"
-                :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
-                :style="{ transitionDelay: `${200 + index * 150}ms` }"
-              >
-                <div class="flex-shrink-0 w-11 h-11 rounded-full bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center transition-all duration-300 group-hover:bg-brand-orange/20 group-hover:border-brand-orange/40">
-                  <svg v-if="valor.icono === 'hoja'" class="w-5 h-5 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4-4-8-7.5-8-12a8 8 0 0116 0c0 4.5-4 8-8 12z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21V9" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12c1.5 0 3-1 3-3" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12c-1.5 0-3-1-3-3" />
-                  </svg>
-                  <svg v-else-if="valor.icono === 'montana'" class="w-5 h-5 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 20l5.5-11L12 14l3.5-6L21 20H3z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 8l3 5" />
-                  </svg>
-                  <svg v-else-if="valor.icono === 'escudo'" class="w-5 h-5 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l8 4v5c0 5-3.5 9.5-8 11-4.5-1.5-8-6-8-11V7l8-4z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 class="font-heading text-lg text-brand-white uppercase tracking-wide mb-0.5">
-                    {{ valor.nombre }}
-                  </h3>
-                  <p class="text-brand-cream/65 text-sm leading-relaxed">
-                    {{ valor.descripcion }}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+               <!-- Ficha pública: no expone DNI, foto ni firma de la credencial. -->
+               <div class="mb-10 rounded-2xl border border-brand-cream/15 bg-brand-card/70 p-5 md:p-6">
+                 <div class="flex items-start gap-3">
+                   <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-brand-orange/30 bg-brand-orange/10 text-brand-orange">
+                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3l8 4v5c0 5-3.5 9.5-8 11-4.5-1.5-8-6-8-11V7l8-4z" />
+                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4" />
+                     </svg>
+                   </div>
+                   <div class="min-w-0">
+                     <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand-orange">
+                       Acreditación oficial
+                     </p>
+                     <h3 class="mt-1 font-heading text-xl uppercase leading-tight text-brand-white">
+                       {{ acreditacion.titulo }}
+                     </h3>
+                     <p class="mt-1 text-sm leading-relaxed text-brand-cream/65">
+                       {{ acreditacion.marcoLegal }} · Resolución {{ acreditacion.resolucion }}
+                     </p>
+                   </div>
+                 </div>
+
+                 <div class="mt-5 border-t border-brand-cream/10 pt-4">
+                   <p class="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-brand-cream/55">
+                     Alcance de la habilitación
+                   </p>
+                   <div class="space-y-3">
+                     <div
+                       v-for="habilitacion in acreditacion.habilitaciones"
+                       :key="habilitacion.riesgo"
+                       class="flex items-start justify-between gap-4 text-sm"
+                     >
+                       <span class="shrink-0 font-semibold text-brand-cream/90">{{ habilitacion.riesgo }}</span>
+                       <span class="text-right text-brand-cream/65">{{ habilitacion.actividades }}</span>
+                     </div>
+                   </div>
+                 </div>
+
+               </div>
+             </div>
+
+           </div>
+
+         </div>
       </div>
     </div>
 
     <!-- BLOQUE 2: Estadísticas -->
     <div class="border-y border-brand-cream/10 bg-brand-orange/5">
       <div class="max-w-7xl mx-auto px-5 md:px-10 lg:px-20">
-        <div class="grid grid-cols-2 md:grid-cols-4 divide-x divide-brand-cream/10">
+        <div class="grid grid-cols-3 divide-x divide-brand-cream/10">
           <div
             v-for="(stat, index) in stats"
             :key="stat.label"

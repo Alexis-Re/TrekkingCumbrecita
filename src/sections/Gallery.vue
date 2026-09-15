@@ -5,21 +5,32 @@ import Lightbox from '../components/Lightbox.vue'
 const sectionRef = ref(null)
 const isVisible = ref(false)
 let observer = null
+let visibilityFallback = null
 
 onMounted(() => {
   observer = new IntersectionObserver(
     ([entry]) => {
       if (entry.isIntersecting) {
         isVisible.value = true
+        clearTimeout(visibilityFallback)
         observer.disconnect()
       }
     },
     { threshold: 0.15 }
   )
   if (sectionRef.value) observer.observe(sectionRef.value)
+
+  // Evita que el encabezado quede oculto si el observer no dispara.
+  visibilityFallback = window.setTimeout(() => {
+    isVisible.value = true
+    observer?.disconnect()
+  }, 1500)
 })
 
-onUnmounted(() => observer?.disconnect())
+onUnmounted(() => {
+  observer?.disconnect()
+  clearTimeout(visibilityFallback)
+})
 
 const galeria = [
   { src: '/assets/tours/champaqui/grupo-bandera-champa.webp', titulo: 'Cumbre del Champaquí', lugar: 'Cerro Champaquí' },
@@ -33,10 +44,49 @@ const galeria = [
   { src: '/assets/tours/pueblo-escondido/gente-cuevas.webp', titulo: 'Cuevas del poblado', lugar: 'Pueblo Escondido' },
   { src: '/assets/tours/champaqui/grupo-nieve-altura.webp', titulo: 'Caminata en altura', lugar: 'Cerro Champaquí' },
   { src: '/assets/tours/champaqui/puente-arroyo-roberrotada.webp', titulo: 'Cruce de arroyo', lugar: 'Cerro Champaquí' },
-  { src: '/assets/tours/pueblo-escondido/gente-bandera-puebloescondido.webp', titulo: 'Pueblo Escondido', lugar: 'Pueblo Escondido' }
+  { src: '/assets/tours/pueblo-escondido/gente-bandera-puebloescondido.webp', titulo: 'Pueblo Escondido', lugar: 'Pueblo Escondido' },
+  // Quebrada del Yatán
+  { src: '/assets/tours/quebrada-yatan/aguila-paisaje.webp', titulo: 'Aves sobre el mar de nubes', lugar: 'Quebrada del Yatán' },
+  { src: '/assets/tours/quebrada-yatan/cascada.webp', titulo: 'La cascada de la Quebrada', lugar: 'Quebrada del Yatán' },
+  { src: '/assets/tours/quebrada-yatan/grupo-cascada.webp', titulo: 'El grupo frente a la cascada', lugar: 'Quebrada del Yatán' },
+  { src: '/assets/tours/quebrada-yatan/paisaje-nubebajita.webp', titulo: 'Nubes bajas en la quebrada', lugar: 'Quebrada del Yatán' },
+  { src: '/assets/tours/quebrada-yatan/aguila.webp', titulo: 'Águila en vuelo', lugar: 'Quebrada del Yatán' },
+  { src: '/assets/tours/quebrada-yatan/cascada-paisaje.webp', titulo: 'Salto entre rocas', lugar: 'Quebrada del Yatán' },
+  { src: '/assets/tours/quebrada-yatan/cascada-verde.webp', titulo: 'Cascada entre la vegetación', lugar: 'Quebrada del Yatán' },
+  { src: '/assets/tours/quebrada-yatan/casita-paisaje.webp', titulo: 'Casita de piedra en la sierra', lugar: 'Quebrada del Yatán' },
+  { src: '/assets/tours/quebrada-yatan/gente-cuevas.webp', titulo: 'Túnel en la oscuridad', lugar: 'Quebrada del Yatán' },
+  { src: '/assets/tours/quebrada-yatan/grupo-descanso.webp', titulo: 'Descanso en el refugio', lugar: 'Quebrada del Yatán' },
+  { src: '/assets/tours/quebrada-yatan/grupo-noche-descanso.webp', titulo: 'Noche en el refugio', lugar: 'Quebrada del Yatán' },
+  { src: '/assets/tours/quebrada-yatan/grupo.webp', titulo: 'El grupo entre ruinas', lugar: 'Quebrada del Yatán' },
+  { src: '/assets/tours/quebrada-yatan/hermosafoto.webp', titulo: 'Ruinas antiguas', lugar: 'Quebrada del Yatán' },
+  { src: '/assets/tours/quebrada-yatan/noche-casapiedra.webp', titulo: 'Vía Láctea sobre la casa de piedra', lugar: 'Quebrada del Yatán' },
+  { src: '/assets/tours/quebrada-yatan/paisaje.webp', titulo: 'Paisaje serrano', lugar: 'Quebrada del Yatán' },
+  { src: '/assets/tours/quebrada-yatan/rober-campana-grupo.webp', titulo: 'Grupo en el portón con campana', lugar: 'Quebrada del Yatán' },
+  // Champaquí (faltantes)
+  { src: '/assets/tours/champaqui/champa -nievegrupo.webp', titulo: 'El grupo entre la nieve', lugar: 'Cerro Champaquí' },
+  { src: '/assets/tours/champaqui/grupo-bandera-champa (2).webp', titulo: 'Bandera en la cumbre', lugar: 'Cerro Champaquí' },
+  { src: '/assets/tours/champaqui/colegio-champa.webp', titulo: 'Grupo de estudiantes', lugar: 'Cerro Champaquí' },
+  { src: '/assets/tours/champaqui/rober-paisajaso.webp', titulo: 'Vista épica desde la cumbre', lugar: 'Cerro Champaquí' },
+  // Pueblo Escondido (faltantes)
+  { src: '/assets/tours/pueblo-escondido/cascada.webp', titulo: 'Velo de la Novia de cerca', lugar: 'Pueblo Escondido' },
+  { src: '/assets/tours/pueblo-escondido/gente-bandera-casa.webp', titulo: 'Con bandera frente a la casa antigua', lugar: 'Pueblo Escondido' },
+  { src: '/assets/tours/pueblo-escondido/gente-bandera-cruz.webp', titulo: 'Partida desde La Cruz', lugar: 'Pueblo Escondido' },
+  { src: '/assets/tours/pueblo-escondido/gente-subiendorotada.webp', titulo: 'Subida en equipo', lugar: 'Pueblo Escondido' },
+  { src: '/assets/tours/pueblo-escondido/hombre-cascada-hielo.webp', titulo: 'Frente a la cascada congelada', lugar: 'Pueblo Escondido' },
+  // La Cumbrecita (faltantes)
+  { src: '/assets/tours/Cumbrecitariosubtecascada/cascada.webp', titulo: 'La Cascada Escondida', lugar: 'La Cumbrecita' },
+  { src: '/assets/tours/Cumbrecitariosubtecascada/gente-cascada.webp', titulo: 'Bajo la cascada escondida', lugar: 'La Cumbrecita' },
+  { src: '/assets/tours/Cumbrecitariosubtecascada/grupo-altura-paisaje.webp', titulo: 'Grupo en las alturas', lugar: 'La Cumbrecita' },
+  { src: '/assets/tours/Cumbrecitariosubtecascada/grupo-enorme.webp', titulo: 'Formación en la montaña', lugar: 'La Cumbrecita' },
+  { src: '/assets/tours/Cumbrecitariosubtecascada/grupo-montaña.webp', titulo: 'Grupo entre montañas', lugar: 'La Cumbrecita' },
+  { src: '/assets/tours/Cumbrecitariosubtecascada/grupo-paisaje.altura.webp', titulo: 'Paisaje de altura', lugar: 'La Cumbrecita' },
+  { src: '/assets/tours/Cumbrecitariosubtecascada/grupo-piedras-baño.webp', titulo: 'Baño entre las piedras', lugar: 'La Cumbrecita' },
+  { src: '/assets/tours/Cumbrecitariosubtecascada/grupo-saltando.webp', titulo: 'Salto al río', lugar: 'La Cumbrecita' },
+  { src: '/assets/tours/Cumbrecitariosubtecascada/grupo-subiendo-vininedo.webp', titulo: 'Subiendo el sendero', lugar: 'La Cumbrecita' },
+  { src: '/assets/tours/Cumbrecitariosubtecascada/pasiaje-grupo.webp', titulo: 'El grupo y el paisaje', lugar: 'La Cumbrecita' }
 ]
 
-const categorias = ['Todos', 'Cerro Champaquí', 'Pueblo Escondido', 'La Cumbrecita']
+const categorias = ['Todos', 'Cerro Champaquí', 'Pueblo Escondido', 'Quebrada del Yatán', 'La Cumbrecita']
 const filtroActivo = ref('Todos')
 
 const galeriaFiltrada = computed(() => {

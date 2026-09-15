@@ -69,7 +69,7 @@ onUnmounted(() => {
   <nav
     class="fixed inset-x-0 top-0 z-50 transition-all duration-300"
     :class="scrolled
-      ? 'bg-brand-dark/80 backdrop-blur-sm shadow-lg shadow-brand-dark/50 border-b border-brand-orange/10'
+      ? 'bg-brand-dark backdrop-blur-sm shadow-lg shadow-brand-dark/50'
       : 'bg-transparent'"
   >
     <div class="max-w-7xl mx-auto pl-3 pr-3 lg:pl-12 lg:pr-10 flex items-center justify-between h-16 md:h-[80px]">

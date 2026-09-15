@@ -10,55 +10,113 @@
 // - requisitos: String[] (condiciones para participar — opcional)
 // - equipamiento: String[] (lista de equipo que debe llevar el participante — opcional)
 // - cupoMax: Number (cupos máximos por salida — opcional)
+
+const reordenarGaleria = (imagenes, inicio, invertida = false) => {
+  const rotada = [...imagenes.slice(inicio), ...imagenes.slice(0, inicio)]
+  return invertida ? rotada.reverse() : rotada
+}
+
+const cumbrecitaGaleria = [
+  '/assets/tours/Cumbrecitariosubtecascada/grupo-saltando.webp',
+  '/assets/tours/Cumbrecitariosubtecascada/cascada.webp',
+  '/assets/tours/Cumbrecitariosubtecascada/gente-cascada.webp',
+  '/assets/tours/Cumbrecitariosubtecascada/grupo-altura-paisaje.webp',
+  '/assets/tours/Cumbrecitariosubtecascada/grupo-bañandose.webp',
+  '/assets/tours/Cumbrecitariosubtecascada/grupo-enorme.webp',
+  '/assets/tours/Cumbrecitariosubtecascada/grupo-montaña.webp',
+  '/assets/tours/Cumbrecitariosubtecascada/grupo-paisaje.altura.webp',
+  '/assets/tours/Cumbrecitariosubtecascada/grupo-piedras-baño.webp',
+  '/assets/tours/Cumbrecitariosubtecascada/grupo-subiendo-vininedo.webp',
+  '/assets/tours/Cumbrecitariosubtecascada/pasiaje-grupo.webp'
+]
+
+const cumbrecitaGaleriaAlternativa = reordenarGaleria(cumbrecitaGaleria, 4, true)
+const cumbrecitaGaleriaCorona = reordenarGaleria(cumbrecitaGaleria, 7)
+const cumbrecitaGaleriaCircuito = reordenarGaleria(cumbrecitaGaleria, 2, true)
+
+const champaquiGaleria = [
+  '/assets/tours/champaqui/grupo-bandera-champa.webp',
+  '/assets/tours/champaqui/grupo-bandera-champa (2).webp',
+  '/assets/tours/champaqui/grupogrande-montaña-casarotada.webp',
+  '/assets/tours/champaqui/colegio-champa.webp',
+  '/assets/tours/champaqui/grupo-nieve-altura.webp',
+  '/assets/tours/champaqui/grupo.champa-nieve.webp',
+  '/assets/tours/champaqui/champa -nievegrupo.webp',
+  '/assets/tours/champaqui/rober-nieve.webp',
+  '/assets/tours/champaqui/caminandogrupo-rocas-reflejo2.webp',
+  '/assets/tours/champaqui/puente-arroyo-roberrotada.webp',
+  '/assets/tours/champaqui/grupoespalkdas.webp',
+  '/assets/tours/champaqui/rober-paisajaso.webp'
+]
+
+const champaquiGaleriaAlternativa = reordenarGaleria(champaquiGaleria, 5, true)
+
+const yatanGaleria = [
+  '/assets/tours/quebrada-yatan/aguila-paisaje.webp',
+  '/assets/tours/quebrada-yatan/cascada.webp',
+  '/assets/tours/quebrada-yatan/grupo-cascada.webp',
+  '/assets/tours/quebrada-yatan/paisaje-nubebajita.webp',
+  '/assets/tours/quebrada-yatan/aguila.webp',
+  '/assets/tours/quebrada-yatan/cascada-paisaje.webp',
+  '/assets/tours/quebrada-yatan/cascada-verde.webp',
+  '/assets/tours/quebrada-yatan/casita-paisaje.webp',
+  '/assets/tours/quebrada-yatan/gente-cuevas.webp',
+  '/assets/tours/quebrada-yatan/grupo-descanso.webp',
+  '/assets/tours/quebrada-yatan/grupo-noche-descanso.webp',
+  '/assets/tours/quebrada-yatan/grupo.webp',
+  '/assets/tours/quebrada-yatan/hermosafoto.webp',
+  '/assets/tours/quebrada-yatan/noche-casapiedra.webp',
+  '/assets/tours/quebrada-yatan/paisaje.webp',
+  '/assets/tours/quebrada-yatan/rober-campana-grupo.webp'
+]
+
+const salidaDelCruceGaleria = [
+  ...cumbrecitaGaleria.slice(0, 4),
+  ...yatanGaleria.slice(0, 4),
+  ...champaquiGaleria.slice(0, 4)
+]
+
+const rioSubterraneoInfo = {
+  duracion: '7 hs',
+  dificultad: 'Media',
+  terreno: null,
+  distancia: null,
+  precio: 55000,
+  precioDetalle: 'Efectivo o transferencia · $60.000 en 3 cuotas sin interés',
+  disponible: true,
+  horarios: 'Sábados, domingos y feriados · 09:00',
+  incluye: [
+    'Guía habilitado',
+    'Seguro médico',
+    'Vianda de marcha',
+    'Comunicación por radio VHF'
+  ],
+  itinerario: [
+    {
+      dia: 1,
+      titulo: 'Río Subterráneo y Cascada Escondida',
+      horas: [
+        { hora: '09:00', evento: 'Encuentro en Panadería de La Cumbrecita' },
+        { hora: '09:15', evento: 'Inicio del trekking hacia el Río Subterráneo' },
+        { hora: '11:00', evento: 'Ingreso al Río Subterráneo (primer tramo)' },
+        { hora: '12:30', evento: 'Descanso y vianda de marcha' },
+        { hora: '13:00', evento: 'Continuación hacia la Cascada Escondida (segundo tramo)' },
+        { hora: '14:30', evento: 'Llegada a la Cascada Escondida – baño y descanso' },
+        { hora: '15:30', evento: 'Regreso' },
+        { hora: '16:00', evento: 'Fin de la actividad' }
+      ]
+    }
+  ],
+  reunion: 'Panadería de La Cumbrecita'
+}
+
 export const tours = [
   {
+    ...rioSubterraneoInfo,
     nombre: 'Cumbrecita: Río Subterráneo y Cascada Escondida',
-    duracion: '7 hs',
-    dificultad: 'Media',
-    terreno: null,
-    distancia: null,
-    precio: 55000,
-    precioDetalle: 'Efectivo o transferencia · $60.000 en 3 cuotas sin interés',
-    disponible: true,
-    imagen: '/assets/tours/Cumbrecitariosubtecascada/grupo-saltando.webp',
+    imagen: cumbrecitaGaleria[0],
     slug: 'rio-subterraneo-cascada-escondida',
-    imagenes: [
-      '/assets/tours/Cumbrecitariosubtecascada/grupo-saltando.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/cascada.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/gente-cascada.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/grupo-altura-paisaje.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/grupo-bañandose.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/grupo-enorme.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/grupo-montaña.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/grupo-paisaje.altura.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/grupo-piedras-baño.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/grupo-subiendo-vininedo.webp',
-      '/assets/tours/Cumbrecitariosubtecascada/pasiaje-grupo.webp'
-    ],
-    horarios: 'Sábados, domingos y feriados · 09:00',
-    incluye: [
-      'Guía habilitado',
-      'Seguro médico',
-      'Vianda de marcha',
-      'Comunicación por radio VHF'
-    ],
-    itinerario: [
-      {
-        dia: 1,
-        titulo: 'Río Subterráneo y Cascada Escondida',
-        horas: [
-          { hora: '09:00', evento: 'Encuentro en Panadería de La Cumbrecita' },
-          { hora: '09:15', evento: 'Inicio del trekking hacia el Río Subterráneo' },
-          { hora: '11:00', evento: 'Ingreso al Río Subterráneo (primer tramo)' },
-          { hora: '12:30', evento: 'Descanso y vianda de marcha' },
-          { hora: '13:00', evento: 'Continuación hacia la Cascada Escondida (segundo tramo)' },
-          { hora: '14:30', evento: 'Llegada a la Cascada Escondida – baño y descanso' },
-          { hora: '15:30', evento: 'Regreso' },
-          { hora: '16:00', evento: 'Fin de la actividad' }
-        ]
-      }
-    ],
-    reunion: 'Panadería de La Cumbrecita'
+    imagenes: cumbrecitaGaleria
   },
   {
     nombre: 'La Cumbrecita: Garganta del Diablo + Cerro Corona + Pozo de las Cabras',
@@ -69,30 +127,20 @@ export const tours = [
     precio: 55000,
     precioDetalle: null,
     disponible: true,
-    imagen: '/assets/tours/default.svg',
+    imagen: cumbrecitaGaleriaCorona[0],
     slug: 'garganta-del-diablo-cerro-corona-pozo-cabras',
-    imagenes: [],
+    imagenes: cumbrecitaGaleriaCorona,
     horarios: '09:15',
     incluye: [],
     itinerario: [],
     reunion: 'Puente de ingreso a La Cumbrecita'
   },
   {
+    ...rioSubterraneoInfo,
     nombre: 'La Cumbrecita: Cascadas Salvajes + Río Subterráneo',
-    duracion: '7 hs',
-    dificultad: 'Media',
-    terreno: 'Media',
-    distancia: 'Alta',
-    precio: 55000,
-    precioDetalle: null,
-    disponible: true,
-    imagen: '/assets/tours/default.svg',
+    imagen: cumbrecitaGaleriaAlternativa[0],
     slug: 'cascadas-salvajes-rio-subterraneo',
-    imagenes: [],
-    horarios: '08:30',
-    incluye: [],
-    itinerario: [],
-    reunion: 'Puente de ingreso a La Cumbrecita'
+    imagenes: cumbrecitaGaleriaAlternativa
   },
   {
     nombre: 'Ascenso al Cerro Tradicional Champaquí',
@@ -103,22 +151,9 @@ export const tours = [
     precio: 370000,
     precioDetalle: null,
     disponible: true,
-    imagen: '/assets/tours/champaqui/rober-paisajaso.webp',
+    imagen: champaquiGaleria[11],
     slug: 'champaqui',
-    imagenes: [
-      '/assets/tours/champaqui/grupo-bandera-champa.webp',
-      '/assets/tours/champaqui/grupo-bandera-champa (2).webp',
-      '/assets/tours/champaqui/grupogrande-montaña-casarotada.webp',
-      '/assets/tours/champaqui/colegio-champa.webp',
-      '/assets/tours/champaqui/grupo-nieve-altura.webp',
-      '/assets/tours/champaqui/grupo.champa-nieve.webp',
-      '/assets/tours/champaqui/champa -nievegrupo.webp',
-      '/assets/tours/champaqui/rober-nieve.webp',
-      '/assets/tours/champaqui/caminandogrupo-rocas-reflejo2.webp',
-      '/assets/tours/champaqui/puente-arroyo-roberrotada.webp',
-      '/assets/tours/champaqui/grupoespalkdas.webp',
-      '/assets/tours/champaqui/rober-paisajaso.webp'
-    ],
+    imagenes: champaquiGaleria,
     horarios: 'Viernes, Sábado, Domingo y Feriados',
     incluye: [
       'Refugio de montaña',
@@ -305,40 +340,6 @@ export const tours = [
     reunion: 'Casa de Roberto Molina, La Cumbrecita'
   },
   {
-    nombre: 'Circuito La Cumbrecita (2 días / 1 noche): La Lagunita + Cerro Corona + Garganta del Diablo',
-    duracion: '2 días / 1 noche',
-    dificultad: 'Media',
-    terreno: 'Media',
-    distancia: 'Alta',
-    precio: 270000,
-    precioDetalle: null,
-    disponible: true,
-    imagen: '/assets/tours/default.svg',
-    slug: 'circuito-cumbrecita-lagunita-corona-garganta-2d',
-    imagenes: [],
-    horarios: '09:15',
-    incluye: [],
-    itinerario: [],
-    reunion: 'Casa de Roberto Molina, La Cumbrecita'
-  },
-  {
-    nombre: 'Circuito La Cumbrecita (3 días / 2 noches): La Lagunita + Cerro Corona + Garganta del Diablo',
-    duracion: '3 días / 2 noches',
-    dificultad: 'Media',
-    terreno: 'Media',
-    distancia: 'Alta',
-    precio: 270000,
-    precioDetalle: null,
-    disponible: true,
-    imagen: '/assets/tours/default.svg',
-    slug: 'circuito-cumbrecita-lagunita-corona-garganta-3d',
-    imagenes: [],
-    horarios: '09:15',
-    incluye: [],
-    itinerario: [],
-    reunion: 'Casa de Roberto Molina, La Cumbrecita'
-  },
-  {
     nombre: 'Los Dos Gigantes: Cerro Champaquí + Cerro La Totora',
     duracion: '3 días / 2 noches',
     dificultad: 'Media',
@@ -347,9 +348,9 @@ export const tours = [
     precio: 370000,
     precioDetalle: null,
     disponible: true,
-    imagen: '/assets/tours/default.svg',
+    imagen: champaquiGaleriaAlternativa[0],
     slug: 'dos-gigantes-champaqui-totora',
-    imagenes: [],
+    imagenes: champaquiGaleriaAlternativa,
     horarios: '09:15',
     incluye: [],
     itinerario: [],
@@ -382,9 +383,9 @@ export const tours = [
     precioDetalle: 'Seña para reservar · 6 cuotas sin tarjeta: 5 × $100.000 + $150.000 el día de la salida · Abonado en su totalidad 10 días antes de la salida · Mula aparte',
     disponible: true,
     cupoMax: 8,
-    imagen: '/assets/tours/default.svg',
+    imagen: salidaDelCruceGaleria[0],
     slug: 'salida-del-cruce',
-    imagenes: [],
+    imagenes: salidaDelCruceGaleria,
     horarios: 'Consultar fechas y horarios',
     incluye: [
       'Dos guías habilitados',
@@ -599,9 +600,9 @@ export const tours = [
     precio: null,
     precioDetalle: null,
     disponible: false,
-    imagen: '/assets/tours/default.svg',
+    imagen: cumbrecitaGaleriaCircuito[0],
     slug: 'circuito-cumbrecita-lagunita-ventana-garganta',
-    imagenes: [],
+    imagenes: cumbrecitaGaleriaCircuito,
     horarios: null,
     incluye: [],
     itinerario: [],

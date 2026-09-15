@@ -1,12 +1,9 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { stats, badges, avatars } from '../data/socialProof.js'
 
 const scrollToTours = () => {
   document.getElementById('tours')?.scrollIntoView({ behavior: 'smooth' })
-}
-
-const scrollToContact = () => {
-  document.getElementById('contacto')?.scrollIntoView({ behavior: 'smooth' })
 }
 
 const parallaxY = ref(0)
@@ -29,7 +26,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section class="relative min-h-svh h-svh md:h-screen flex items-center justify-center overflow-hidden">
+  <section class="relative min-h-svh flex items-center justify-center overflow-hidden">
     <img
       src="/assets/hero/hero.webp"
       alt=""
@@ -40,7 +37,7 @@ onUnmounted(() => {
     />
     <div class="absolute inset-0 bg-gradient-to-b from-brand-dark/80 via-brand-dark/60 to-brand-dark"></div>
 
-    <div class="relative z-10 flex flex-col items-center text-center px-6 lg:px-16 max-w-3xl mx-auto pt-20 pb-14 md:py-0">
+    <div class="relative z-10 flex flex-col items-center text-center px-6 lg:px-16 max-w-3xl mx-auto pt-24 pb-10 md:pt-16 md:pb-6">
       <p
         class="font-sans text-xs sm:text-sm md:text-lg tracking-[0.2em] sm:tracking-[0.35em] uppercase text-brand-cream/90 [text-shadow:0_2px_16px_rgba(0,0,0,0.8)] mb-2 transition-all duration-700 ease-out"
         :class="loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'"
@@ -48,10 +45,10 @@ onUnmounted(() => {
         Trekking Cumbrecita
       </p>
       <h1
-        class="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-brand-white leading-tight uppercase tracking-wide transition-all duration-700 ease-out delay-150"
+        class="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-brand-white leading-none uppercase tracking-wide transition-all duration-700 ease-out delay-150"
         :class="loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'"
       >
-        Viví la montaña desde adentro
+         Córdoba más allá del circuito turístico
       </h1>
 
       <div
@@ -63,7 +60,7 @@ onUnmounted(() => {
         class="text-sm md:text-base lg:text-lg text-brand-cream/90 max-w-lg leading-relaxed [text-shadow:0_2px_12px_rgba(0,0,0,0.6)] transition-all duration-700 ease-out delay-300"
         :class="loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'"
       >
-        Desde La Cumbrecita, te acompaño a descubrir ríos, cascadas y senderos de las sierras de Córdoba.
+         Explorá ríos subterráneos, cascadas escondidas y grandes cumbres con el guía habilitado Roberto Molina, sin perderte ni preocuparte por la logística.
       </p>
 
       <div
@@ -72,24 +69,74 @@ onUnmounted(() => {
       >
         <button
           @click="scrollToTours"
-          class="min-h-12 px-8 py-3.5 md:px-10 md:py-5 border-2 border-brand-cream text-brand-cream font-semibold rounded-lg hover:bg-brand-cream hover:text-brand-dark transition-colors duration-300 text-base md:text-lg flex items-center justify-center gap-2"
+          class="group min-h-12 px-8 py-3.5 md:px-10 md:py-5 border-2 border-brand-cream text-brand-cream font-semibold rounded-lg hover:bg-brand-cream hover:text-brand-dark transition-colors duration-300 text-base md:text-lg flex items-center justify-center gap-2"
         >
-          Ver experiencias
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           Elegí tu aventura
+          <svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
           </svg>
         </button>
-        <button
-          @click="scrollToContact"
-          class="min-h-12 px-8 py-3.5 md:px-10 md:py-5 bg-brand-orange/85 text-brand-white font-semibold rounded-lg shadow-lg shadow-brand-orange/25 hover:bg-brand-orange hover:shadow-brand-orange/50 hover:shadow-xl transition-all duration-300 text-base md:text-lg"
-        >
-          Consultar disponibilidad
-        </button>
+      </div>
+
+      <!-- Social proof -->
+      <div
+        class="flex flex-col items-center gap-3 md:gap-4 mt-5 md:mt-7 transition-all duration-700 ease-out delay-700"
+        :class="loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'"
+      >
+        <!-- Avatars + texto -->
+        <div class="flex items-center gap-3">
+          <div class="flex -space-x-2.5">
+            <img
+              v-for="(avatar, i) in avatars"
+              :key="avatar.src"
+              :src="avatar.src"
+              :alt="avatar.alt"
+              loading="lazy"
+              decoding="async"
+              class="w-8 h-8 md:w-9 md:h-9 rounded-full object-cover border-2 border-brand-dark/80"
+              :style="{ zIndex: avatars.length - i }"
+            />
+          </div>
+          <p class="text-xs md:text-sm text-brand-cream/90 [text-shadow:0_1px_8px_rgba(0,0,0,0.7)] text-left leading-snug">
+            <span class="font-semibold text-brand-white">Miles de historias</span> compartidas en la montaña
+          </p>
+        </div>
+
+        <!-- Stats -->
+        <div class="flex items-center justify-center gap-4 md:gap-8">
+          <div v-for="stat in stats" :key="stat.label" class="text-center">
+            <p class="font-heading text-lg md:text-2xl text-brand-white leading-none">
+              {{ stat.valor }} <span class="text-brand-orange">{{ stat.sufijo }}</span>
+            </p>
+            <p class="text-[10px] md:text-xs text-brand-cream/70 mt-0.5 md:mt-1">{{ stat.label }}</p>
+          </div>
+        </div>
+
+        <!-- Badges -->
+        <div class="flex flex-wrap items-center justify-center gap-2 md:gap-3">
+          <span
+            v-for="badge in badges"
+            :key="badge.label"
+            class="flex items-center gap-1.5 px-2.5 py-1 md:px-3 md:py-1.5 rounded-full border border-brand-cream/20 bg-brand-dark/40 backdrop-blur-sm text-[10px] md:text-xs text-brand-cream/90"
+          >
+            <svg v-if="badge.icono === 'guia'" class="w-3 h-3 md:w-3.5 md:h-3.5 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            <svg v-else-if="badge.icono === 'seguro'" class="w-3 h-3 md:w-3.5 md:h-3.5 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            <svg v-else class="w-3 h-3 md:w-3.5 md:h-3.5 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+            </svg>
+            {{ badge.label }}
+          </span>
+        </div>
+
       </div>
 
       <!-- Redes sociales -->
       <div
-        class="flex justify-center gap-4 mt-5 md:mt-6 transition-all duration-700 ease-out delay-[650ms]"
+        class="flex justify-center gap-4 mt-4 md:mt-6 transition-all duration-700 ease-out delay-[750ms]"
         :class="loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'"
       >
         <a
@@ -113,16 +160,17 @@ onUnmounted(() => {
           </svg>
         </a>
       </div>
-    </div>
-
-    <div
-      class="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 transition-all duration-700 ease-out delay-700"
-      :class="loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"
-    >
-      <div class="animate-bounce">
-        <svg class="w-5 h-5 md:w-6 md:h-6 text-brand-cream/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-        </svg>
+      <!-- Scroll indicator -->
+      <div
+        class="flex flex-col items-center gap-0.5 mt-4 md:mt-6 transition-all duration-700 ease-out delay-[850ms]"
+        :class="loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'"
+      >
+        <span class="text-[10px] md:text-xs tracking-[0.2em] uppercase text-brand-cream/60">Deslizá para descubrir</span>
+        <div class="animate-bounce">
+          <svg class="w-5 h-5 md:w-6 md:h-6 text-brand-cream/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </div>
       </div>
     </div>
   </section>
