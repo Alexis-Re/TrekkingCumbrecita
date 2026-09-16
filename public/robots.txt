@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://trekking-cumbrecita.vercel.app/sitemap.xml
+Sitemap: https://trekkingcumbrecita.tur.ar/sitemap.xml

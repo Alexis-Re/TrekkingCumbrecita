@@ -21,13 +21,13 @@ imagenes:     galería opcional en la misma carpeta
 - [ ] `cascadas-salvajes-rio-subterraneo` — 7 hs · $55.000 · 08:30 · Puente de ingreso
 
 ### Tanda B — 2 días / 1 noche
-- [ ] `quebrada-yatan` — $250.000 · 09:00 · Casa de Roberto Molina
+- [ ] `quebrada-yatan` — $250.000 · 09:00 · Casa de Rober Molina
 - [ ] `paraiso-guanacos-casita-de-cristal` — $270.000 · 08:30 · Parador Julio Cesar
 - [ ] `los-gigantes-cerro-mogote-cajones` — $270.000 · 08:30 · Parador el Cóndor Altas Cumbres
-- [ ] `circuito-cumbrecita-lagunita-corona-garganta-2d` — $270.000 · 09:15 · Casa de Roberto Molina
+- [ ] `circuito-cumbrecita-lagunita-corona-garganta-2d` — $270.000 · 09:15 · Casa de Rober Molina
 
 ### Tanda C — 3 días / 2 noches
-- [ ] `circuito-cumbrecita-lagunita-corona-garganta-3d` — $270.000 · 09:15 · Casa de Roberto Molina
+- [ ] `circuito-cumbrecita-lagunita-corona-garganta-3d` — $270.000 · 09:15 · Casa de Rober Molina
 - [ ] `dos-gigantes-champaqui-totora` — $370.000 · 09:15 · Villa Alpina
 - [ ] `altas-cumbres-nacientes-mina-clavero` — $470.000 · 08:30 · Parador Julio Cesar, Villa Cura Brochero
 

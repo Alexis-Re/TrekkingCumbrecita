@@ -78,13 +78,13 @@ watch(isVisible, (val) => {
 
           <!-- Mosaico de fotos -->
           <div
-            class="grid grid-cols-2 grid-rows-3 gap-3 h-[420px] md:grid-cols-3 md:grid-rows-3 md:h-[450px] transition-all duration-700"
+            class="grid grid-cols-2 grid-rows-3 gap-3 h-[300px] md:grid-cols-3 md:grid-rows-3 md:h-[450px] transition-all duration-700"
             :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
           >
             <div class="col-span-1 row-span-2 md:col-span-2 md:row-span-3 rounded-xl overflow-hidden">
               <img
-                src="/assets/brand/robertomolina.webp"
-                alt="Roberto Molina - Guía de trekking"
+                src="/assets/brand/robermolina.webp"
+                alt="Rober Molina - Guía de trekking"
                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
               />
             </div>
@@ -121,7 +121,7 @@ watch(isVisible, (val) => {
                 Quién te acompaña
               </p>
               <h2 class="font-heading text-3xl md:text-4xl text-brand-white uppercase mb-4">
-                Conocé a Roberto
+                Conocé a Rober
               </h2>
               <div class="h-1 w-16 bg-gradient-to-r from-brand-orange to-brand-gold mb-6"></div>
 
@@ -186,14 +186,14 @@ watch(isVisible, (val) => {
           <div
             v-for="(stat, index) in stats"
             :key="stat.label"
-            class="py-5 md:py-7 px-3 md:px-4 text-center transition-all duration-500"
+            class="py-5 md:py-7 px-2 md:px-4 text-center transition-all duration-500"
             :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
             :style="{ transitionDelay: `${200 + index * 150}ms` }"
           >
-            <span class="block font-heading text-3xl md:text-5xl text-brand-orange mb-1">
+            <span class="block font-heading text-2xl sm:text-3xl md:text-5xl text-brand-orange mb-1">
               {{ animatedStats[index].current }}{{ stat.suffix }}
             </span>
-            <span class="text-brand-cream/60 text-sm font-sans">
+            <span class="text-brand-cream/60 text-xs md:text-sm leading-tight font-sans">
               {{ stat.label }}
             </span>
           </div>

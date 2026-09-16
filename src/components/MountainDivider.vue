@@ -1,8 +1,17 @@
 <script setup>
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   flip: { type: Boolean, default: false },
   color: { type: String, default: 'brand-dark' }
 })
+
+/* Clases literales para que Tailwind las detecte al compilar */
+const fills = {
+  'brand-dark': 'fill-brand-dark'
+}
+
+const fillClass = computed(() => fills[props.color] || fills['brand-dark'])
 </script>
 
 <template>
@@ -15,11 +24,11 @@ defineProps({
     >
       <path
         d="M0 60L48 52C96 44 192 28 288 24C384 20 480 28 576 32C672 36 768 36 864 30C960 24 1056 12 1152 12C1248 12 1344 24 1392 30L1440 36V60H0Z"
-        :class="`fill-${color}`"
+        :class="fillClass"
       />
       <path
         d="M0 60L48 54C96 48 192 36 288 32C384 28 480 32 576 38C672 44 768 52 864 48C960 44 1056 28 1152 22C1248 16 1344 20 1392 22L1440 24V60H0Z"
-        :class="`fill-${color}`"
+        :class="fillClass"
         opacity="0.5"
       />
     </svg>

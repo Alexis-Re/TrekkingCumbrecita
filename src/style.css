@@ -20,6 +20,11 @@ html {
   scrollbar-color: var(--color-brand-orange) var(--color-brand-dark);
 }
 
+/* Compensa la navbar fija al navegar a anclas */
+section[id] {
+  scroll-margin-top: calc(4rem + env(safe-area-inset-top));
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--color-brand-dark);

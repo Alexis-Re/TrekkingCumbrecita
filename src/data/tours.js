@@ -76,6 +76,22 @@ const salidaDelCruceGaleria = [
   ...champaquiGaleria.slice(0, 4)
 ]
 
+const gigantesGaleria = [
+  '/assets/tours/los-gigantes-cerro-mogote-cajones/grupo-cueva-grande.webp',
+  '/assets/tours/los-gigantes-cerro-mogote-cajones/grupo-lagunita.webp',
+  '/assets/tours/los-gigantes-cerro-mogote-cajones/laguna-cascada.webp',
+  '/assets/tours/los-gigantes-cerro-mogote-cajones/grupo-arroyo-piedras.webp',
+  '/assets/tours/los-gigantes-cerro-mogote-cajones/persona-silla-cumbre.webp',
+  '/assets/tours/los-gigantes-cerro-mogote-cajones/persona-silla-cumbre-espalda.webp',
+  '/assets/tours/los-gigantes-cerro-mogote-cajones/persona-carro-viejo.webp',
+  '/assets/tours/los-gigantes-cerro-mogote-cajones/persona-carro-viejo-brazos.webp',
+  '/assets/tours/los-gigantes-cerro-mogote-cajones/persona-cueva-pasadizo.webp',
+  '/assets/tours/los-gigantes-cerro-mogote-cajones/persona-pasadizo-rocas.webp',
+  '/assets/tours/los-gigantes-cerro-mogote-cajones/grupo-bajando-rocas.webp',
+  '/assets/tours/los-gigantes-cerro-mogote-cajones/grupo-caminando-sol.webp',
+  '/assets/tours/los-gigantes-cerro-mogote-cajones/refugio-don-antonio.webp'
+]
+
 const rioSubterraneoInfo = {
   duracion: '7 hs',
   dificultad: 'Media',
@@ -296,9 +312,9 @@ export const tours = [
     precio: 270000,
     precioDetalle: null,
     disponible: true,
-    imagen: '/assets/tours/default.svg',
+    imagen: gigantesGaleria[0],
     slug: 'los-gigantes-cerro-mogote-cajones',
-    imagenes: [],
+    imagenes: gigantesGaleria,
     horarios: '08:30',
     incluye: [],
     itinerario: [],
@@ -337,7 +353,7 @@ export const tours = [
     horarios: '09:00',
     incluye: [],
     itinerario: [],
-    reunion: 'Casa de Roberto Molina, La Cumbrecita'
+    reunion: 'Casa de Rober Molina, La Cumbrecita'
   },
   {
     nombre: 'Los Dos Gigantes: Cerro Champaquí + Cerro La Totora',
@@ -575,6 +591,116 @@ export const tours = [
     reunion: 'Consultar punto de encuentro'
   },
   {
+    nombre: 'Travesía Cumbrecita – Villa Alpina: Cerro Wank + Río Subterráneo + Cascadas Escondidas',
+    duracion: '3 días / 2 noches',
+    dificultad: 'Media',
+    terreno: 'Media',
+    distancia: 'Alta',
+    precio: 250000,
+    precioDetalle: 'Se reserva con seña del 50%',
+    disponible: true,
+    imagen: '/assets/tours/default.svg',
+    slug: 'travesia-cumbrecita-villa-alpina',
+    imagenes: [],
+    horarios: 'Consultar fechas y horarios',
+    incluye: [
+      '2 noches de albergue en Villa Alpina (luz por generador, agua caliente y baño)',
+      'Desayunos, meriendas y cenas',
+      'Almuerzo de cierre el día 3',
+      'Traslado en vehículo al albergue al final del día 1'
+    ],
+    equipamiento: [
+      'Linterna frontal (obligatoria para el Río Subterráneo)',
+      'Bolsa de dormir',
+      'Plato y cubiertos',
+      'Vianda de marcha para los almuerzos de los días 1 y 2',
+      'Ropa adecuada para dos días'
+    ],
+    itinerario: [
+      {
+        dia: 1,
+        titulo: 'Cumbrecita → Villa Alpina',
+        horas: [
+          { hora: '09:00', evento: 'Encuentro en la Panadería de La Cumbrecita' },
+          { hora: '09:20', evento: 'Inicio del trekking por el pueblo hasta el Lago de los Patos' },
+          { hora: '11:15', evento: 'Llegada al Cerro Wank: descanso y fotos con vistas al Valle de Calamuchita' },
+          { hora: '11:45', evento: 'Continuación hacia el Río Subterráneo' },
+          { hora: '12:15', evento: 'Arribo e ingreso al Río Subterráneo (grupos de 10 a 15 personas) · Es obligatorio llevar linterna frontal' },
+          { hora: '13:30', evento: 'Trekking a las Cascadas Escondidas: almuerzo con vianda de marcha en el lugar' },
+          { hora: '15:30', evento: 'Retorno por el Valle del Abedul, vistas panorámicas de Casas Viejas y llegada a Villa Alpina' },
+          { hora: '17:30', evento: 'Fin de la excursión y traslado en vehículo al albergue en Villa Alpina (arribo aprox. 19:00)' },
+          { hora: '19:00', evento: 'Merienda' },
+          { hora: '21:30', evento: 'Cena y descanso' }
+        ]
+      },
+      {
+        dia: 2,
+        titulo: 'Trekking a las cascadas',
+        horas: [
+          { hora: '07:30', evento: 'Desayuno' },
+          { hora: '08:30', evento: 'Trekking a las dos cascadas (llegada 11:00)' },
+          { hora: '11:00', evento: 'Tiempo de baño y almuerzo con vianda de marcha' },
+          { hora: '13:30', evento: 'Regreso pasando por la Olla, con posibilidad de bañarse' },
+          { hora: '15:30', evento: 'Llegada al refugio: tiempo libre' },
+          { hora: '17:30', evento: 'Merienda' },
+          { hora: '21:00', evento: 'Cena' }
+        ]
+      },
+      {
+        dia: 3,
+        titulo: 'Villa Alpina',
+        horas: [
+          { hora: '07:30', evento: 'Desayuno' },
+          { hora: '08:45', evento: 'Caminata por el lote de Villa Alpina' },
+          { hora: '13:00', evento: 'Almuerzo y cierre de la excursión' }
+        ]
+      }
+    ],
+    reunion: 'Panadería de La Cumbrecita'
+  },
+  {
+    nombre: 'Salida del Día Villa Alpina: 2 Cascadas y Olla',
+    duracion: '1 día',
+    dificultad: 'Alta',
+    terreno: 'Media',
+    distancia: 'Media',
+    precio: 75000,
+    precioDetalle: 'Se reserva con seña del 50% · Cupos limitados a 15 personas',
+    disponible: true,
+    cupoMax: 15,
+    imagen: '/assets/tours/default.svg',
+    slug: 'villa-alpina-2-cascadas-olla',
+    imagenes: [],
+    horarios: 'Consultar fechas y horarios · Encuentro 07:30',
+    incluye: [
+      'Estacionamiento',
+      'Ingreso al predio',
+      'Cierre con empanadas o pizza (no incluye bebidas)'
+    ],
+    equipamiento: [
+      'Pantalones largos (obligatorio: hay mucha zarzamora en el sendero)',
+      'Traje de baño',
+      'Protector solar',
+      '1 litro de agua (se puede recargar en los arroyos)'
+    ],
+    itinerario: [
+      {
+        dia: 1,
+        titulo: '2 Cascadas y Olla de Villa Alpina',
+        horas: [
+          { hora: '07:30', evento: 'Encuentro en el ingreso a Villa Alpina (camino de ripio) · Traslado en vehículo 20 km y se deja el auto en el estacionamiento' },
+          { hora: '08:45', evento: 'Comienza el trekking por sendero y campo traviesa (actividad de turismo aventura 100%)' },
+          { hora: '11:00', evento: 'Llegada a las 2 cascadas: baño y descanso, nos quedamos un largo rato en el lugar' },
+          { hora: '13:00', evento: 'Comienza el regreso hacia la Olla de Villa Alpina' },
+          { hora: '14:30', evento: 'Llegada a la Olla: paramos a disfrutar hasta las 15:30' },
+          { hora: '15:30', evento: 'Retorno hacia los autos' },
+          { hora: '—', evento: 'Cierre de la excursión con empanadas o pizza (no incluye bebidas)' }
+        ]
+      }
+    ],
+    reunion: 'Ingreso a Villa Alpina (camino de ripio)'
+  },
+  {
     nombre: 'Casita de Cristal + Cinco Saltos',
     duracion: 'Definir',
     dificultad: null,
@@ -593,19 +719,54 @@ export const tours = [
   },
   {
     nombre: 'Circuito La Cumbrecita: La Lagunita + Cerro La Ventana + Garganta del Diablo',
-    duracion: 'Definir',
-    dificultad: null,
-    terreno: null,
-    distancia: null,
-    precio: null,
+    duracion: '3 días / 2 noches',
+    dificultad: 'Media',
+    terreno: 'Media',
+    distancia: 'Alta',
+    precio: 350000,
     precioDetalle: null,
-    disponible: false,
+    disponible: true,
     imagen: cumbrecitaGaleriaCircuito[0],
     slug: 'circuito-cumbrecita-lagunita-ventana-garganta',
     imagenes: cumbrecitaGaleriaCircuito,
-    horarios: null,
-    incluye: [],
-    itinerario: [],
-    reunion: null
+    horarios: 'Viernes, Sábados y Domingos · 09:00',
+    incluye: [
+      'Raciones de marcha (salado y dulce)',
+      'Merienda, cena y desayuno en los refugios',
+      'Guía habilitado'
+    ],
+    itinerario: [
+      {
+        dia: 1,
+        titulo: 'La Lagunita y Olla del Río Paso de Garay',
+        horas: [
+          { hora: '09:00', evento: 'Encuentro en la Casa de Rober, La Cumbrecita · Salida del trekking' },
+          { hora: '—', evento: 'Recorrido hacia La Lagunita y Olla del Río Paso de Garay, pasando por Puesto Viejo y Puesto de Juvencio' },
+          { hora: '17:00', evento: 'Llegada al refugio (aprox.) · Cena y pernocte' }
+        ]
+      },
+      {
+        dia: 2,
+        titulo: 'Cerro La Ventana',
+        horas: [
+          { hora: '07:30', evento: 'Desayuno' },
+          { hora: '08:20', evento: 'Salida hacia el Cerro La Ventana' },
+          { hora: '11:00', evento: 'Arribo: almuerzo con vianda de marcha, fotos y videos' },
+          { hora: '13:00', evento: 'Regreso al refugio · Merienda y descanso' },
+          { hora: '—', evento: 'Cena y pernocte' }
+        ]
+      },
+      {
+        dia: 3,
+        titulo: 'Garganta del Diablo, Cerro Corona y Nacimiento del Río del Medio',
+        horas: [
+          { hora: '—', evento: 'Desayuno en el puesto' },
+          { hora: '—', evento: 'Recorrido por Garganta del Diablo, Cerro Corona y Nacimiento del Río del Medio · Almuerzo en marcha' },
+          { hora: '—', evento: 'Merienda en el puesto' },
+          { hora: '16:00', evento: 'Regreso al pueblo (llegada aprox.) · Fin de la actividad' }
+        ]
+      }
+    ],
+    reunion: 'Casa de Rober Molina, La Cumbrecita'
   }
 ]

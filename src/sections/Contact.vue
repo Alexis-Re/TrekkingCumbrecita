@@ -1,494 +1,218 @@
 <script setup>
-import { ref, computed } from 'vue'
-import emailjs from '@emailjs/browser'
+import { computed, ref } from 'vue'
 import { tours } from '../data/tours.js'
 
-// Configuración EmailJS - leer desde variables de entorno
-const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID
-const TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID
-const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+const WHATSAPP_NUMBER = '5493546453047'
 
-const form = ref({
+const opciones = [
+  {
+    id: 'reserva',
+    titulo: 'Quiero reservar una salida',
+    descripcion: 'Decime qué experiencia te interesa y para cuándo.',
+    icono: 'calendar'
+  },
+  {
+    id: 'elegir',
+    titulo: 'Necesito ayuda para elegir',
+    descripcion: 'Te recomiendo una salida según lo que estés buscando.',
+    icono: 'compass'
+  },
+  {
+    id: 'otra',
+    titulo: 'Tengo otra consulta',
+    descripcion: 'Escribime directamente y lo vemos juntos.',
+    icono: 'chat'
+  }
+]
+
+const preferencias = [
+  'Cascadas, ríos y lugares para bañarse',
+  'Una experiencia exigente de montaña',
+  'Una salida de varios días',
+  'Algo tranquilo para disfrutar el paisaje',
+  'Todavía no estoy seguro/a'
+]
+
+const paso = ref(1)
+const tipoConsulta = ref('')
+const datos = ref({
+  tour: '',
+  fecha: '',
+  personas: '2',
   nombre: '',
-  email: '',
-  telefono: '',
-  tourInteres: '',
-  mensaje: ''
+  preferencia: '',
+  detalle: ''
 })
 
-// Honeypot: campo señuelo invisible para humanos, los bots lo rellenan
-const honeypot = ref('')
+const toursDisponibles = computed(() => tours.filter(tour => tour.disponible))
+const fechaLocal = new Date()
+const fechaMinima = [fechaLocal.getFullYear(), String(fechaLocal.getMonth() + 1).padStart(2, '0'), String(fechaLocal.getDate()).padStart(2, '0')].join('-')
 
-// Timing check: los bots envían el formulario demasiado rápido
-const formMountedAt = Date.now()
-
-// Rate limit: 1 envío cada 60s por pestaña
-const RATE_LIMIT_MS = 60000
-const ultimoEnvio = () => Number(sessionStorage.getItem('ultimoEnvioContacto') || 0)
-
-const enviado = ref(false)
-const errorEnvio = ref(false)
-const errorValidacion = ref('')
-const cargando = ref(false)
-const aceptaPrivacidad = ref(false)
-const RATE_LIMIT_MSG = 'Esperá un momento antes de enviar otra consulta.'
-
-// Estados de touched para validación visual
-const touched = ref({
-  nombre: false,
-  email: false,
-  telefono: false
+const puedeAvanzar = computed(() => {
+  if (tipoConsulta.value === 'reserva') {
+    return Boolean(datos.value.tour && datos.value.fecha && datos.value.personas)
+  }
+  if (tipoConsulta.value === 'elegir') return Boolean(datos.value.preferencia)
+  return true
 })
 
-const tourOptions = computed(() =>
-  tours
-    .filter(t => t.disponible)
-    .map(t => ({ value: t.nombre, label: t.nombre }))
-)
+const mensajeWhatsApp = computed(() => {
+  const nombre = datos.value.nombre.trim()
+  let mensaje = 'Hola Rober, vi la web de Trekking Cumbrecita y quería consultar.'
 
-const mensajeLength = computed(() => form.value.mensaje.length)
+  if (tipoConsulta.value === 'reserva') {
+    const fecha = datos.value.fecha.split('-').reverse().join('/')
+    mensaje += `\n\nExperiencia: ${datos.value.tour}\nFecha tentativa: ${fecha}\nSomos: ${datos.value.personas} persona${datos.value.personas === '1' ? '' : 's'}.`
+  } else if (tipoConsulta.value === 'elegir') {
+    mensaje += `\n\nEstoy buscando: ${datos.value.preferencia}.`
+  }
 
-const nombreValido = computed(() => {
-  const n = form.value.nombre.trim()
-  return n.length >= 2 && n.length <= 60 && !/[\r\n]/.test(n)
+  if (nombre) mensaje += `\nMi nombre es: ${nombre}.`
+  if (datos.value.detalle.trim()) mensaje += `\n\nConsulta: ${datos.value.detalle.trim()}`
+
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`
 })
 
-const emailValido = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email.trim()))
-
-const telefonoValido = computed(() => {
-  const tel = form.value.telefono.trim()
-  return tel === '' || (/^[\d\s\+\-\(\)]{7,25}$/.test(tel) && !/[\r\n]/.test(tel))
-})
-
-const formularioValido = computed(() =>
-  nombreValido.value &&
-  emailValido.value &&
-  telefonoValido.value &&
-  aceptaPrivacidad.value
-)
-
-// Trim + colapso de espacios múltiples
-const sanitizar = (str) => str.trim().replace(/\s+/g, ' ')
-
-// Clases de validación por campo
-const nombreClass = computed(() => {
-  if (!touched.value.nombre) return ''
-  return nombreValido.value ? 'border-brand-green/50 focus:border-brand-green/70' : 'border-brand-orange/50 focus:border-brand-orange/70'
-})
-
-const emailClass = computed(() => {
-  if (!touched.value.email || !form.value.email) return ''
-  return emailValido.value ? 'border-brand-green/50 focus:border-brand-green/70' : 'border-brand-orange/50 focus:border-brand-orange/70'
-})
-
-const telefonoClass = computed(() => {
-  if (!touched.value.telefono || !form.value.telefono) return ''
-  return telefonoValido.value ? 'border-brand-green/50 focus:border-brand-green/70' : 'border-brand-orange/50 focus:border-brand-orange/70'
-})
-
-function onBlur(field) {
-  touched.value[field] = true
+function elegirTipo(tipo) {
+  tipoConsulta.value = tipo
+  paso.value = tipo === 'otra' ? 2 : 2
 }
 
-async function enviarFormulario() {
-  errorValidacion.value = ''
-  touched.value = { nombre: true, email: true, telefono: true }
-
-  // Honeypot: si un bot lo rellena, fingimos éxito sin enviar nada
-  if (honeypot.value !== '') {
-    enviado.value = true
-    return
-  }
-
-  // Bots envían en menos de 2 segundos
-  if (Date.now() - formMountedAt < 2000) {
-    enviado.value = true
-    return
-  }
-
-  // Rate limit por pestaña
-  if (Date.now() - ultimoEnvio() < RATE_LIMIT_MS) {
-    errorValidacion.value = RATE_LIMIT_MSG
-    return
-  }
-
-  if (!nombreValido.value) {
-    errorValidacion.value = 'Ingresá tu nombre.'
-    return
-  }
-
-  if (!emailValido.value) {
-    errorValidacion.value = 'Ingresá un email válido.'
-    return
-  }
-
-  if (!telefonoValido.value) {
-    errorValidacion.value = 'Ingresá un teléfono válido o dejalo vacío.'
-    return
-  }
-
-  if (!aceptaPrivacidad.value) {
-    errorValidacion.value = 'Aceptá el uso de tus datos para responder la consulta.'
-    return
-  }
-
-  cargando.value = true
-  errorEnvio.value = false
-
-  // Sanitización: valores limpios antes de armar el submit
-  const nombre = sanitizar(form.value.nombre)
-  const email = form.value.email.trim()
-  const telefono = sanitizar(form.value.telefono)
-  const mensaje = form.value.mensaje.trim().slice(0, 500)
-  // tourInteres solo acepta valores de la lista
-  const tourInteres = tourOptions.value.some(t => t.value === form.value.tourInteres)
-    ? form.value.tourInteres
-    : ''
-
-  try {
-    await emailjs.send(
-      SERVICE_ID,
-      TEMPLATE_ID,
-      { nombre, email, telefono, tour: tourInteres, mensaje },
-      PUBLIC_KEY
-    )
-    sessionStorage.setItem('ultimoEnvioContacto', String(Date.now()))
-    enviado.value = true
-    form.value = { nombre: '', email: '', telefono: '', tourInteres: '', mensaje: '' }
-    honeypot.value = ''
-    touched.value = { nombre: false, email: false, telefono: false }
-    aceptaPrivacidad.value = false
-  } catch {
-    errorEnvio.value = true
-  } finally {
-    cargando.value = false
-  }
+function volver() {
+  paso.value = Math.max(1, paso.value - 1)
 }
+
 </script>
 
 <template>
-  <section id="contacto" class="relative py-20 md:py-28 overflow-hidden border-t border-brand-cream/10">
+  <section id="contacto" class="relative overflow-hidden border-t border-brand-cream/10 py-20 md:py-28">
     <img
       src="/assets/tours/pueblo-escondido/cascada.webp"
       alt=""
       loading="lazy"
       decoding="async"
-      class="absolute inset-0 w-full h-full object-cover"
+      class="absolute inset-0 h-full w-full object-cover"
     />
-    <div class="absolute inset-0 bg-gradient-to-b from-brand-dark/70 via-brand-dark/60 to-brand-dark"></div>
-    <div class="relative max-w-7xl mx-auto px-5 md:px-10 lg:px-20">
+    <div class="absolute inset-0 bg-gradient-to-b from-brand-dark/80 via-brand-dark/75 to-brand-dark"></div>
 
-      <!-- Header -->
-      <div class="text-center mb-12 md:mb-16">
-        <p class="font-sans text-sm tracking-[0.3em] uppercase text-brand-orange mb-3">
-          Contacto
-        </p>
-        <h2 class="font-heading text-4xl md:text-5xl lg:text-6xl text-brand-white uppercase leading-tight mb-4">
-            Planificá tu próxima aventura
+    <div class="relative mx-auto max-w-7xl px-5 md:px-10 lg:px-20">
+      <div class="mb-12 max-w-2xl md:mb-16">
+        <p class="mb-3 font-sans text-sm uppercase tracking-[0.3em] text-brand-orange">Contacto</p>
+        <h2 class="mb-4 font-heading text-4xl uppercase leading-tight text-brand-white md:text-5xl lg:text-6xl">
+          Organicemos tu próxima aventura
         </h2>
-        <div class="h-1 w-20 bg-gradient-to-r from-brand-gold to-brand-cream/50 mx-auto mb-6"></div>
-        <p class="text-brand-cream/70 text-sm md:text-base max-w-lg mx-auto">
-            Escribime para consultar fechas, disponibilidad y todo lo que necesitás saber antes de salir.
+        <div class="mb-6 h-1 w-20 bg-gradient-to-r from-brand-gold to-brand-cream/50"></div>
+        <p class="max-w-xl font-sans text-sm leading-relaxed text-brand-cream/70 md:text-base">
+          Elegí qué necesitás y te llevo directo al canal más rápido para resolverlo.
         </p>
       </div>
 
-      <!-- Contenido: Dos columnas -->
-      <div class="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16">
-
-        <!-- Formulario (3 columnas) -->
+      <div class="grid grid-cols-1 gap-10 lg:grid-cols-5 lg:gap-16">
         <div class="lg:col-span-3">
-          <form
-            v-if="!enviado"
-            @submit.prevent="enviarFormulario"
-            class="space-y-5"
-          >
-            <!-- Honeypot: invisible para humanos -->
-            <input
-              v-model="honeypot"
-              type="text"
-              name="empresa"
-              tabindex="-1"
-              autocomplete="off"
-              aria-hidden="true"
-              class="absolute -left-[9999px] top-auto h-px w-px overflow-hidden opacity-0"
-            />
-            <!-- Nombre -->
-            <div>
-              <label for="nombre" class="block text-brand-cream/80 text-sm font-sans mb-1.5">
-                Nombre completo
-              </label>
-              <div class="relative">
-                <input
-                  id="nombre"
-                  v-model="form.nombre"
-                  type="text"
-                  name="nombre"
-                  required
-                  maxlength="60"
-                  autocomplete="name"
-                  placeholder="Tu nombre"
-                  @blur="onBlur('nombre')"
-                  class="w-full min-h-11 px-4 py-3.5 pr-10 bg-brand-card border rounded-lg text-base text-brand-cream placeholder-brand-cream/30 font-sans focus:outline-none focus:ring-1 transition-colors"
-                  :class="nombreClass || 'border-brand-cream/15 focus:border-brand-orange/50 focus:ring-brand-orange/30'"
-                />
-                <span v-if="touched.nombre && nombreValido" class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-green">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                </span>
-                <span v-else-if="touched.nombre && form.nombre" class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-orange">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </span>
-              </div>
+          <div class="rounded-2xl border border-brand-cream/15 bg-brand-dark/75 p-5 backdrop-blur-sm sm:p-8">
+            <div class="mb-8 flex items-center gap-3" aria-label="Progreso de la consulta">
+              <span
+                v-for="numero in 2"
+                :key="numero"
+                class="flex h-8 w-8 items-center justify-center rounded-full border text-sm font-semibold transition-colors"
+                :class="paso >= numero ? 'border-brand-orange bg-brand-orange text-brand-white' : 'border-brand-cream/20 text-brand-cream/40'"
+              >{{ numero }}</span>
+              <span class="h-px w-10 bg-brand-cream/20"></span>
+              <span class="text-xs uppercase tracking-wider text-brand-cream/45">Consulta rápida</span>
             </div>
 
-            <!-- Email + Teléfono -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label for="email" class="block text-brand-cream/80 text-sm font-sans mb-1.5">
-                  Email
-                </label>
-                <div class="relative">
-                  <input
-                    id="email"
-                    v-model="form.email"
-                    type="email"
-                    name="email"
-                    required
-                    autocomplete="email"
-                    placeholder="tu@email.com"
-                    @blur="onBlur('email')"
-                    class="w-full min-h-11 px-4 py-3.5 pr-10 bg-brand-card border rounded-lg text-base text-brand-cream placeholder-brand-cream/30 font-sans focus:outline-none focus:ring-1 transition-colors"
-                    :class="emailClass || 'border-brand-cream/15 focus:border-brand-orange/50 focus:ring-brand-orange/30'"
-                  />
-                  <span v-if="touched.email && form.email && emailValido" class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-green">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                  </span>
-                  <span v-else-if="touched.email && form.email && !emailValido" class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-orange">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                  </span>
-                </div>
-              </div>
-              <div>
-                <label for="telefono" class="block text-brand-cream/80 text-sm font-sans mb-1.5">
-                  Teléfono <span class="text-brand-cream/40">(opcional)</span>
-                </label>
-                <div class="relative">
-                  <input
-                    id="telefono"
-                    v-model="form.telefono"
-                    type="tel"
-                    name="telefono"
-                    maxlength="25"
-                    autocomplete="tel"
-                    placeholder="+54 9 351 123-4567"
-                    @blur="onBlur('telefono')"
-                    class="w-full min-h-11 px-4 py-3.5 pr-10 bg-brand-card border rounded-lg text-base text-brand-cream placeholder-brand-cream/30 font-sans focus:outline-none focus:ring-1 transition-colors"
-                    :class="telefonoClass || 'border-brand-cream/15 focus:border-brand-orange/50 focus:ring-brand-orange/30'"
-                  />
-                  <span v-if="touched.telefono && form.telefono && telefonoValido" class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-green">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                  </span>
-                  <span v-else-if="touched.telefono && form.telefono && !telefonoValido" class="absolute right-3 top-1/2 -translate-y-1/2 text-brand-orange">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Tour de interés -->
-            <div>
-              <label for="tour" class="block text-brand-cream/80 text-sm font-sans mb-1.5">
-                Experiencia de interés
-              </label>
-              <div class="relative">
-                <select
-                  id="tour"
-                  v-model="form.tourInteres"
-                  name="tour"
-                  class="w-full min-h-11 appearance-none rounded-lg border border-brand-cream/15 bg-brand-card px-4 py-3.5 pr-10 font-sans text-base text-brand-cream focus:outline-none focus:border-brand-orange/50 focus:ring-1 focus:ring-brand-orange/30 transition-colors"
-                  :class="form.tourInteres ? 'text-brand-cream' : 'text-brand-cream/30'"
+            <div v-if="paso === 1">
+              <h3 class="mb-2 font-heading text-3xl uppercase text-brand-white">¿En qué te ayudo?</h3>
+              <p class="mb-6 font-sans text-sm text-brand-cream/60">Elegí una opción para empezar.</p>
+              <div class="grid gap-3">
+                <button
+                  v-for="opcion in opciones"
+                  :key="opcion.id"
+                  type="button"
+                  class="group flex min-h-20 items-center gap-4 rounded-xl border border-brand-cream/15 bg-brand-card/80 p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-orange/60 hover:bg-brand-card"
+                  @click="elegirTipo(opcion.id)"
                 >
-                  <option value="" disabled>Elegí una experiencia</option>
-                  <option
-                    v-for="tour in tourOptions"
-                    :key="tour.value"
-                    :value="tour.value"
-                    class="bg-brand-card text-brand-cream"
-                  >
-                    {{ tour.label }}
-                  </option>
-                </select>
-                <svg class="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-brand-cream/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m6 9 6 6 6-6" />
-                </svg>
+                  <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-orange/15 text-brand-orange">
+                    <svg v-if="opcion.icono === 'calendar'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 3v2.25M17.25 3v2.25M3.75 9.75h16.5M5.25 5.25h13.5a1.5 1.5 0 011.5 1.5v12a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-12a1.5 1.5 0 011.5-1.5z" /></svg>
+                    <svg v-else-if="opcion.icono === 'compass'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 9.75l4.5-1.5-1.5 4.5-4.5 1.5 1.5-4.5zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m5.625 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-3.75 3.75h.008v.008H9.75v-.008zm2.625 0h.008v.008h-.008v-.008zm2.625 0h.008v.008H15v-.008zM3.75 6.75a3 3 0 013-3h10.5a3 3 0 013 3v8.5a3 3 0 01-3 3H12l-3.75 2.25v-2.25h-1.5a3 3 0 01-3-3v-8.5z" /></svg>
+                  </span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block font-sans text-sm font-semibold text-brand-white">{{ opcion.titulo }}</span>
+                    <span class="mt-1 block font-sans text-xs leading-relaxed text-brand-cream/55">{{ opcion.descripcion }}</span>
+                  </span>
+                  <svg class="h-5 w-5 shrink-0 text-brand-cream/35 transition-transform group-hover:translate-x-1 group-hover:text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7" /></svg>
+                </button>
               </div>
             </div>
 
-            <!-- Mensaje -->
-            <div>
-              <label for="mensaje" class="block text-brand-cream/80 text-sm font-sans mb-1.5">
-                Mensaje <span class="text-brand-cream/40">(opcional)</span>
-              </label>
-              <textarea
-                id="mensaje"
-                v-model="form.mensaje"
-                name="mensaje"
-                rows="4"
-                maxlength="500"
-                placeholder="Contanos si tenés alguna consulta, preferencia de fecha, cantidad de personas..."
-                class="w-full min-h-11 px-4 py-3.5 bg-brand-card border border-brand-cream/15 rounded-lg text-base text-brand-cream placeholder-brand-cream/30 font-sans focus:outline-none focus:border-brand-orange/50 focus:ring-1 focus:ring-brand-orange/30 transition-colors resize-none"
-              ></textarea>
-              <div class="text-right text-brand-cream/30 text-xs font-sans mt-1">
-                {{ mensajeLength }} / 500
+            <div v-else>
+              <button type="button" class="mb-5 text-xs font-semibold uppercase tracking-wider text-brand-orange hover:text-brand-gold" @click="volver">← Volver</button>
+
+              <div v-if="tipoConsulta === 'reserva'">
+                <h3 class="mb-2 font-heading text-3xl uppercase text-brand-white">Consultá tu lugar</h3>
+                <p class="mb-6 font-sans text-sm text-brand-cream/60">Con estos datos te confirmo disponibilidad por WhatsApp.</p>
+                <div class="space-y-5">
+                  <label class="block font-sans text-sm text-brand-cream/80">
+                    Experiencia
+                    <select v-model="datos.tour" class="mt-2 min-h-12 w-full rounded-lg border border-brand-cream/15 bg-brand-card px-4 py-3 text-base text-brand-cream focus:border-brand-orange/60 focus:outline-none focus:ring-1 focus:ring-brand-orange/30">
+                      <option value="" disabled>Elegí una experiencia</option>
+                      <option v-for="tour in toursDisponibles" :key="tour.slug" :value="tour.nombre">{{ tour.nombre }}</option>
+                    </select>
+                  </label>
+                  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <label class="block font-sans text-sm text-brand-cream/80">Fecha tentativa<input v-model="datos.fecha" :min="fechaMinima" type="date" class="mt-2 min-h-12 w-full rounded-lg border border-brand-cream/15 bg-brand-card px-4 py-3 text-base text-brand-cream focus:border-brand-orange/60 focus:outline-none focus:ring-1 focus:ring-brand-orange/30" /></label>
+                    <label class="block font-sans text-sm text-brand-cream/80">Cantidad de personas<select v-model="datos.personas" class="mt-2 min-h-12 w-full rounded-lg border border-brand-cream/15 bg-brand-card px-4 py-3 text-base text-brand-cream focus:border-brand-orange/60 focus:outline-none focus:ring-1 focus:ring-brand-orange/30"><option v-for="cantidad in 12" :key="cantidad" :value="String(cantidad)">{{ cantidad }} {{ cantidad === 1 ? 'persona' : 'personas' }}</option></select></label>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <!-- Error -->
-            <p v-if="errorValidacion" class="text-brand-orange text-sm font-sans">
-              {{ errorValidacion }}
-            </p>
-            <p v-if="errorEnvio" class="text-brand-orange text-sm font-sans">
-              Hubo un error al enviar. Intentá nuevamente o escribime por WhatsApp.
-            </p>
-
-            <!-- Privacidad -->
-            <div>
-              <label class="flex items-start gap-3 cursor-pointer select-none" for="privacidad">
-                <input
-                  id="privacidad"
-                  v-model="aceptaPrivacidad"
-                  type="checkbox"
-                  required
-                  class="mt-0.5 w-4 h-4 shrink-0 accent-brand-orange"
-                />
-                <span class="text-brand-cream/60 text-xs font-sans leading-relaxed">
-                  Acepto que mis datos personales (nombre, email y teléfono) sean utilizados
-                  únicamente para responder esta consulta. No se comparten con terceros.
-                </span>
-              </label>
-            </div>
-
-            <!-- Botón enviar -->
-            <button
-              type="submit"
-              :disabled="cargando || !formularioValido"
-              class="w-full min-h-11 bg-brand-orange text-brand-white rounded-lg py-4 font-sans font-semibold hover:bg-brand-gold transition-colors duration-300 text-base disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {{ cargando ? 'Enviando...' : 'Consultar disponibilidad' }}
-            </button>
-          </form>
-
-          <!-- Mensaje de éxito -->
-          <div v-else class="text-center py-16">
-            <div class="w-16 h-16 rounded-full bg-brand-gold/10 border border-brand-gold/30 flex items-center justify-center mx-auto mb-6">
-              <svg class="w-8 h-8 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h3 class="font-heading text-2xl text-brand-white uppercase mb-2">
-              ¡Consulta enviada!
-            </h3>
-            <p class="text-brand-cream/70 text-sm font-sans mb-6">
-              Te responderé a la brevedad para ayudarte a organizar tu salida.
-            </p>
-            <button
-              @click="enviado = false"
-              class="inline-flex min-h-11 items-center px-4 text-brand-orange text-sm font-sans hover:underline"
-            >
-              Hacer otra consulta
-            </button>
-          </div>
-        </div>
-
-        <!-- Contacto directo (2 columnas) -->
-        <div class="lg:col-span-2 flex flex-col">
-          <h3 class="font-heading text-2xl md:text-3xl text-brand-white uppercase mb-3">
-            ¿Preferís escribirme directamente?
-          </h3>
-          <p class="text-brand-cream/65 text-sm font-sans mb-8 leading-relaxed">
-            Te respondo por WhatsApp en menos de 1 hora. También podés escribirme por Instagram o email.
-          </p>
-
-          <div class="rounded-2xl border border-brand-cream/10 bg-brand-dark/50 p-5">
-            <div class="space-y-4">
-              <!-- WhatsApp -->
-              <a
-                href="https://wa.me/5493546453047"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="flex min-h-14 items-center gap-3 bg-brand-card border border-brand-cream/15 rounded-xl px-4 py-3.5 group hover:border-brand-orange/40 hover:-translate-y-0.5 transition-all duration-300"
-              >
-                <span class="w-10 h-10 rounded-full bg-[#25D366]/15 text-[#25D366] flex items-center justify-center shrink-0">
-                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                  </svg>
-                </span>
-                <span class="flex flex-col min-w-0">
-                  <span class="text-brand-white text-sm font-semibold font-sans">WhatsApp</span>
-                  <span class="text-brand-cream/50 text-xs font-sans">Respondo en menos de 1 hora</span>
-                </span>
-                <svg class="w-4 h-4 ml-auto shrink-0 text-brand-cream/40 group-hover:text-brand-orange group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </a>
-
-              <!-- Email -->
-              <a
-                href="https://mail.google.com/mail/?view=cm&fs=1&to=cascadaelchorrillo.2018@gmail.com&subject=Consulta%20Trekking%20Cumbrecita&body=Hola%20Roberto%2C%20quiero%20consultar%20sobre%20una%20experiencia%20de%20trekking."
-                target="_blank"
-                rel="noopener noreferrer"
-                class="flex min-h-14 items-center gap-3 bg-brand-card border border-brand-cream/15 rounded-xl px-4 py-3.5 group hover:border-brand-orange/40 hover:-translate-y-0.5 transition-all duration-300"
-              >
-                <span class="w-10 h-10 rounded-full bg-brand-orange/15 text-brand-orange flex items-center justify-center shrink-0">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                  </svg>
-                </span>
-                <span class="flex flex-col min-w-0">
-                  <span class="text-brand-white text-sm font-semibold font-sans">Email</span>
-                  <span class="text-brand-cream/50 text-xs font-sans truncate">Cascadaelchorrillo.2018@gmail.com</span>
-                </span>
-                <svg class="w-4 h-4 ml-auto shrink-0 text-brand-cream/40 group-hover:text-brand-orange group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </a>
-
-              <!-- Instagram -->
-              <a
-                href="https://www.instagram.com/trekking_cumbrecita/"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="flex min-h-14 items-center gap-3 bg-brand-card border border-brand-cream/15 rounded-xl px-4 py-3.5 group hover:border-brand-orange/40 hover:-translate-y-0.5 transition-all duration-300"
-              >
-                <span class="w-10 h-10 rounded-full bg-[#E1306C]/15 text-[#E1306C] flex items-center justify-center shrink-0">
-                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                  </svg>
-                </span>
-                <span class="flex flex-col min-w-0">
-                  <span class="text-brand-white text-sm font-semibold font-sans">Instagram</span>
-                  <span class="text-brand-cream/50 text-xs font-sans">@trekking_cumbrecita</span>
-                </span>
-                <svg class="w-4 h-4 ml-auto shrink-0 text-brand-cream/40 group-hover:text-brand-orange group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </a>
-            </div>
-
-            <!-- Ubicación -->
-            <div class="mt-5 pt-5 border-t border-brand-cream/10">
-              <div class="flex items-start gap-3">
-                <svg class="w-5 h-5 text-brand-orange shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-                </svg>
-                <p class="text-brand-cream/80 text-sm font-sans leading-relaxed">
-                  <span class="font-semibold text-brand-cream">Ubicación:</span> La Cumbrecita, Córdoba, Argentina. En el Valle de Calamuchita, entre sierras y ríos.
-                </p>
+              <div v-else-if="tipoConsulta === 'elegir'">
+                <h3 class="mb-2 font-heading text-3xl uppercase text-brand-white">Te ayudo a elegir</h3>
+                <p class="mb-6 font-sans text-sm text-brand-cream/60">Contame qué tipo de aventura estás buscando.</p>
+                <div class="space-y-3">
+                  <label v-for="preferencia in preferencias" :key="preferencia" class="flex cursor-pointer items-center gap-3 rounded-lg border border-brand-cream/15 bg-brand-card/70 p-4 font-sans text-sm text-brand-cream/85 transition-colors hover:border-brand-orange/50 has-[:checked]:border-brand-orange/70 has-[:checked]:bg-brand-orange/10"><input v-model="datos.preferencia" type="radio" name="preferencia" :value="preferencia" class="h-4 w-4 accent-brand-orange" />{{ preferencia }}</label>
+                </div>
               </div>
+
+              <div v-else>
+                <h3 class="mb-2 font-heading text-3xl uppercase text-brand-white">Hablemos</h3>
+                <p class="mb-6 font-sans text-sm text-brand-cream/60">Mandame tu consulta y te respondo personalmente.</p>
+              </div>
+
+              <div class="mt-6 space-y-5">
+                <label class="block font-sans text-sm text-brand-cream/80">Tu nombre <span class="text-brand-cream/40">(opcional)</span><input v-model="datos.nombre" type="text" maxlength="60" autocomplete="name" placeholder="¿Cómo te llamás?" class="mt-2 min-h-12 w-full rounded-lg border border-brand-cream/15 bg-brand-card px-4 py-3 text-base text-brand-cream placeholder-brand-cream/30 focus:border-brand-orange/60 focus:outline-none focus:ring-1 focus:ring-brand-orange/30" /></label>
+                <label class="block font-sans text-sm text-brand-cream/80">¿Algo más que quieras contarme? <span class="text-brand-cream/40">(opcional)</span><textarea v-model="datos.detalle" maxlength="500" rows="3" placeholder="Por ejemplo: nivel de experiencia, si vienen con chicos o una duda puntual..." class="mt-2 w-full resize-none rounded-lg border border-brand-cream/15 bg-brand-card px-4 py-3 text-base text-brand-cream placeholder-brand-cream/30 focus:border-brand-orange/60 focus:outline-none focus:ring-1 focus:ring-brand-orange/30"></textarea></label>
+              </div>
+
+              <a v-if="puedeAvanzar" :href="mensajeWhatsApp" target="_blank" rel="noopener noreferrer" class="mt-7 flex min-h-13 w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-5 py-4 font-sans text-base font-semibold text-brand-dark transition-colors duration-300 hover:bg-[#42df7a]">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
+                {{ tipoConsulta === 'reserva' ? 'Consultar disponibilidad por WhatsApp' : 'Abrir WhatsApp y enviar consulta' }}
+              </a>
+              <p v-else class="mt-5 text-center font-sans text-xs text-brand-cream/50">Completá los datos principales para continuar.</p>
+              <p class="mt-4 text-center font-sans text-xs leading-relaxed text-brand-cream/40">WhatsApp se abrirá con el mensaje listo para revisar. No guardamos estos datos en esta web.</p>
             </div>
           </div>
         </div>
 
+        <div class="flex flex-col lg:col-span-2">
+          <h3 class="font-heading text-3xl uppercase text-brand-white">¿Preferís escribirme directamente?</h3>
+          <p class="mb-7 mt-3 font-sans text-sm leading-relaxed text-brand-cream/65">Te respondo por WhatsApp en menos de 1 hora. También podés encontrarme por Instagram o email.</p>
+          <div class="space-y-3">
+            <a href="https://wa.me/5493546453047" target="_blank" rel="noopener noreferrer" class="flex min-h-14 items-center gap-3 rounded-xl border border-brand-cream/15 bg-brand-card/80 px-4 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#25D366]/60"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#25D366]/15 text-[#25D366]"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg></span><span><strong class="block font-sans text-sm text-brand-white">WhatsApp</strong><small class="font-sans text-xs text-brand-cream/50">Respuesta habitual en menos de 1 hora</small></span></a>
+            <a href="mailto:cascadaelchorrillo.2018@gmail.com?subject=Consulta%20Trekking%20Cumbrecita" class="flex min-h-14 items-center gap-3 rounded-xl border border-brand-cream/15 bg-brand-card/80 px-4 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-orange/50"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-orange/15 text-brand-orange"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg></span><span><strong class="block font-sans text-sm text-brand-white">Email</strong><small class="break-all font-sans text-xs text-brand-cream/50">cascadaelchorrillo.2018@gmail.com</small></span></a>
+            <a href="https://www.instagram.com/trekking_cumbrecita/" target="_blank" rel="noopener noreferrer" class="flex min-h-14 items-center gap-3 rounded-xl border border-brand-cream/15 bg-brand-card/80 px-4 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#E1306C]/60"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#E1306C]/15 text-[#E1306C]"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.28-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0 5.838a4 4 0 100 8 4 4 0 000-8zm6.406-1.56a1.44 1.44 0 100 2.88 1.44 1.44 0 000-2.88z" /></svg></span><span><strong class="block font-sans text-sm text-brand-white">Instagram</strong><small class="font-sans text-xs text-brand-cream/50">@trekking_cumbrecita</small></span></a>
+          </div>
+
+          <div class="mt-8 border-t border-brand-cream/10 pt-6">
+            <p class="mb-3 font-sans text-xs uppercase tracking-wider text-brand-orange">Antes de salir</p>
+            <div class="space-y-2 font-sans text-sm text-brand-cream/65">
+              <details class="group"><summary class="cursor-pointer list-none py-1 text-brand-cream/85">¿Qué tengo que llevar? <span class="float-right text-brand-orange">+</span></summary><p class="pb-2 pt-1 text-xs leading-relaxed">Ropa cómoda, calzado de trekking, agua, protector solar y abrigo impermeable. Según la salida pueden hacer falta elementos adicionales.</p></details>
+              <details class="group"><summary class="cursor-pointer list-none py-1 text-brand-cream/85">¿Qué pasa si llueve? <span class="float-right text-brand-orange">+</span></summary><p class="pb-2 pt-1 text-xs leading-relaxed">La seguridad es prioridad. Evaluamos el clima y te avisamos si la salida se reprograma.</p></details>
+              <details class="group"><summary class="cursor-pointer list-none py-1 text-brand-cream/85">¿Cómo confirmo mi lugar? <span class="float-right text-brand-orange">+</span></summary><p class="pb-2 pt-1 text-xs leading-relaxed">Te informo disponibilidad, forma de reserva y todos los detalles por WhatsApp.</p></details>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>

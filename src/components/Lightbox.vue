@@ -102,7 +102,7 @@ onUnmounted(() => {
 
         <button
           @click="emit('close')"
-          class="absolute top-4 right-4 z-20 w-11 h-11 rounded-full bg-brand-dark/60 backdrop-blur-sm border border-brand-cream/15 text-brand-cream flex items-center justify-center hover:bg-brand-orange hover:border-brand-orange hover:text-brand-white transition-colors duration-200"
+          class="absolute top-4 right-[max(1rem,env(safe-area-inset-right))] z-20 w-11 h-11 rounded-full bg-brand-dark/60 backdrop-blur-sm border border-brand-cream/15 text-brand-cream flex items-center justify-center hover:bg-brand-orange hover:border-brand-orange hover:text-brand-white active:scale-95 transition-all duration-200"
           aria-label="Cerrar"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -144,7 +144,7 @@ onUnmounted(() => {
             :src="current.src"
             :alt="current.titulo || current.lugar || 'Imagen de la galería'"
             decoding="async"
-            class="max-h-[75vh] w-auto object-contain rounded-lg shadow-2xl"
+            class="max-h-[75dvh] w-auto object-contain rounded-lg shadow-2xl"
           />
           <div v-if="current.titulo || current.lugar" class="text-center px-4">
             <span v-if="current.titulo" class="block font-heading text-xl md:text-2xl text-brand-white uppercase leading-tight">

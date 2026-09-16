@@ -29,7 +29,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
       type="button"
       aria-label="Volver arriba"
       @click="scrollToTop"
-      class="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-brand-orange text-brand-white flex items-center justify-center shadow-lg shadow-brand-orange/25 hover:bg-brand-gold hover:shadow-brand-orange/40 transition-all duration-300"
+      class="fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] right-[max(1.5rem,env(safe-area-inset-right))] z-50 w-12 h-12 rounded-full bg-brand-orange text-brand-white flex items-center justify-center shadow-lg shadow-brand-orange/25 hover:bg-brand-gold hover:shadow-brand-orange/40 active:scale-95 transition-all duration-300"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />

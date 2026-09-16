@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import Lightbox from '../components/Lightbox.vue'
 
 const sectionRef = ref(null)
@@ -94,6 +94,26 @@ const galeriaFiltrada = computed(() => {
   return galeria.filter(img => img.lugar === filtroActivo.value)
 })
 
+// Carga progresiva: primero 5, luego duplica el lote (10 → 20 → 40 → ...)
+const INICIAL = 5
+const limiteVisible = ref(INICIAL)
+
+const visibles = computed(() => galeriaFiltrada.value.slice(0, limiteVisible.value))
+const hayMas = computed(() => limiteVisible.value < galeriaFiltrada.value.length)
+const restantes = computed(() => galeriaFiltrada.value.length - limiteVisible.value)
+
+function verMas() {
+  if (hayMas.value) {
+    limiteVisible.value = Math.min(limiteVisible.value * 2, galeriaFiltrada.value.length)
+  } else {
+    limiteVisible.value = INICIAL
+  }
+}
+
+watch(filtroActivo, () => {
+  limiteVisible.value = INICIAL
+})
+
 const lightboxOpen = ref(false)
 const lightboxIndex = ref(0)
 
@@ -102,6 +122,10 @@ const abrirLightbox = (i) => {
   const originalIndex = galeria.findIndex(img => img.src === filteredSrc)
   lightboxIndex.value = originalIndex >= 0 ? originalIndex : i
   lightboxOpen.value = true
+
+  // Precarga la siguiente imagen para que el swipe no muestre hueco
+  const siguiente = galeria[(originalIndex + 1) % galeria.length]
+  if (siguiente) new Image().src = siguiente.src
 }
 </script>
 
@@ -151,7 +175,7 @@ const abrirLightbox = (i) => {
           v-for="cat in categorias"
           :key="cat"
           @click="filtroActivo = cat"
-          class="px-4 py-2 rounded-full text-xs font-sans font-semibold transition-all duration-300"
+          class="min-h-11 flex items-center px-4 py-2 rounded-full text-xs font-sans font-semibold transition-all duration-300"
           :class="filtroActivo === cat
             ? 'bg-brand-orange text-brand-white shadow-md shadow-brand-orange/25'
             : 'bg-brand-card border border-brand-cream/15 text-brand-cream/70 hover:border-brand-orange/40 hover:text-brand-cream'"
@@ -160,11 +184,11 @@ const abrirLightbox = (i) => {
         </button>
       </div>
 
-      <div class="columns-2 md:columns-3 gap-4">
+      <div class="columns-2 md:columns-3 gap-3 md:gap-4">
         <figure
-          v-for="(img, i) in galeriaFiltrada"
+          v-for="(img, i) in visibles"
           :key="img.src"
-          class="group relative mb-4 break-inside-avoid rounded-xl overflow-hidden cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange transition-all duration-500"
+          class="group relative mb-3 md:mb-4 break-inside-avoid rounded-xl overflow-hidden cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange transition-all duration-500"
           tabindex="0"
           role="button"
           :aria-label="`Abrir imagen: ${img.titulo}`"
@@ -195,6 +219,23 @@ const abrirLightbox = (i) => {
             </svg>
           </span>
         </figure>
+      </div>
+
+      <!-- Ver más / Ver menos -->
+      <div v-if="galeriaFiltrada.length > INICIAL" class="flex justify-center mt-2 mb-8">
+        <button
+          type="button"
+          @click="verMas"
+          class="min-h-11 inline-flex items-center gap-2 px-6 py-2.5 rounded-full font-sans text-sm font-semibold transition-all duration-300 active:scale-95"
+          :class="hayMas
+            ? 'bg-brand-card border border-brand-cream/15 text-brand-cream hover:border-brand-orange/40 hover:text-brand-cream'
+            : 'bg-brand-orange text-brand-white shadow-md shadow-brand-orange/25 hover:bg-brand-gold'"
+        >
+          <svg class="w-4 h-4" :class="hayMas ? '' : 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+          {{ hayMas ? `Ver más imágenes (quedan ${restantes})` : 'Mostrar menos' }}
+        </button>
       </div>
 
       <a

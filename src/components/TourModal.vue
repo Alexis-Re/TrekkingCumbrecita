@@ -116,13 +116,13 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
         >
           <div
             ref="modalRef"
-            class="relative bg-brand-card rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden border border-brand-cream/10 shadow-2xl"
+            class="relative bg-brand-card rounded-2xl w-full max-w-2xl max-h-[85dvh] overflow-hidden border border-brand-cream/10 shadow-2xl"
             @click.stop
           >
             <!-- Close button -->
             <button
               @click="emit('close')"
-              class="absolute top-4 right-4 z-10 w-11 h-11 rounded-full bg-brand-dark/60 backdrop-blur-sm text-brand-cream flex items-center justify-center hover:bg-brand-orange transition-colors duration-200"
+              class="absolute top-4 right-[max(1rem,env(safe-area-inset-right))] z-10 w-11 h-11 rounded-full bg-brand-dark/60 backdrop-blur-sm text-brand-cream flex items-center justify-center hover:bg-brand-orange active:scale-95 transition-all duration-200"
               aria-label="Cerrar detalles"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,18 +131,18 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
             </button>
 
             <!-- Scrollable content -->
-            <div class="overflow-y-auto max-h-[85vh]">
+            <div class="overflow-y-auto max-h-[85dvh]">
               <!-- Gallery carousel -->
               <div
                 v-if="tour.imagenes && tour.imagenes.length > 0"
-                class="relative bg-brand-dark overflow-hidden [touch-action:pan-y] flex items-center justify-center min-h-[300px] md:min-h-[400px] max-h-[55vh] md:max-h-[60vh]"
+                class="relative bg-brand-dark overflow-hidden [touch-action:pan-y] flex items-center justify-center min-h-[300px] md:min-h-[400px] max-h-[55dvh] md:max-h-[60dvh]"
                 @touchstart="onTouchStart"
                 @touchend="onTouchEnd"
               >
                 <img
                   :src="tour.imagenes[currentIndex]"
                   :alt="`${tour.nombre} - imagen ${currentIndex + 1} de ${tour.imagenes.length}`"
-                  class="max-w-full max-h-[55vh] md:max-h-[60vh] object-contain"
+                  class="max-w-full max-h-[55dvh] md:max-h-[60dvh] object-contain"
                 />
 
                 <!-- Arrows -->
@@ -243,6 +243,59 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
                   <p v-if="tour.precioDetalle" class="text-brand-cream/55 text-sm font-sans mt-1">
                     {{ tour.precioDetalle }}
                   </p>
+                </div>
+
+                <!-- Reserva rápida -->
+                <div class="hidden mb-8 rounded-xl border border-[#25D366]/25 bg-[#25D366]/5 p-4 md:p-5">
+                  <h3 class="font-heading text-xl text-brand-white mb-1">Reservá tu lugar</h3>
+                  <p class="text-brand-cream/65 text-sm font-sans mb-4">
+                    Elegí una fecha y te escribimos por WhatsApp para confirmar disponibilidad.
+                  </p>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                    <div>
+                      <label for="fecha-reserva" class="block text-brand-cream/80 text-xs font-semibold font-sans mb-1.5">
+                        Fecha preferida
+                      </label>
+                      <input
+                        id="fecha-reserva"
+                        v-model="fechaReserva"
+                        type="date"
+                        :min="fechaMinima"
+                        class="w-full min-h-11 rounded-lg border border-brand-cream/15 bg-brand-dark/60 px-3 py-2.5 text-sm text-brand-cream font-sans focus:outline-none focus:border-[#25D366]/70 focus:ring-1 focus:ring-[#25D366]/30"
+                      />
+                    </div>
+                    <div>
+                      <label for="cantidad-personas" class="block text-brand-cream/80 text-xs font-semibold font-sans mb-1.5">
+                        Cantidad de personas
+                      </label>
+                      <input
+                        id="cantidad-personas"
+                        v-model.number="cantidadPersonas"
+                        type="number"
+                        min="1"
+                        :max="cantidadMaxima"
+                        class="w-full min-h-11 rounded-lg border border-brand-cream/15 bg-brand-dark/60 px-3 py-2.5 text-sm text-brand-cream font-sans focus:outline-none focus:border-[#25D366]/70 focus:ring-1 focus:ring-[#25D366]/30"
+                      />
+                      <span v-if="tour.cupoMax" class="block text-brand-cream/45 text-[11px] font-sans mt-1">
+                        Cupo máximo: {{ tour.cupoMax }} personas
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    :disabled="!fechaReserva || !cantidadValida"
+                    @click="reservarPorWhatsApp"
+                    class="w-full min-h-12 rounded-lg bg-[#25D366] px-4 py-3 font-sans font-bold text-white shadow-lg shadow-[#25D366]/15 transition-all duration-300 hover:bg-[#1ebe5d] hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
+                  >
+                    <span class="inline-flex items-center justify-center gap-2">
+                      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.198.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884"/>
+                      </svg>
+                      Reservar por WhatsApp
+                    </span>
+                  </button>
                 </div>
 
                 <!-- Itinerary -->
@@ -364,6 +417,33 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
                     <span class="text-brand-white font-medium">{{ tour.reunion }}</span>
                   </div>
                 </div>
+
+                <div class="mt-6 rounded-xl border border-[#25D366]/25 bg-[#25D366]/5 p-4 md:p-5">
+                  <h3 class="font-heading text-xl text-brand-white mb-1">Reservá tu lugar</h3>
+                  <p class="text-brand-cream/65 text-sm font-sans mb-4">
+                    Elegí una fecha y cantidad para consultar disponibilidad por WhatsApp.
+                  </p>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                    <div>
+                      <label for="fecha-reserva-final" class="block text-brand-cream/80 text-xs font-semibold font-sans mb-1.5">Fecha preferida</label>
+                      <input id="fecha-reserva-final" v-model="fechaReserva" type="date" :min="fechaMinima" class="w-full min-h-11 rounded-lg border border-brand-cream/15 bg-brand-dark/60 px-3 py-2.5 text-sm text-brand-cream font-sans focus:outline-none focus:border-[#25D366]/70" />
+                    </div>
+                    <div>
+                      <label for="cantidad-personas-final" class="block text-brand-cream/80 text-xs font-semibold font-sans mb-1.5">Cantidad de personas</label>
+                      <input id="cantidad-personas-final" v-model.number="cantidadPersonas" type="number" min="1" :max="cantidadMaxima" class="w-full min-h-11 rounded-lg border border-brand-cream/15 bg-brand-dark/60 px-3 py-2.5 text-sm text-brand-cream font-sans focus:outline-none focus:border-[#25D366]/70" />
+                      <span v-if="tour.cupoMax" class="block text-brand-cream/45 text-[11px] font-sans mt-1">Cupo máximo: {{ tour.cupoMax }} personas</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  :disabled="!fechaReserva || !cantidadValida"
+                  @click="reservarPorWhatsApp"
+                  class="mt-6 w-full min-h-12 rounded-lg bg-[#25D366] px-4 py-3 font-sans font-bold text-white transition-all duration-300 hover:bg-[#1ebe5d] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Reservar esta experiencia por WhatsApp
+                </button>
               </div>
             </div>
           </div>
