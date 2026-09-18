@@ -1,9 +1,14 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { stats, badges, avatars } from '../data/socialProof.js'
+import WhatsAppIcon from '../components/WhatsAppIcon.vue'
 
 const scrollToTours = () => {
   document.getElementById('tours')?.scrollIntoView({ behavior: 'smooth' })
+}
+
+const scrollToBadgeTarget = (target) => {
+  document.getElementById(target)?.scrollIntoView({ behavior: 'smooth' })
 }
 
 const parallaxY = ref(0)
@@ -115,10 +120,15 @@ onUnmounted(() => {
 
         <!-- Badges -->
         <div class="flex flex-wrap items-center justify-center gap-2 md:gap-3">
-          <span
+          <component
+            :is="badge.target ? 'button' : 'span'"
             v-for="badge in badges"
             :key="badge.label"
-            class="flex items-center gap-1.5 px-2.5 py-1 md:px-3 md:py-1.5 rounded-full border border-brand-cream/20 bg-brand-dark/40 backdrop-blur-sm text-[10px] md:text-xs text-brand-cream/90"
+            :type="badge.target ? 'button' : undefined"
+            :aria-label="badge.target ? `Ver ${badge.label.toLowerCase()}` : undefined"
+            class="flex items-center gap-1.5 px-2.5 py-1 md:px-3 md:py-1.5 rounded-full border border-brand-cream/20 bg-brand-dark/40 backdrop-blur-sm text-[10px] md:text-xs text-brand-cream/90 transition-colors duration-300"
+            :class="badge.target ? 'cursor-pointer hover:bg-brand-orange/20 hover:border-brand-orange/50 hover:text-brand-white' : ''"
+            @click="badge.target && scrollToBadgeTarget(badge.target)"
           >
             <svg v-if="badge.icono === 'guia'" class="w-3 h-3 md:w-3.5 md:h-3.5 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -130,7 +140,7 @@ onUnmounted(() => {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
             </svg>
             {{ badge.label }}
-          </span>
+          </component>
         </div>
 
       </div>
@@ -159,6 +169,15 @@ onUnmounted(() => {
           <svg class="w-5 h-5 text-brand-cream" fill="currentColor" viewBox="0 0 24 24">
             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
           </svg>
+        </a>
+        <a
+          href="https://wa.me/5493546453047"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="WhatsApp"
+          class="w-11 h-11 rounded-full border border-brand-cream/30 flex items-center justify-center text-brand-cream hover:bg-[#25D366]/20 hover:border-[#25D366]/60 hover:text-[#25D366] active:bg-[#25D366]/20 active:border-[#25D366]/60 active:scale-95 transition-all duration-300"
+        >
+          <WhatsAppIcon />
         </a>
       </div>
       <!-- Scroll indicator -->

@@ -33,10 +33,10 @@ function scrollTo(href) {
     <div class="relative max-w-7xl mx-auto px-5 md:px-10 lg:px-20 pt-16 pb-8">
 
       <!-- Contenido principal: 3 columnas -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 lg:gap-16 mb-12">
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-8 lg:gap-16 mb-12">
 
         <!-- Columna izquierda: Marca -->
-        <div class="md:col-span-1">
+        <div class="col-span-2 md:col-span-1">
           <p class="font-heading text-2xl tracking-[0.2em] text-brand-orange uppercase mb-4">
             Trekking Cumbrecita
           </p>

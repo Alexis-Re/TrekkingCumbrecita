@@ -5,7 +5,6 @@ export const acreditacion = {
   resolucion: '079/20',
   habilitaciones: [
     {
-      riesgo: 'Riesgo medio',
       actividades: 'Trekking y espeleoturismo'
     }
   ]

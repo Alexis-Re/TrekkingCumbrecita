@@ -140,7 +140,7 @@ const abrirLightbox = (i) => {
     />
     <div class="absolute inset-0 bg-gradient-to-b from-brand-dark/80 via-brand-dark/70 to-brand-dark"></div>
     <div class="relative max-w-7xl mx-auto px-5 md:px-10 lg:px-20">
-      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 md:mb-12">
+      <div class="mb-10 md:mb-12">
         <div class="transition-all duration-700" :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'">
           <p class="font-sans text-sm tracking-[0.3em] uppercase text-brand-orange mb-2">
             Galería
@@ -149,21 +149,22 @@ const abrirLightbox = (i) => {
             Así se vive la montaña
           </h2>
           <div class="h-1 w-16 bg-gradient-to-r from-brand-gold to-brand-cream/50 mt-4"></div>
-        </div>
 
-        <a
-          href="https://www.instagram.com/trekking_cumbrecita/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="hidden md:inline-flex items-center gap-2 border border-brand-cream/20 text-brand-cream/90 px-5 py-2.5 rounded-full font-sans text-sm font-semibold hover:bg-brand-orange hover:border-brand-orange hover:text-brand-white transition-all duration-300"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-            <rect x="3" y="3" width="18" height="18" rx="5" />
-            <circle cx="12" cy="12" r="4" />
-            <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none" />
-          </svg>
-          Seguinos en Instagram
-        </a>
+          <!-- Instagram, discreto -->
+          <a
+            href="https://www.instagram.com/trekking_cumbrecita/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="mt-4 inline-flex items-center gap-1.5 text-brand-cream/50 text-xs font-sans tracking-wide hover:text-brand-orange active:text-brand-orange transition-colors duration-300"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="5" />
+              <circle cx="12" cy="12" r="4" />
+              <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none" />
+            </svg>
+            <span class="underline decoration-brand-cream/20 underline-offset-2 hover:decoration-brand-orange/50">@trekking_cumbrecita</span>
+          </a>
+        </div>
       </div>
 
       <!-- Filtros -->
@@ -237,20 +238,6 @@ const abrirLightbox = (i) => {
           {{ hayMas ? `Ver más imágenes (quedan ${restantes})` : 'Mostrar menos' }}
         </button>
       </div>
-
-      <a
-        href="https://www.instagram.com/trekking_cumbrecita/"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="md:hidden inline-flex items-center gap-2 border border-brand-cream/20 text-brand-cream/90 px-5 py-3.5 rounded-full font-sans text-sm font-semibold hover:bg-brand-orange hover:border-brand-orange hover:text-brand-white transition-all duration-300 mt-6"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-          <rect x="3" y="3" width="18" height="18" rx="5" />
-          <circle cx="12" cy="12" r="4" />
-          <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none" />
-        </svg>
-        Seguinos en Instagram
-      </a>
     </div>
 
     <Lightbox

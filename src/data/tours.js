@@ -139,24 +139,76 @@ export const tours = [
     duracion: '6 hs',
     dificultad: 'Media',
     terreno: 'Media',
-    distancia: null,
+    distancia: '12 km aprox.',
     precio: 55000,
-    precioDetalle: null,
+    precioDetalle: 'Seña para reservar · 3 cuotas sin interés',
     disponible: true,
     imagen: cumbrecitaGaleriaCorona[0],
     slug: 'garganta-del-diablo-cerro-corona-pozo-cabras',
     imagenes: cumbrecitaGaleriaCorona,
-    horarios: '09:15',
+    horarios: 'Sábados, domingos y feriados · 08:30',
     incluye: [],
-    itinerario: [],
-    reunion: 'Puente de ingreso a La Cumbrecita'
+    itinerario: [
+      {
+        dia: 1,
+        titulo: 'Garganta del Diablo y Pozo de las Cabras',
+        horas: [
+          { hora: '08:30', evento: 'Salida desde la Panadería de La Cumbrecita' },
+          { hora: '—', evento: 'Visita a la Capilla, Mirador del Indio y vistas de Casas Viejas' },
+          { hora: '—', evento: 'Llegada a la Cascada Garganta del Diablo · descanso' },
+          { hora: '—', evento: 'Regreso por el río' },
+          { hora: '—', evento: 'Visita al Pozo de las Cabras · descanso' },
+          { hora: '—', evento: 'Regreso al pueblo y fin de la actividad' }
+        ]
+      }
+    ],
+    reunion: 'Panadería de La Cumbrecita'
   },
   {
     ...rioSubterraneoInfo,
     nombre: 'La Cumbrecita: Cascadas Salvajes + Río Subterráneo',
+    duracion: '7 hs',
+    dificultad: 'Media',
+    terreno: 'Media',
+    distancia: '16 km',
+    precio: 60000,
+    precioDetalle: 'Efectivo o transferencia · $70.000 en 3 cuotas sin interés · Se reserva con el 50% de seña',
     imagen: cumbrecitaGaleriaAlternativa[0],
     slug: 'cascadas-salvajes-rio-subterraneo',
-    imagenes: cumbrecitaGaleriaAlternativa
+    imagenes: cumbrecitaGaleriaAlternativa,
+    horarios: 'Sábados, domingos y feriados · Salida 08:30 · Inicio 08:45',
+    incluye: [],
+    requisitos: [
+      'Edad de 12 a 60 años con buen estado físico',
+      'Mayores de 60 años: entrenamiento excelente',
+      'Peso máximo: 90 kg por zonas de paso reducido'
+    ],
+    equipamiento: [
+      'Linterna',
+      'Ropa cómoda o deportiva de trekking',
+      'Traje de baño',
+      'Mochila de 30/40 litros (una cada dos personas)',
+      'Protector solar, gorra y lentes',
+      'Agua, termo, mate, almuerzo liviano y vianda de marcha',
+      'Mini botiquín personal',
+      'Bastones de trekking (opcional)'
+    ],
+    itinerario: [
+      {
+        dia: 1,
+        titulo: 'Wilds Waterfalls: cascadas salvajes y Río Subterráneo',
+        horas: [
+          { hora: '08:30', evento: 'Salida desde la Panadería de La Cumbrecita' },
+          { hora: '08:45', evento: 'Inicio de la actividad' },
+          { hora: '—', evento: 'Recorrido por el Cerro Wank y el Río Subterráneo' },
+          { hora: '—', evento: 'Visita a las cascadas de la Novia, El Tabaquillo, El Abedul, del Claro y Las Dos Rocas' },
+          { hora: '—', evento: 'Vista panorámica de la Cascada Abanico' },
+          { hora: '—', evento: 'Regreso por la Iglesia de la Gruta y la Plaza de Doña Victoria Giménez' },
+          { hora: '15:45', evento: 'Fin aproximado de la actividad' }
+        ]
+      }
+    ],
+    reunion: 'Panadería de La Cumbrecita'
   },
   {
     nombre: 'Ascenso al Cerro Tradicional Champaquí',
@@ -298,7 +350,7 @@ export const tours = [
     imagen: '/assets/tours/default.svg',
     slug: 'paraiso-guanacos-casita-de-cristal',
     imagenes: [],
-    horarios: '08:30',
+    horarios: 'Sábados, domingos y feriados · 08:30',
     incluye: [],
     itinerario: [],
     reunion: 'Parador Julio Cesar'
@@ -315,9 +367,42 @@ export const tours = [
     imagen: gigantesGaleria[0],
     slug: 'los-gigantes-cerro-mogote-cajones',
     imagenes: gigantesGaleria,
-    horarios: '08:30',
-    incluye: [],
-    itinerario: [],
+    horarios: 'Sábados, domingos y feriados · 08:00',
+    incluye: [
+      'Guía habilitado',
+      'Trekking de 2 días / 1 noche',
+      'Alojamiento',
+      'Merienda del día 1',
+      'Cena',
+      'Desayuno',
+      'Vianda de marcha',
+      'Merienda del día 2',
+      'Visita a cascadas, ollas y puestos serranos abandonados',
+      'Recorrido por Cajones de Achala y Cerro Mogote'
+    ],
+    itinerario: [
+      {
+        dia: 1,
+        titulo: 'Camino del Peregrino y cascadas secretas',
+        horas: [
+          { hora: '08:00', evento: 'Encuentro en el Parador El Cóndor, Altas Cumbres' },
+          { hora: '—', evento: 'Traslado por el Camino del Peregrino hasta los puestos serranos' },
+          { hora: '—', evento: 'Trekking por cascadas escondidas, ollas naturales y puestos serranos abandonados' },
+          { hora: '—', evento: 'Recorrido de aproximadamente 10 km entre ida y vuelta' },
+          { hora: '—', evento: 'Merienda, cena y alojamiento' }
+        ]
+      },
+      {
+        dia: 2,
+        titulo: 'Cajones de Achala y Cerro Mogote',
+        horas: [
+          { hora: '—', evento: 'Desayuno' },
+          { hora: '—', evento: 'Trekking por los Cajones de Achala y el Cerro Mogote' },
+          { hora: '—', evento: 'Vianda de marcha' },
+          { hora: '—', evento: 'Merienda y regreso al finalizar la actividad' }
+        ]
+      }
+    ],
     reunion: 'Parador el Cóndor Altas Cumbres'
   },
   {
@@ -350,9 +435,60 @@ export const tours = [
       '/assets/tours/quebrada-yatan/paisaje.webp',
       '/assets/tours/quebrada-yatan/rober-campana-grupo.webp'
     ],
-    horarios: '09:00',
+    horarios: 'Sábados, domingos y feriados · 09:00',
     incluye: [],
     itinerario: [],
+    reunion: 'Casa de Rober Molina, La Cumbrecita'
+  },
+  {
+    nombre: 'La Cumbrecita: Quebrada del Yatán + Paso de Garay',
+    duracion: '2 días / 1 noche',
+    dificultad: 'Media',
+    terreno: 'Media',
+    distancia: 'Alta',
+    precio: null,
+    precioDetalle: 'Consultar precio',
+    disponible: true,
+    imagen: yatanGaleria[1],
+    slug: 'cumbrecita-quebrada-yatan-paso-garay',
+    imagenes: yatanGaleria,
+    horarios: 'Consultar fechas · 09:00',
+    incluye: [
+      'Guía habilitado',
+      'Trekking de 2 días / 1 noche',
+      'Carga de la mochila en mula',
+      'Alojamiento en Paso de Garay',
+      'Merienda seca del día 1',
+      'Cena',
+      'Desayuno seco',
+      'Vianda de marcha del día 2'
+    ],
+    itinerario: [
+      {
+        dia: 1,
+        titulo: 'La Cumbrecita, Quebrada del Yatán y Paso de Garay',
+        horas: [
+          { hora: '09:00', evento: 'Encuentro en Casa de Rober, La Cumbrecita, y armado de mochilas para la carga de la mula' },
+          { hora: '10:30', evento: 'Comienzo del trekking' },
+          { hora: '—', evento: 'Recorrido por el Río del Medio, Puentes Colgantes, Iglesia La Gruta y Arroyo El Tambito' },
+          { hora: '—', evento: 'Ingreso a la Quebrada del Yatán y continuación hacia Paso de Garay' },
+          { hora: '18:30', evento: 'Arribo aproximado a Paso de Garay' },
+          { hora: '19:20', evento: 'Merienda seca' },
+          { hora: '21:00', evento: 'Cena y pernocte en Paso de Garay' }
+        ]
+      },
+      {
+        dia: 2,
+        titulo: 'Paso de Garay, cascadas, Cerro Wank y La Cumbrecita',
+        horas: [
+          { hora: '08:00', evento: 'Desayuno seco' },
+          { hora: '09:00', evento: 'Comienzo del trekking de regreso desde Paso de Garay' },
+          { hora: '—', evento: 'Regreso por la zona de las cascadas, Cerro Wank, Arroyo El Tambito y el Riachuelo' },
+          { hora: '—', evento: 'Almuerzo: vianda de marcha' },
+          { hora: '17:00', evento: 'Arribo aproximado a La Cumbrecita y fin de la travesía' }
+        ]
+      }
+    ],
     reunion: 'Casa de Rober Molina, La Cumbrecita'
   },
   {
@@ -367,9 +503,54 @@ export const tours = [
     imagen: champaquiGaleriaAlternativa[0],
     slug: 'dos-gigantes-champaqui-totora',
     imagenes: champaquiGaleriaAlternativa,
-    horarios: '09:15',
-    incluye: [],
-    itinerario: [],
+    horarios: 'Viernes, sábados, domingos y feriados · 09:15',
+    incluye: [
+      'Guía habilitado',
+      'Trekking de 3 días / 2 noches',
+      'Alojamiento en puesto serrano',
+      'Meriendas',
+      'Cenas',
+      'Desayunos',
+      'Viandas de marcha',
+      'Almuerzo del tercer día',
+      'Ascenso al Cerro Champaquí',
+      'Ascenso nocturno al Cerro La Totora, sujeto a condiciones climáticas',
+      'Visita a cascadas de la zona',
+      'Recorrido por antiguos puestos serranos'
+    ],
+    itinerario: [
+      {
+        dia: 1,
+        titulo: 'Villa Alpina y Puesto Marcos Domínguez',
+        horas: [
+          { hora: '—', evento: 'Encuentro en Villa Alpina' },
+          { hora: '—', evento: 'Trekking por antiguos puestos serranos y el Camino Norte' },
+          { hora: '—', evento: 'Paso por el antiguo cementerio de la zona y llegada al Puesto Marcos Domínguez' },
+          { hora: '—', evento: 'Merienda y alojamiento' },
+          { hora: '—', evento: 'Ascenso nocturno al Cerro La Totora, sujeto a condiciones climáticas' },
+          { hora: '—', evento: 'Cena y alojamiento' }
+        ]
+      },
+      {
+        dia: 2,
+        titulo: 'Cumbre del Cerro Champaquí',
+        horas: [
+          { hora: '—', evento: 'Desayuno y ascenso al Cerro Champaquí' },
+          { hora: '—', evento: 'Llegada a la cumbre y vianda de marcha' },
+          { hora: '—', evento: 'Descenso hacia el puesto con visita a cascadas de la zona' },
+          { hora: '—', evento: 'Merienda, cena y alojamiento' }
+        ]
+      },
+      {
+        dia: 3,
+        titulo: 'Regreso a Villa Alpina',
+        horas: [
+          { hora: '—', evento: 'Desayuno y regreso a Villa Alpina' },
+          { hora: '—', evento: 'Parada en el Puesto de Moisés López y almuerzo incluido' },
+          { hora: '—', evento: 'Continuación del trekking hasta Villa Alpina y fin de la travesía' }
+        ]
+      }
+    ],
     reunion: 'Villa Alpina'
   },
   {
@@ -384,7 +565,7 @@ export const tours = [
     imagen: '/assets/tours/default.svg',
     slug: 'altas-cumbres-nacientes-mina-clavero',
     imagenes: [],
-    horarios: '08:30',
+    horarios: 'Viernes, sábados, domingos y feriados · 08:30',
     incluye: [],
     itinerario: [],
     reunion: 'Parador Julio Cesar, Villa Cura Brochero'
@@ -542,6 +723,55 @@ export const tours = [
     reunion: 'La Cumbrecita'
   },
   {
+    nombre: 'Excursión Nocturna: La Cumbrecita → Villa Alpina',
+    duracion: '2 días / 1 noche',
+    dificultad: 'Media',
+    terreno: 'Media',
+    distancia: null,
+    precio: 250000,
+    precioDetalle: 'Próxima fecha a confirmar · 3 cuotas sin interés',
+    disponible: true,
+    imagen: '/assets/tours/default.svg',
+    slug: 'excursion-nocturna-cumbrecita-villa-alpina',
+    imagenes: [],
+    horarios: 'Consultar fecha · Salida 18:00',
+    incluye: [
+      'Guía habilitado',
+      'Noche en refugio de montaña',
+      'Vianda de marcha',
+      'Desayuno en refugio',
+      'Recorrido por las Cascadas de Villa Alpina'
+    ],
+    equipamiento: [
+      'Linterna frontal',
+      'Bolsa de dormir',
+      'Ropa y calzado adecuados para trekking nocturno'
+    ],
+    itinerario: [
+      {
+        dia: 1,
+        titulo: 'Travesía nocturna: La Cumbrecita → Villa Alpina',
+        horas: [
+          { hora: '18:00', evento: 'Salida desde el Puente de Ingreso a La Cumbrecita' },
+          { hora: '—', evento: 'Recorrido por Cerro Cristal, Arroyo de las Mojarras, Cascada El Chorrillo y Arroyo La Puente' },
+          { hora: '01:00', evento: 'Llegada aproximada a Villa Alpina · Noche en refugio de montaña' }
+        ]
+      },
+      {
+        dia: 2,
+        titulo: 'Cascadas de Villa Alpina',
+        horas: [
+          { hora: '07:00', evento: 'Desayuno en el refugio' },
+          { hora: '07:30', evento: 'Inicio del recorrido a las Cascadas de Villa Alpina' },
+          { hora: '—', evento: 'Caminata entre bosques serranos, arroyos y saltos de agua' },
+          { hora: '15:00', evento: 'Finalización aproximada en Villa Alpina' },
+          { hora: '—', evento: 'Regreso por cuenta propia en vehículo o caminando hasta La Cumbrecita' }
+        ]
+      }
+    ],
+    reunion: 'Puente de Ingreso a La Cumbrecita'
+  },
+  {
     nombre: 'Running Camp en la Montaña',
     duracion: '3 días / 2 noches',
     dificultad: 'Alta',
@@ -671,7 +901,7 @@ export const tours = [
     imagen: '/assets/tours/default.svg',
     slug: 'villa-alpina-2-cascadas-olla',
     imagenes: [],
-    horarios: 'Consultar fechas y horarios · Encuentro 07:30',
+    horarios: 'Sábados, domingos y feriados · Encuentro 07:30',
     incluye: [
       'Estacionamiento',
       'Ingreso al predio',

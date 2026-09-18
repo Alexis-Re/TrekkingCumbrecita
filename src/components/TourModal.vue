@@ -1,7 +1,9 @@
 <script setup>
 import { ref, watch, nextTick, onMounted, onUnmounted, computed } from 'vue'
 import { formatPrecio } from '../utils/format.js'
+import { crearMensajeReserva } from '../utils/whatsapp.js'
 import TourPlaceholder from './TourPlaceholder.vue'
+import DatePicker from './DatePicker.vue'
 
 const props = defineProps({
   tour: { type: Object, default: null },
@@ -20,12 +22,30 @@ const dificultadClass = computed(() =>
 
 const currentIndex = ref(0)
 const modalRef = ref(null)
+const fechaReserva = ref('')
+const cantidadPersonas = ref(1)
+const fechaLocal = new Date()
+const fechaMinima = [fechaLocal.getFullYear(), String(fechaLocal.getMonth() + 1).padStart(2, '0'), String(fechaLocal.getDate()).padStart(2, '0')].join('-')
+const cantidadMaxima = computed(() => props.tour?.cupoMax || 15)
+const cantidadValida = computed(() => Number.isInteger(cantidadPersonas.value) && cantidadPersonas.value >= 1 && cantidadPersonas.value <= cantidadMaxima.value)
 let touchStartX = 0
 let previousActiveElement = null
+
+function ajustarCantidad(cambio) {
+  const cantidadActual = Number(cantidadPersonas.value) || 1
+  cantidadPersonas.value = Math.min(cantidadMaxima.value, Math.max(1, cantidadActual + cambio))
+}
+
+function reservarPorWhatsApp() {
+  if (!props.tour || !fechaReserva.value || !cantidadValida.value) return
+  window.open(crearMensajeReserva(props.tour, fechaReserva.value, cantidadPersonas.value), '_blank', 'noopener,noreferrer')
+}
 
 watch(() => props.open, (val) => {
   if (val) {
     currentIndex.value = 0
+    fechaReserva.value = ''
+    cantidadPersonas.value = 1
     document.body.style.overflow = 'hidden'
     previousActiveElement = document.activeElement
     nextTick(() => modalRef.value?.querySelector('button')?.focus())
@@ -34,6 +54,12 @@ watch(() => props.open, (val) => {
     previousActiveElement?.focus()
     previousActiveElement = null
   }
+})
+
+watch(cantidadPersonas, (value) => {
+  const cantidad = Number(value)
+  if (!Number.isFinite(cantidad)) cantidadPersonas.value = 1
+  else cantidadPersonas.value = Math.min(cantidadMaxima.value, Math.max(1, Math.trunc(cantidad)))
 })
 
 function prev() {
@@ -257,26 +283,11 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
                       <label for="fecha-reserva" class="block text-brand-cream/80 text-xs font-semibold font-sans mb-1.5">
                         Fecha preferida
                       </label>
-                      <input
-                        id="fecha-reserva"
-                        v-model="fechaReserva"
-                        type="date"
-                        :min="fechaMinima"
-                        class="w-full min-h-11 rounded-lg border border-brand-cream/15 bg-brand-dark/60 px-3 py-2.5 text-sm text-brand-cream font-sans focus:outline-none focus:border-[#25D366]/70 focus:ring-1 focus:ring-[#25D366]/30"
-                      />
                     </div>
                     <div>
                       <label for="cantidad-personas" class="block text-brand-cream/80 text-xs font-semibold font-sans mb-1.5">
                         Cantidad de personas
                       </label>
-                      <input
-                        id="cantidad-personas"
-                        v-model.number="cantidadPersonas"
-                        type="number"
-                        min="1"
-                        :max="cantidadMaxima"
-                        class="w-full min-h-11 rounded-lg border border-brand-cream/15 bg-brand-dark/60 px-3 py-2.5 text-sm text-brand-cream font-sans focus:outline-none focus:border-[#25D366]/70 focus:ring-1 focus:ring-[#25D366]/30"
-                      />
                       <span v-if="tour.cupoMax" class="block text-brand-cream/45 text-[11px] font-sans mt-1">
                         Cupo máximo: {{ tour.cupoMax }} personas
                       </span>
@@ -426,12 +437,16 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                     <div>
                       <label for="fecha-reserva-final" class="block text-brand-cream/80 text-xs font-semibold font-sans mb-1.5">Fecha preferida</label>
-                      <input id="fecha-reserva-final" v-model="fechaReserva" type="date" :min="fechaMinima" class="w-full min-h-11 rounded-lg border border-brand-cream/15 bg-brand-dark/60 px-3 py-2.5 text-sm text-brand-cream font-sans focus:outline-none focus:border-[#25D366]/70" />
+                      <DatePicker id="fecha-reserva-final" v-model="fechaReserva" :min-date="fechaMinima" />
                     </div>
                     <div>
                       <label for="cantidad-personas-final" class="block text-brand-cream/80 text-xs font-semibold font-sans mb-1.5">Cantidad de personas</label>
-                      <input id="cantidad-personas-final" v-model.number="cantidadPersonas" type="number" min="1" :max="cantidadMaxima" class="w-full min-h-11 rounded-lg border border-brand-cream/15 bg-brand-dark/60 px-3 py-2.5 text-sm text-brand-cream font-sans focus:outline-none focus:border-[#25D366]/70" />
-                      <span v-if="tour.cupoMax" class="block text-brand-cream/45 text-[11px] font-sans mt-1">Cupo máximo: {{ tour.cupoMax }} personas</span>
+                      <div id="cantidad-personas-final" class="flex min-h-12 items-center overflow-hidden rounded-lg border border-brand-cream/15 bg-brand-dark/60 transition-colors focus-within:border-[#25D366]/70 focus-within:ring-1 focus-within:ring-[#25D366]/30" role="group" aria-label="Cantidad de personas">
+                        <button type="button" class="flex h-12 w-12 shrink-0 items-center justify-center border-r border-brand-cream/10 text-xl text-brand-cream/80 transition-colors hover:bg-brand-cream/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30" :disabled="cantidadPersonas <= 1" aria-label="Disminuir cantidad de personas" @click="ajustarCantidad(-1)">−</button>
+                        <output class="flex-1 text-center text-base font-semibold text-brand-cream" aria-live="polite" :aria-label="`${cantidadPersonas} ${cantidadPersonas === 1 ? 'persona' : 'personas'}`">{{ cantidadPersonas }}</output>
+                        <button type="button" class="flex h-12 w-12 shrink-0 items-center justify-center border-l border-brand-cream/10 text-xl text-brand-cream/80 transition-colors hover:bg-brand-cream/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30" :disabled="cantidadPersonas >= cantidadMaxima" aria-label="Aumentar cantidad de personas" @click="ajustarCantidad(1)">+</button>
+                      </div>
+                      <span class="block text-brand-cream/45 text-[11px] font-sans mt-1">Hasta {{ cantidadMaxima }} personas</span>
                     </div>
                   </div>
                 </div>

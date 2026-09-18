@@ -1,36 +1,70 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { testimonios } from '../data/testimonios.js'
 import TestimonialCollageCard from '../components/TestimonialCollageCard.vue'
 
-// Fotos de fondo decorativas por testimonio (fotos con "grupo/gente" en el nombre)
+// Fotos de fondo por testimonio (imágenes con "grupo/gente" en el nombre)
 const fondosTestimonios = [
   '/assets/tours/champaqui/grupo-nieve-altura.webp',
   '/assets/tours/pueblo-escondido/gente-bandera-puebloescondido.webp',
-  '/assets/tours/pueblo-escondido/gente-bandera-cruz.webp'
+  '/assets/tours/pueblo-escondido/gente-bandera-cruz.webp',
+  '/assets/tours/Cumbrecitariosubtecascada/grupo-bañandose.webp',
+  '/assets/tours/quebrada-yatan/grupo-cascada.webp',
+  '/assets/tours/champaqui/champa -nievegrupo.webp',
+  '/assets/tours/quebrada-yatan/grupo-noche-descanso.webp',
+  '/assets/tours/Cumbrecitariosubtecascada/grupo-enorme.webp'
 ]
-
-// El primer testimonio se muestra como card destacada del collage
-const [destacada, ...compactos] = testimonios
 
 const sectionRef = ref(null)
 const isVisible = ref(false)
 let observer = null
+let visibilityFallback = null
 
 onMounted(() => {
   observer = new IntersectionObserver(
     ([entry]) => {
       if (entry.isIntersecting) {
         isVisible.value = true
+        clearTimeout(visibilityFallback)
         observer.disconnect()
       }
     },
     { threshold: 0.15 }
   )
   if (sectionRef.value) observer.observe(sectionRef.value)
+
+  // Evita que la sección quede oculta si el observer no dispara.
+  visibilityFallback = window.setTimeout(() => {
+    isVisible.value = true
+    observer?.disconnect()
+  }, 1500)
 })
 
-onUnmounted(() => observer?.disconnect())
+onUnmounted(() => {
+  observer?.disconnect()
+  clearTimeout(visibilityFallback)
+})
+
+// Carga progresiva: primero 5, luego duplica el lote (5 → 10 → ...)
+const INICIAL = 5
+const limiteVisible = ref(INICIAL)
+
+const visibles = computed(() => testimonios.slice(0, limiteVisible.value))
+const hayMas = computed(() => limiteVisible.value < testimonios.length)
+const restantes = computed(() => testimonios.length - limiteVisible.value)
+
+// Materiales variados de fondo para tarjetas repetidas al duplicar
+function fondoPara(index) {
+  return fondosTestimonios[index % fondosTestimonios.length]
+}
+
+function verMas() {
+  if (hayMas.value) {
+    limiteVisible.value = Math.min(limiteVisible.value * 2, testimonios.length)
+  } else {
+    limiteVisible.value = INICIAL
+  }
+}
 </script>
 
 <template>
@@ -61,34 +95,34 @@ onUnmounted(() => observer?.disconnect())
         <div class="h-1 w-20 bg-gradient-to-r from-brand-orange to-brand-gold mx-auto"></div>
       </div>
 
-      <!-- Collage asimétrico -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6 items-stretch">
-        <!-- Card destacada: 2 columnas en desktop -->
-        <div
-          class="md:col-span-2 transition-all duration-700"
-          :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
-          style="transition-delay: 200ms"
-        >
-          <TestimonialCollageCard
-            :testimonio="destacada"
-            :imagen-fondo="fondosTestimonios[0]"
-            destacada
-          />
-        </div>
-
-        <!-- Cards compactas -->
-        <div
-          v-for="(testimonio, index) in compactos"
+      <!-- Masonry de testimonios -->
+      <div class="columns-1 sm:columns-2 md:columns-3">
+        <TestimonialCollageCard
+          v-for="(testimonio, index) in visibles"
           :key="testimonio.nombre"
-          class="transition-all duration-700"
+          :testimonio="testimonio"
+          :imagen-fondo="fondoPara(index)"
           :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
-          :style="{ transitionDelay: `${350 + (index + 1) * 150}ms` }"
+          class="transition-all duration-700"
+          :style="{ transitionDelay: `${150 + (index % INICIAL) * 120}ms` }"
+        />
+      </div>
+
+      <!-- Ver más / Ver menos -->
+      <div v-if="testimonios.length > INICIAL" class="flex justify-center mt-4">
+        <button
+          type="button"
+          @click="verMas"
+          class="min-h-11 inline-flex items-center gap-2 px-6 py-2.5 rounded-full font-sans text-sm font-semibold transition-all duration-300 active:scale-95"
+          :class="hayMas
+            ? 'bg-brand-card border border-brand-cream/15 text-brand-cream hover:border-brand-orange/40 hover:text-brand-cream'
+            : 'bg-brand-orange text-brand-white shadow-md shadow-brand-orange/25 hover:bg-brand-gold'"
         >
-          <TestimonialCollageCard
-            :testimonio="testimonio"
-            :imagen-fondo="fondosTestimonios[index + 1] || fondosTestimonios[0]"
-          />
-        </div>
+          <svg class="w-4 h-4" :class="hayMas ? '' : 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+          {{ hayMas ? `Ver más testimonios (quedan ${restantes})` : 'Mostrar menos' }}
+        </button>
       </div>
     </div>
   </section>

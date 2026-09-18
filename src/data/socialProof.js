@@ -10,7 +10,7 @@ export const stats = [
 ]
 
 export const badges = [
-  { icono: 'guia', label: 'Prestador habilitado' },
+  { icono: 'guia', label: 'Prestador habilitado', target: 'acreditacion' },
   { icono: 'seguro', label: 'Seguro médico incluido' },
   { icono: 'radio', label: 'Comunicación VHF' }
 ]

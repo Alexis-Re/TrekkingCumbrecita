@@ -8,6 +8,8 @@ import { crearConsultaTour } from '../utils/whatsapp.js'
 
 const scrollContainer = ref(null)
 const selectedTour = ref(null)
+const canScrollLeft = ref(false)
+const canScrollRight = ref(true)
 
 const sectionRef = ref(null)
 const isVisible = ref(false)
@@ -24,6 +26,7 @@ onMounted(() => {
     { threshold: 0.15 }
   )
   if (sectionRef.value) observer.observe(sectionRef.value)
+  requestAnimationFrame(updateScrollState)
 })
 
 onUnmounted(() => observer?.disconnect())
@@ -66,6 +69,13 @@ const scroll = (direction) => {
   const gap = 24
   scrollContainer.value.scrollBy({ left: direction * (cardWidth + gap), behavior: 'smooth' })
 }
+
+const updateScrollState = () => {
+  if (!scrollContainer.value) return
+  const { scrollLeft, scrollWidth, clientWidth } = scrollContainer.value
+  canScrollLeft.value = scrollLeft > 4
+  canScrollRight.value = scrollLeft + clientWidth < scrollWidth - 4
+}
 </script>
 
 <template>
@@ -99,6 +109,7 @@ const scroll = (direction) => {
         <!-- Navigation arrows -->
         <button
           @click="scroll(-1)"
+           v-if="canScrollLeft"
           aria-label="Experiencia anterior"
           class="absolute left-0 md:-left-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-brand-cream/10 backdrop-blur-sm border border-brand-cream/10 flex items-center justify-center text-brand-cream opacity-60 md:opacity-0 md:group-hover/nav:opacity-100 hover:bg-brand-orange hover:border-brand-orange hover:text-brand-white active:scale-95 transition-all duration-300"
         >
@@ -108,6 +119,7 @@ const scroll = (direction) => {
         </button>
         <button
           @click="scroll(1)"
+           v-if="canScrollRight"
           aria-label="Experiencia siguiente"
           class="absolute right-0 md:-right-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-brand-cream/10 backdrop-blur-sm border border-brand-cream/10 flex items-center justify-center text-brand-cream opacity-60 md:opacity-0 md:group-hover/nav:opacity-100 hover:bg-brand-orange hover:border-brand-orange hover:text-brand-white active:scale-95 transition-all duration-300"
         >
@@ -118,12 +130,13 @@ const scroll = (direction) => {
 
         <div
           ref="scrollContainer"
-          class="flex items-start gap-5 md:gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-6 scrollbar-hide"
+          @scroll="updateScrollState"
+           class="flex items-stretch gap-5 md:gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-6 scrollbar-hide"
         >
           <article
             v-for="tour in toursOrdenados"
             :key="tour.slug"
-            class="w-[85vw] sm:w-[80vw] md:w-[calc((100%-2rem)/3)] snap-start flex-shrink-0 bg-brand-card rounded-2xl overflow-hidden group transition-all duration-300 border border-brand-cream/15 hover:border-brand-cream/25 hover:shadow-lg hover:shadow-brand-orange/10"
+            class="h-full w-[85vw] sm:w-[80vw] md:w-[calc((100%-2rem)/3)] snap-start flex-shrink-0 flex flex-col bg-brand-card rounded-2xl overflow-hidden group transition-all duration-300 border border-brand-cream/15 hover:border-brand-cream/25 hover:shadow-lg hover:shadow-brand-orange/10"
           >
             <!-- Image -->
             <div class="relative aspect-video overflow-hidden">
@@ -164,12 +177,12 @@ const scroll = (direction) => {
             </div>
 
             <!-- Content -->
-            <div class="p-5">
-              <h3 class="font-heading text-xl md:text-2xl text-brand-white mb-3 leading-tight">
+            <div class="flex flex-1 flex-col p-5">
+              <h3 class="min-h-14 font-heading text-xl md:text-2xl text-brand-white mb-3 leading-tight">
                 {{ tour.nombre }}
               </h3>
 
-              <div v-if="!esDefinir(tour)" class="flex items-center gap-1 mb-4 text-sm text-brand-cream/60 font-sans">
+              <div v-if="!esDefinir(tour)" class="min-h-10 line-clamp-2 flex items-start gap-1 mb-4 text-sm text-brand-cream/60 font-sans">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 text-brand-cream/40">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                 </svg>
@@ -179,13 +192,26 @@ const scroll = (direction) => {
               <div v-if="!esDefinir(tour)" class="mb-5">
                 <div class="flex items-baseline gap-2">
                   <span class="text-brand-cream/90 font-heading text-2xl">
-                    {{ formatPrecio(tour.precio) }}
+                    {{ formatPrecio(tour.precio) || 'Consultar precio' }}
                   </span>
                   <span class="text-brand-cream/50 text-xs font-sans">por persona</span>
                 </div>
-                <p v-if="tour.precioDetalle" class="text-brand-cream/50 text-xs font-sans mt-1">
+                <p v-if="tour.precioDetalle" class="line-clamp-2 text-brand-cream/50 text-xs font-sans mt-1">
                   {{ tour.precioDetalle }}
                 </p>
+                <a
+                  v-if="!esDefinir(tour)"
+                  :href="crearConsultaTour(tour)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  :aria-label="`Consultar por WhatsApp sobre ${tour.nombre}`"
+                  class="mt-2 flex min-h-8 w-full items-center justify-center rounded-lg bg-[#25D366]/80 px-3 py-1.5 text-center text-xs font-semibold leading-tight text-white shadow-sm shadow-[#25D366]/15 transition-all duration-300 hover:bg-[#1ebe5d]"
+                >
+                  <span>Consultar por este recorrido</span>
+                  <svg class="ml-1.5 h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.198.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.347-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884"/>
+                  </svg>
+                </a>
               </div>
 
               <button
@@ -196,13 +222,14 @@ const scroll = (direction) => {
                 Conocer la experiencia
               </button>
               <a
-                v-if="!esDefinir(tour)"
+                v-if="false"
                 :href="crearConsultaTour(tour)"
                 target="_blank"
                 rel="noopener noreferrer"
                 :aria-label="`Consultar por WhatsApp sobre ${tour.nombre}`"
-                class="mx-auto mt-3 flex h-11 w-11 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg shadow-[#25D366]/15 transition-all duration-300 hover:scale-110 hover:bg-[#1ebe5d]"
+                class="hidden"
               >
+                <span>Consultar por este recorrido</span>
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.198.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884"/>
                 </svg>

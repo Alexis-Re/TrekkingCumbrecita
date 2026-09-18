@@ -18,21 +18,33 @@ export const testimonios = [
     foto: '/assets/brand/pasiaje-grupo.webp'
   },
   {
-    texto: 'El Río Subterráneo fue una aventura distinta a todo lo que había hecho. La organización y la seguridad del grupo fueron excelentes.',
-    nombre: 'Lucas M.',
+    texto: 'El baño en la cascada después de la caminata no tiene precio. Salimos encantados y con ganas de volver.',
+    nombre: 'Lucía y Fede M.',
     trekking: 'Río Subterráneo y Cascada Escondida',
-    foto: '/assets/tours/Cumbrecitariosubtecascada/grupo-piedras-baño.webp'
+    foto: '/assets/tours/Cumbrecitariosubtecascada/grupo-saltando.webp'
   },
   {
-    texto: 'Pasar dos días en la montaña, caminar entre las sierras y compartir la noche con el grupo fue exactamente la desconexión que necesitaba.',
-    nombre: 'Sofía P.',
-    trekking: 'Los Gigantes + Cerro Mogote + Los Cajones',
-    foto: '/assets/tours/los-gigantes-cerro-mogote-cajones/grupo-lagunita.webp'
-  },
-  {
-    texto: 'La Quebrada del Yatán tiene paisajes increíbles. Rober conoce el camino, está atento a cada persona y hace que disfrutes todo el recorrido.',
-    nombre: 'Diego F.',
+    texto: 'Dos días de paisajes increíbles. La organización es impecable: se nota la experiencia y el cuidado por el grupo.',
+    nombre: 'Martín P.',
     trekking: 'La Quebrada del Yatán',
-    foto: '/assets/tours/quebrada-yatan/grupo-cascada.webp'
+    foto: '/assets/tours/quebrada-yatan/grupo-descanso.webp'
+  },
+  {
+    texto: 'Fuimos con compañeros del colegio y fue inolvidable. La cena en el refugio con la cumbre nevada de fondo, un recuerdo para siempre.',
+    nombre: 'Sofía H.',
+    trekking: 'Circuito La Cumbrecita',
+    foto: '/assets/tours/champaqui/grupo-bandera-champa (2).webp'
+  },
+  {
+    texto: 'La travesía de Los Gigantes fue un desafío hermoso. Siempre nos sentimos acompañados y los kilómetros se pasan volando.',
+    nombre: 'Diego V.',
+    trekking: 'Los Gigantes + Cerro Mogote + Los Cajones',
+    foto: '/assets/tours/quebrada-yatan/rober-campana-grupo.webp'
+  },
+  {
+    texto: 'Nunca pensé que iba a llegar a una cumbre de casi 2.800 metros. Con el apoyo del guía se logra todo. Gracias por tanto.',
+    nombre: 'Julieta S.',
+    trekking: 'La Salida del Cruce',
+    foto: '/assets/tours/Cumbrecitariosubtecascada/grupo-montaña.webp'
   }
 ]

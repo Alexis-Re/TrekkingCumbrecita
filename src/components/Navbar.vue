@@ -1,9 +1,12 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 
 const scrolled = ref(false)
 const mobileOpen = ref(false)
 const activeSection = ref('')
+const menuButton = ref(null)
+const firstMenuLink = ref(null)
+let sectionObserver
 
 const links = [
   { label: 'Experiencias', href: '#tours' },
@@ -14,16 +17,6 @@ const links = [
 
 function handleScroll() {
   scrolled.value = window.scrollY > 50
-
-  const sections = ['tours', 'identity', 'gallery', 'contacto']
-  for (const id of [...sections].reverse()) {
-    const el = document.getElementById(id)
-    if (el && el.getBoundingClientRect().top <= 150) {
-      activeSection.value = id
-      return
-    }
-  }
-  activeSection.value = ''
 }
 
 function scrollToTop() {
@@ -41,6 +34,12 @@ function scrollTo(href) {
 function toggleMobile() {
   mobileOpen.value = !mobileOpen.value
   document.body.style.overflow = mobileOpen.value ? 'hidden' : ''
+
+  if (mobileOpen.value) {
+    nextTick(() => firstMenuLink.value?.focus())
+  } else {
+    menuButton.value?.focus()
+  }
 }
 
 function closeMobile() {
@@ -55,27 +54,45 @@ function onKeydown(e) {
 onMounted(() => {
   window.addEventListener('scroll', handleScroll, { passive: true })
   document.addEventListener('keydown', onKeydown)
+  sectionObserver = new IntersectionObserver(
+    (entries) => {
+      const visible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+
+      if (visible[0]) activeSection.value = visible[0].target.id
+    },
+    { rootMargin: '-18% 0px -62% 0px', threshold: 0 },
+  )
+
+  for (const id of ['tours', 'identity', 'gallery', 'contacto']) {
+    const section = document.getElementById(id)
+    if (section) sectionObserver.observe(section)
+  }
+
   handleScroll()
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
   document.removeEventListener('keydown', onKeydown)
+  sectionObserver?.disconnect()
   document.body.style.overflow = ''
 })
 </script>
 
 <template>
   <nav
+    aria-label="Navegación principal"
     class="fixed inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)] transition-all duration-300"
     :class="scrolled
-      ? 'bg-brand-dark backdrop-blur-sm shadow-lg shadow-brand-dark/50'
-      : 'bg-transparent'"
+      ? 'bg-brand-dark/95 backdrop-blur-md shadow-lg shadow-brand-dark/50'
+      : 'bg-gradient-to-b from-brand-dark/60 to-transparent'"
   >
-    <div class="max-w-7xl mx-auto pl-3 pr-3 lg:pl-12 lg:pr-10 flex items-center justify-between min-h-16 md:min-h-[80px]">
+    <div class="max-w-7xl mx-auto pl-3 pr-3 lg:pl-12 lg:pr-10 flex items-center justify-between min-h-16 md:min-h-[80px] transition-[min-height] duration-300" :class="scrolled ? 'md:min-h-[68px]' : ''">
 
       <!-- Logo -->
-      <a href="#" @click.prevent="scrollToTop" class="flex items-center gap-2 shrink-0">
+      <a href="#" @click.prevent="scrollToTop" class="flex items-center gap-2 shrink-0" aria-label="Ir al inicio">
         <img
           src="/assets/navbar/logoTC.webp"
           alt="Trekking Cumbrecita"
@@ -84,13 +101,14 @@ onUnmounted(() => {
       </a>
 
       <!-- Desktop links -->
-      <div class="hidden md:flex items-center gap-8">
+      <div class="hidden md:flex items-center gap-6 lg:gap-8">
         <a
           v-for="link in links"
           :key="link.label"
           :href="link.href"
           :target="link.external ? '_blank' : undefined"
           :rel="link.external ? 'noopener noreferrer' : undefined"
+          :aria-current="activeSection === link.href?.slice(1) ? 'location' : undefined"
           class="relative font-sans text-sm tracking-wide uppercase transition-colors duration-300 py-1"
           :class="[
             !link.external && activeSection === link.href?.slice(1)
@@ -105,10 +123,12 @@ onUnmounted(() => {
             class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-orange to-brand-gold rounded-full"
           ></span>
         </a>
+
       </div>
 
       <!-- Mobile hamburger -->
       <button
+        ref="menuButton"
         @click="toggleMobile"
         class="md:hidden relative w-11 h-11 flex flex-col items-center justify-center gap-1.5 rounded-full border border-brand-cream/30 bg-brand-dark/40 backdrop-blur-sm active:scale-95 transition-transform duration-200"
         :aria-label="mobileOpen ? 'Cerrar menú' : 'Abrir menú'"
@@ -148,14 +168,18 @@ onUnmounted(() => {
       <div
         v-if="mobileOpen"
         id="mobile-menu"
+        role="dialog"
+        aria-label="Menú de navegación"
         class="relative z-50 md:hidden bg-brand-dark/95 backdrop-blur-md border-t border-brand-cream/10 rounded-b-2xl shadow-2xl shadow-brand-dark/50 px-6 pt-2 pb-7"
       >
         <a
           v-for="(link, i) in links"
           :key="link.label"
+          :ref="i === 0 ? firstMenuLink : undefined"
           :href="link.href"
           :target="link.external ? '_blank' : undefined"
           :rel="link.external ? 'noopener noreferrer' : undefined"
+          :aria-current="activeSection === link.href?.slice(1) ? 'location' : undefined"
           class="block min-h-12 py-3.5 font-sans text-base tracking-wide uppercase rounded-lg transition-colors duration-300 active:bg-brand-cream/10"
           :class="[
             i > 0 ? 'border-t border-brand-cream/10' : '',
@@ -168,14 +192,6 @@ onUnmounted(() => {
         >
           {{ link.label }}
         </a>
-
-        <button
-          @click="scrollTo('#contacto')"
-          :style="{ animationDelay: `${links.length * 60}ms` }"
-          class="w-full mt-5 px-8 py-3.5 bg-brand-orange/90 text-brand-white font-semibold rounded-lg shadow-lg shadow-brand-orange/25 active:bg-brand-orange active:scale-[0.98] transition-all duration-300 text-base"
-        >
-          Consultar disponibilidad
-        </button>
 
         <!-- Redes sociales -->
         <div class="flex justify-center gap-4 mt-5" :style="{ animationDelay: `${(links.length + 1) * 60}ms` }">
@@ -222,6 +238,14 @@ onUnmounted(() => {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #mobile-menu a,
+  #mobile-menu button,
+  #mobile-menu > div {
+    animation: none;
   }
 }
 </style>
