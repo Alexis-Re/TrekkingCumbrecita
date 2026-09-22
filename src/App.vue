@@ -2,6 +2,7 @@
 import Navbar from './components/Navbar.vue'
 import Hero from './sections/Hero.vue'
 import Tours from './sections/Tours.vue'
+import Documentacion from './sections/Documentacion.vue'
 import Identity from './sections/Identity.vue'
 import Testimonials from './sections/Testimonials.vue'
 import Gallery from './sections/Gallery.vue'
@@ -17,6 +18,8 @@ import MountainDivider from './components/MountainDivider.vue'
     <Navbar />
     <Hero />
     <Tours />
+    <MountainDivider color="brand-dark" />
+    <Documentacion />
     <MountainDivider color="brand-dark" />
     <Identity />
     <MountainDivider color="brand-dark" flip />

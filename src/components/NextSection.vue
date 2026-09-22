@@ -6,17 +6,18 @@ const nextSection = ref(null)
 let sections = []
 
 function updateNextSection() {
-  if (!sections.length) return
+  if (!sections.length || window.scrollY <= 100) {
+    nextSection.value = null
+    visible.value = false
+    return
+  }
 
   const marker = 120
-  let currentIndex = -1
+  const currentIndex = sections.reduce((lastIndex, section, index) => {
+    return section.getBoundingClientRect().top <= marker ? index : lastIndex
+  }, 0)
 
-  sections.forEach((section, index) => {
-    if (section.getBoundingClientRect().top <= marker) currentIndex = index
-  })
-
-  const hasNextSection = window.scrollY > 100 && currentIndex >= 0 && currentIndex < sections.length - 1
-  nextSection.value = hasNextSection ? sections[currentIndex + 1] : null
+  nextSection.value = sections[currentIndex + 1] || null
   visible.value = Boolean(nextSection.value)
 }
 
@@ -26,7 +27,7 @@ function scrollToNextSection() {
 
 onMounted(() => {
   sections = [...document.querySelectorAll('section')]
-  updateNextSection()
+  requestAnimationFrame(updateNextSection)
   window.addEventListener('scroll', updateNextSection, { passive: true })
   window.addEventListener('resize', updateNextSection)
 })

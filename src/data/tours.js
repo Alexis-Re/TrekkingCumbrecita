@@ -31,8 +31,39 @@ const cumbrecitaGaleria = [
 ]
 
 const cumbrecitaGaleriaAlternativa = reordenarGaleria(cumbrecitaGaleria, 4, true)
+  .filter((_, index) => index !== 4)
 const cumbrecitaGaleriaCorona = reordenarGaleria(cumbrecitaGaleria, 7)
 const cumbrecitaGaleriaCircuito = reordenarGaleria(cumbrecitaGaleria, 2, true)
+
+const lagunitaGaleria = [
+  '/assets/tours/circuito-cumbrecita-lagunita-ventana-garganta/01-construccion-monta-a.webp',
+  '/assets/tours/circuito-cumbrecita-lagunita-ventana-garganta/02-desde-dentro.webp',
+  '/assets/tours/circuito-cumbrecita-lagunita-ventana-garganta/03-gente-babndera-desdearriba.webp',
+  '/assets/tours/circuito-cumbrecita-lagunita-ventana-garganta/04-gente-bandera.webp',
+  '/assets/tours/circuito-cumbrecita-lagunita-ventana-garganta/05-gente-lagunita.webp',
+  '/assets/tours/circuito-cumbrecita-lagunita-ventana-garganta/06-gente-saludando-lagunita.webp',
+  '/assets/tours/circuito-cumbrecita-lagunita-ventana-garganta/07-grupo-cascada-lagunita.webp',
+  '/assets/tours/circuito-cumbrecita-lagunita-ventana-garganta/08-grupo-lagunita.webp',
+  '/assets/tours/circuito-cumbrecita-lagunita-ventana-garganta/09-lagunita-persona.webp',
+  '/assets/tours/circuito-cumbrecita-lagunita-ventana-garganta/10-rober-entrepiedras.webp',
+  '/assets/tours/circuito-cumbrecita-lagunita-ventana-garganta/11-vista-lateral.webp',
+  '/assets/tours/circuito-cumbrecita-lagunita-ventana-garganta/12-vista-piedra.webp'
+]
+
+const travesiaCumbrecitaVillaAlpinaGaleria = [
+  '/assets/tours/travesia-cumbrecita-villa-alpina/02-bandera-grupo.webp',
+  '/assets/tours/travesia-cumbrecita-villa-alpina/03-caba-a-1.webp',
+  '/assets/tours/travesia-cumbrecita-villa-alpina/04-caba-a-2.webp',
+  '/assets/tours/travesia-cumbrecita-villa-alpina/05-caba-a-3.webp',
+  '/assets/tours/travesia-cumbrecita-villa-alpina/06-grupo-cascadainterna.webp',
+  '/assets/tours/travesia-cumbrecita-villa-alpina/07-grupo-subterraneo.webp',
+  '/assets/tours/travesia-cumbrecita-villa-alpina/08-grupoe-subte.webp',
+  '/assets/tours/travesia-cumbrecita-villa-alpina/09-laguna.webp',
+  '/assets/tours/travesia-cumbrecita-villa-alpina/10-llocaba-llano.webp',
+  '/assets/tours/travesia-cumbrecita-villa-alpina/11-pareja-lagunita.webp',
+  '/assets/tours/travesia-cumbrecita-villa-alpina/12-rober-bandera-complejo.webp',
+  '/assets/tours/travesia-cumbrecita-villa-alpina/13-rober-pareja-cascada.webp'
+]
 
 const champaquiGaleria = [
   '/assets/tours/champaqui/grupo-bandera-champa.webp',
@@ -68,6 +99,21 @@ const yatanGaleria = [
   '/assets/tours/quebrada-yatan/noche-casapiedra.webp',
   '/assets/tours/quebrada-yatan/paisaje.webp',
   '/assets/tours/quebrada-yatan/rober-campana-grupo.webp'
+]
+
+const excursionNocturnaGaleria = [
+  '/assets/tours/excursion-nocturna-cumbrecita-villa-alpina/01-img-20211125-222327623-hdr.webp',
+  '/assets/tours/excursion-nocturna-cumbrecita-villa-alpina/02-img-20170811-wa0029.webp',
+  '/assets/tours/excursion-nocturna-cumbrecita-villa-alpina/03-img-20251207-wa0003.webp',
+  '/assets/tours/excursion-nocturna-cumbrecita-villa-alpina/04-img-20251207-wa0005.webp',
+  '/assets/tours/excursion-nocturna-cumbrecita-villa-alpina/05-img-20260106-wa0002.webp',
+  '/assets/tours/excursion-nocturna-cumbrecita-villa-alpina/06-img-20260106-wa0003.webp',
+  '/assets/tours/excursion-nocturna-cumbrecita-villa-alpina/07-img-20260106-wa0009.webp',
+  '/assets/tours/excursion-nocturna-cumbrecita-villa-alpina/08-img-20260106-wa0030.webp',
+  '/assets/tours/excursion-nocturna-cumbrecita-villa-alpina/09-img-20260106-wa0033.webp',
+  '/assets/tours/excursion-nocturna-cumbrecita-villa-alpina/10-img-20260106-wa0036.webp',
+  '/assets/tours/excursion-nocturna-cumbrecita-villa-alpina/11-img-20260106-wa0039.webp',
+  '/assets/tours/excursion-nocturna-cumbrecita-villa-alpina/12-img-20260616-wa0016.webp'
 ]
 
 const salidaDelCruceGaleria = [
@@ -166,7 +212,7 @@ export const tours = [
   },
   {
     ...rioSubterraneoInfo,
-    nombre: 'La Cumbrecita: Cascadas Salvajes + Río Subterráneo',
+    nombre: 'La Cumbrecita: Wild Waterfalls + Río Subterráneo',
     duracion: '7 hs',
     dificultad: 'Media',
     terreno: 'Media',
@@ -177,7 +223,6 @@ export const tours = [
     slug: 'cascadas-salvajes-rio-subterraneo',
     imagenes: cumbrecitaGaleriaAlternativa,
     horarios: 'Sábados, domingos y feriados · Salida 08:30 · Inicio 08:45',
-    incluye: [],
     requisitos: [
       'Edad de 12 a 60 años con buen estado físico',
       'Mayores de 60 años: entrenamiento excelente',
@@ -196,22 +241,21 @@ export const tours = [
     itinerario: [
       {
         dia: 1,
-        titulo: 'Wilds Waterfalls: cascadas salvajes y Río Subterráneo',
+        titulo: 'Wild Waterfalls + Río Subterráneo',
         horas: [
-          { hora: '08:30', evento: 'Salida desde la Panadería de La Cumbrecita' },
-          { hora: '08:45', evento: 'Inicio de la actividad' },
-          { hora: '—', evento: 'Recorrido por el Cerro Wank y el Río Subterráneo' },
-          { hora: '—', evento: 'Visita a las cascadas de la Novia, El Tabaquillo, El Abedul, del Claro y Las Dos Rocas' },
-          { hora: '—', evento: 'Vista panorámica de la Cascada Abanico' },
-          { hora: '—', evento: 'Regreso por la Iglesia de la Gruta y la Plaza de Doña Victoria Giménez' },
-          { hora: '15:45', evento: 'Fin aproximado de la actividad' }
+          { hora: '08:45', evento: 'Salida desde la Panadería de La Cumbrecita' },
+          { hora: '09:45', evento: 'Recorrido por el Cerro Wank y el Río Subterráneo' },
+          { hora: '12:30', evento: 'Visita a las cascadas de la Novia, El Tabaquillo, El Abedul, del Claro y Las Dos Rocas' },
+          { hora: '14:00', evento: 'Vista panorámica de la Cascada Abanico' },
+          { hora: '15:45', evento: 'Regreso por la Iglesia de la Gruta y la Plaza de Doña Victoria Giménez' },
+          { hora: '16:30', evento: 'Fin aproximado de la actividad' }
         ]
       }
     ],
     reunion: 'Panadería de La Cumbrecita'
   },
   {
-    nombre: 'Ascenso al Cerro Tradicional Champaquí',
+    nombre: 'ACENSO AL CERRO CHAMPAQUI',
     duracion: '3 días / 2 noches',
     dificultad: 'Alta',
     terreno: null,
@@ -222,6 +266,11 @@ export const tours = [
     imagen: champaquiGaleria[11],
     slug: 'champaqui',
     imagenes: champaquiGaleria,
+    video: {
+      tipo: 'local',
+      src: '/assets/tours/champaqui/cerro-champaqui.mp4',
+      poster: champaquiGaleria[11]
+    },
     horarios: 'Viernes, Sábado, Domingo y Feriados',
     incluye: [
       'Refugio de montaña',
@@ -229,6 +278,9 @@ export const tours = [
       'Seguro y guía habilitado',
       'Caballo de rescate en caso de esguince',
       'Comunicación por radio VHF'
+    ],
+    equipamiento: [
+      'Bolsa de dormir'
     ],
     itinerario: [
       {
@@ -386,9 +438,10 @@ export const tours = [
         titulo: 'Camino del Peregrino y cascadas secretas',
         horas: [
           { hora: '08:00', evento: 'Encuentro en el Parador El Cóndor, Altas Cumbres' },
-          { hora: '—', evento: 'Traslado por el Camino del Peregrino hasta los puestos serranos' },
-          { hora: '—', evento: 'Trekking por cascadas escondidas, ollas naturales y puestos serranos abandonados' },
-          { hora: '—', evento: 'Recorrido de aproximadamente 10 km entre ida y vuelta' },
+          { hora: '09:20', evento: 'Traslado por el Camino del Peregrino hasta los puestos serranos' },
+          { hora: '10:00', evento: 'Trekking por cascadas escondidas, ollas naturales y puestos serranos abandonados' },
+          { hora: '12:00', evento: 'Recorrido de aproximadamente 10 km entre ida y vuelta' },
+          { hora: '13:30', evento: 'Almuerzo' },
           { hora: '—', evento: 'Merienda, cena y alojamiento' }
         ]
       },
@@ -396,49 +449,15 @@ export const tours = [
         dia: 2,
         titulo: 'Cajones de Achala y Cerro Mogote',
         horas: [
-          { hora: '—', evento: 'Desayuno' },
-          { hora: '—', evento: 'Trekking por los Cajones de Achala y el Cerro Mogote' },
-          { hora: '—', evento: 'Vianda de marcha' },
-          { hora: '—', evento: 'Merienda y regreso al finalizar la actividad' }
+          { hora: '07:30', evento: 'Desayuno' },
+          { hora: '08:30', evento: 'Inicio del trekking por los Cajones de Achala y el Cerro Mogote' },
+          { hora: '11:00', evento: 'Llegada al Cerro Mogote y vianda de marcha' },
+          { hora: '13:30', evento: 'Recorrido por los Cajones de Achala' },
+          { hora: '16:00', evento: 'Regreso al refugio' }
         ]
       }
     ],
     reunion: 'Parador el Cóndor Altas Cumbres'
-  },
-  {
-    nombre: 'La Quebrada del Yatán',
-    duracion: '2 días / 1 noche',
-    dificultad: 'Media',
-    terreno: 'Media',
-    distancia: 'Alta',
-    precio: 250000,
-    precioDetalle: null,
-    disponible: true,
-    imagen: '/assets/tours/quebrada-yatan/aguila-paisaje.webp',
-    slug: 'quebrada-yatan',
-    imagenes: [
-      '/assets/tours/quebrada-yatan/aguila-paisaje.webp',
-      '/assets/tours/quebrada-yatan/cascada.webp',
-      '/assets/tours/quebrada-yatan/grupo-cascada.webp',
-      '/assets/tours/quebrada-yatan/paisaje-nubebajita.webp',
-      '/assets/tours/quebrada-yatan/aguila-paisaje.webp',
-      '/assets/tours/quebrada-yatan/aguila.webp',
-      '/assets/tours/quebrada-yatan/cascada-paisaje.webp',
-      '/assets/tours/quebrada-yatan/cascada-verde.webp',
-      '/assets/tours/quebrada-yatan/casita-paisaje.webp',
-      '/assets/tours/quebrada-yatan/gente-cuevas.webp',
-      '/assets/tours/quebrada-yatan/grupo-descanso.webp',
-      '/assets/tours/quebrada-yatan/grupo-noche-descanso.webp',
-      '/assets/tours/quebrada-yatan/grupo.webp',
-      '/assets/tours/quebrada-yatan/hermosafoto.webp',
-      '/assets/tours/quebrada-yatan/noche-casapiedra.webp',
-      '/assets/tours/quebrada-yatan/paisaje.webp',
-      '/assets/tours/quebrada-yatan/rober-campana-grupo.webp'
-    ],
-    horarios: 'Sábados, domingos y feriados · 09:00',
-    incluye: [],
-    itinerario: [],
-    reunion: 'Casa de Rober Molina, La Cumbrecita'
   },
   {
     nombre: 'La Cumbrecita: Quebrada del Yatán + Paso de Garay',
@@ -446,8 +465,8 @@ export const tours = [
     dificultad: 'Media',
     terreno: 'Media',
     distancia: 'Alta',
-    precio: null,
-    precioDetalle: 'Consultar precio',
+    precio: 270000,
+    precioDetalle: null,
     disponible: true,
     imagen: yatanGaleria[1],
     slug: 'cumbrecita-quebrada-yatan-paso-garay',
@@ -562,9 +581,18 @@ export const tours = [
     precio: 470000,
     precioDetalle: null,
     disponible: true,
-    imagen: '/assets/tours/default.svg',
+     imagen: '/assets/tours/altas-cumbres-nacientes-mina-clavero/arco-piedra-grupo.webp',
     slug: 'altas-cumbres-nacientes-mina-clavero',
-    imagenes: [],
+    imagenes: [
+      '/assets/tours/altas-cumbres-nacientes-mina-clavero/tarucapampa.webp',
+      '/assets/tours/altas-cumbres-nacientes-mina-clavero/kayak.webp',
+      '/assets/tours/altas-cumbres-nacientes-mina-clavero/horno.webp',
+      '/assets/tours/altas-cumbres-nacientes-mina-clavero/gente-piedras-lago.webp',
+      '/assets/tours/altas-cumbres-nacientes-mina-clavero/kayak-rio-interno.webp',
+      '/assets/tours/altas-cumbres-nacientes-mina-clavero/cascada-interna.webp',
+      '/assets/tours/altas-cumbres-nacientes-mina-clavero/arco-piedra-grupo.webp',
+      '/assets/tours/altas-cumbres-nacientes-mina-clavero/arco-piedra-bandera.webp'
+    ],
     horarios: 'Viernes, sábados, domingos y feriados · 08:30',
     incluye: [],
     itinerario: [],
@@ -731,9 +759,9 @@ export const tours = [
     precio: 250000,
     precioDetalle: 'Próxima fecha a confirmar · 3 cuotas sin interés',
     disponible: true,
-    imagen: '/assets/tours/default.svg',
+    imagen: excursionNocturnaGaleria[1],
     slug: 'excursion-nocturna-cumbrecita-villa-alpina',
-    imagenes: [],
+    imagenes: excursionNocturnaGaleria,
     horarios: 'Consultar fecha · Salida 18:00',
     incluye: [
       'Guía habilitado',
@@ -829,9 +857,9 @@ export const tours = [
     precio: 250000,
     precioDetalle: 'Se reserva con seña del 50%',
     disponible: true,
-    imagen: '/assets/tours/default.svg',
+    imagen: travesiaCumbrecitaVillaAlpinaGaleria[11],
     slug: 'travesia-cumbrecita-villa-alpina',
-    imagenes: [],
+    imagenes: travesiaCumbrecitaVillaAlpinaGaleria,
     horarios: 'Consultar fechas y horarios',
     incluye: [
       '2 noches de albergue en Villa Alpina (luz por generador, agua caliente y baño)',
@@ -932,20 +960,52 @@ export const tours = [
   },
   {
     nombre: 'Casita de Cristal + Cinco Saltos',
-    duracion: 'Definir',
-    dificultad: null,
-    terreno: null,
-    distancia: null,
-    precio: null,
+    duracion: '1 día',
+    dificultad: 'Media',
+    terreno: 'Media',
+    distancia: 'Media',
+    precio: 85000,
     precioDetalle: null,
-    disponible: false,
-    imagen: '/assets/tours/default.svg',
+    disponible: true,
+    imagen: '/assets/tours/casita-cristal-cinco-saltos/paisake.webp',
     slug: 'casita-de-cristal-cinco-saltos',
-    imagenes: [],
-    horarios: null,
-    incluye: [],
-    itinerario: [],
-    reunion: null
+    imagenes: [
+      '/assets/tours/casita-cristal-cinco-saltos/paisake.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/casa-paisaje.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/casaantigua.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/construccion.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/contruccion-antigua.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/bandera.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/rober-bandera-casitacristal.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/perdsona-casa.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/grupo.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/cascada.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/cascada2.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/cascada3.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/piedras.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/placa-refugio.webp'
+    ],
+    horarios: 'Salidas de jornada completa · Encuentro 07:30',
+    incluye: [
+      'Vianda de marcha'
+    ],
+    itinerario: [
+      {
+        dia: 1,
+        titulo: 'Trekking Casita de Cristal + Cinco Saltos',
+        distancia: '12 km aprox. · 8 a 10 hs',
+        horas: [
+          { hora: '07:30', evento: 'Encuentro en el Parador Santa Rita, Altas Cumbres' },
+          { hora: '—', evento: 'Inicio del trekking por el camino serrano hacia la Casita de Cristal, ubicada aproximadamente a 7 km de la ruta' },
+          { hora: '—', evento: 'Recorrido por paisajes de las Altas Cumbres, puestos abandonados y cascadas' },
+          { hora: '—', evento: 'Parada de aproximadamente 1 hora y media en la Casita de Cristal para disfrutar del lugar y compartir la vianda de marcha' },
+          { hora: '—', evento: 'Regreso pasando por un puesto abandonado hasta el sector de Cinco Saltos' },
+          { hora: '—', evento: 'Opción de continuar hasta la cascada más alta del circuito, según las condiciones del terreno y del grupo' },
+          { hora: '—', evento: 'Regreso al Parador Santa Rita, donde dejamos los vehículos' }
+        ]
+      }
+    ],
+    reunion: 'Parador Santa Rita – Altas Cumbres (12 km antes de Mina Clavero)'
   },
   {
     nombre: 'Circuito La Cumbrecita: La Lagunita + Cerro La Ventana + Garganta del Diablo',
@@ -956,9 +1016,9 @@ export const tours = [
     precio: 350000,
     precioDetalle: null,
     disponible: true,
-    imagen: cumbrecitaGaleriaCircuito[0],
+    imagen: lagunitaGaleria[8],
     slug: 'circuito-cumbrecita-lagunita-ventana-garganta',
-    imagenes: cumbrecitaGaleriaCircuito,
+    imagenes: lagunitaGaleria,
     horarios: 'Viernes, Sábados y Domingos · 09:00',
     incluye: [
       'Raciones de marcha (salado y dulce)',

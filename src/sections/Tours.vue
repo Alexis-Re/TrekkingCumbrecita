@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import { tours } from '../data/tours.js'
 import { formatPrecio } from '../utils/format.js'
 import TourModal from '../components/TourModal.vue'
@@ -10,9 +10,16 @@ const scrollContainer = ref(null)
 const selectedTour = ref(null)
 const canScrollLeft = ref(false)
 const canScrollRight = ref(true)
-
 const sectionRef = ref(null)
 const isVisible = ref(false)
+const filtros = ref({
+  busqueda: '',
+  dias: 'todos',
+  dificultad: 'todas',
+  precio: 'todos',
+  disponibilidad: 'todas'
+})
+const mostrarFiltros = ref(false)
 let observer = null
 
 onMounted(() => {
@@ -39,7 +46,6 @@ const esPlaceholder = (tour) => tour.imagen === '/assets/tours/default.svg'
 const ordenDeseado = [
   'champaqui',
   'velo-novia-pueblo-escondido',
-  'quebrada-yatan',
   'rio-subterraneo-cascada-escondida',
   'cascadas-salvajes-rio-subterraneo',
   'los-gigantes-cerro-mogote-cajones'
@@ -55,6 +61,55 @@ const toursOrdenados = computed(() =>
     return jerarquiaTour(a) - jerarquiaTour(b)
   })
 )
+
+const obtenerDias = (duracion = '') => {
+  const coincidencia = duracion.match(/(\d+)\s*d[ií]a/)
+  return coincidencia ? Number(coincidencia[1]) : null
+}
+
+const coincidePrecio = (tour) => {
+  if (filtros.value.precio === 'todos') return true
+  if (filtros.value.precio === 'consultar') return tour.precio === null
+  if (tour.precio === null) return false
+  if (filtros.value.precio === 'hasta-100000') return tour.precio <= 100000
+  if (filtros.value.precio === '100000-300000') return tour.precio > 100000 && tour.precio <= 300000
+  return tour.precio > 300000
+}
+
+const toursFiltrados = computed(() => {
+  const texto = filtros.value.busqueda.trim().toLocaleLowerCase()
+
+  return toursOrdenados.value.filter((tour) => {
+    const dias = obtenerDias(tour.duracion)
+    const coincideNombre = !texto || tour.nombre.toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(texto.normalize('NFD').replace(/[\u0300-\u036f]/g, ''))
+    const coincideDias = filtros.value.dias === 'todos'
+      || (filtros.value.dias === 'horas' && dias === null && tour.duracion !== 'Definir')
+      || dias === Number(filtros.value.dias)
+    const coincideDificultad = filtros.value.dificultad === 'todas' || tour.dificultad === filtros.value.dificultad
+    const coincideDisponibilidad = filtros.value.disponibilidad === 'todas'
+      || (filtros.value.disponibilidad === 'disponibles' && tour.disponible)
+      || (filtros.value.disponibilidad === 'proximamente' && !tour.disponible)
+
+    return coincideNombre && coincideDias && coincideDificultad && coincidePrecio(tour) && coincideDisponibilidad
+  })
+})
+
+const limpiarFiltros = () => {
+  filtros.value = {
+    busqueda: '',
+    dias: 'todos',
+    dificultad: 'todas',
+    precio: 'todos',
+    disponibilidad: 'todas'
+  }
+  reiniciarScroll()
+}
+
+const reiniciarScroll = async () => {
+  await nextTick()
+  if (scrollContainer.value) scrollContainer.value.scrollTo({ left: 0, behavior: 'smooth' })
+  requestAnimationFrame(updateScrollState)
+}
 
 const dificultadClass = (tour) =>
   tour.dificultad === 'Alta'
@@ -76,6 +131,7 @@ const updateScrollState = () => {
   canScrollLeft.value = scrollLeft > 4
   canScrollRight.value = scrollLeft + clientWidth < scrollWidth - 4
 }
+
 </script>
 
 <template>
@@ -95,10 +151,108 @@ const updateScrollState = () => {
           Experiencias de trekking
         </h2>
         <div class="h-1 w-24 bg-gradient-to-r from-brand-gold to-brand-cream/50 mb-4"></div>
-        <p class="text-brand-cream/70 text-sm md:text-base max-w-md">
-          Elegí tu próxima aventura en las sierras de Córdoba.
-        </p>
-      </div>
+          <p class="text-brand-cream/70 text-sm md:text-base max-w-md">
+           Elegí tu próxima aventura en las sierras de Córdoba.
+          </p>
+       </div>
+
+       <!-- Filtros -->
+       <div class="mb-8 rounded-2xl border border-brand-cream/15 bg-brand-dark/45 p-4 backdrop-blur-sm md:p-5">
+         <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+           <div>
+             <h3 class="font-heading text-xl text-brand-white">Encontrá tu experiencia</h3>
+             <p class="text-xs text-brand-cream/60">{{ toursFiltrados.length }} de {{ toursOrdenados.length }} experiencias</p>
+           </div>
+           <div class="flex items-center gap-4 self-start md:self-auto">
+             <button
+               type="button"
+               class="hidden text-xs font-semibold text-brand-cream/70 transition-colors hover:text-brand-orange focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-orange sm:block"
+               :aria-expanded="mostrarFiltros"
+               aria-controls="filtros-avanzados"
+               @click="mostrarFiltros = !mostrarFiltros"
+             >
+               {{ mostrarFiltros ? 'Ocultar filtros' : 'Más filtros' }}
+             </button>
+             <button
+               v-if="filtros.busqueda || filtros.dias !== 'todos' || filtros.dificultad !== 'todas' || filtros.precio !== 'todos' || filtros.disponibilidad !== 'todas'"
+               type="button"
+               class="text-xs font-semibold text-brand-orange underline-offset-4 transition-colors hover:text-brand-gold hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-orange"
+               @click="limpiarFiltros"
+             >
+               Limpiar
+             </button>
+           </div>
+         </div>
+
+         <div class="flex flex-col gap-3 sm:flex-row">
+           <label class="relative flex-1">
+             <span class="sr-only">Buscar por nombre</span>
+             <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-cream/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" />
+             </svg>
+             <input
+               v-model="filtros.busqueda"
+               type="search"
+               placeholder="Buscar experiencia"
+               class="min-h-11 w-full rounded-lg border border-brand-cream/15 bg-brand-card/80 pl-10 pr-3 text-sm text-brand-white outline-none transition-colors placeholder:text-brand-cream/40 focus:border-brand-orange focus:ring-1 focus:ring-brand-orange"
+               @input="reiniciarScroll"
+             />
+           </label>
+           <button
+             type="button"
+             class="min-h-11 rounded-lg border border-brand-cream/15 px-4 text-sm font-semibold text-brand-cream transition-colors hover:border-brand-orange hover:text-brand-orange focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-orange sm:hidden"
+             :aria-expanded="mostrarFiltros"
+             aria-controls="filtros-avanzados"
+             @click="mostrarFiltros = !mostrarFiltros"
+           >
+             {{ mostrarFiltros ? 'Ocultar' : 'Filtrar' }}
+           </button>
+         </div>
+
+         <div v-if="mostrarFiltros" id="filtros-avanzados" class="mt-3 grid gap-3 border-t border-brand-cream/10 pt-3 sm:grid-cols-2 lg:grid-cols-4">
+           <label>
+             <span class="sr-only">Filtrar por duración</span>
+             <select v-model="filtros.dias" class="min-h-11 w-full rounded-lg border border-brand-cream/15 bg-brand-card/80 px-3 text-sm text-brand-cream outline-none transition-colors focus:border-brand-orange focus:ring-1 focus:ring-brand-orange" @change="reiniciarScroll">
+               <option value="todos">Cualquier duración</option>
+               <option value="horas">Jornada / horas</option>
+               <option value="1">1 día</option>
+               <option value="2">2 días</option>
+               <option value="3">3 días</option>
+               <option value="7">7 días</option>
+             </select>
+           </label>
+
+           <label>
+             <span class="sr-only">Filtrar por dificultad</span>
+             <select v-model="filtros.dificultad" class="min-h-11 w-full rounded-lg border border-brand-cream/15 bg-brand-card/80 px-3 text-sm text-brand-cream outline-none transition-colors focus:border-brand-orange focus:ring-1 focus:ring-brand-orange" @change="reiniciarScroll">
+               <option value="todas">Cualquier dificultad</option>
+               <option value="Baja">Dificultad baja</option>
+               <option value="Media">Dificultad media</option>
+               <option value="Alta">Dificultad alta</option>
+             </select>
+           </label>
+
+           <label>
+             <span class="sr-only">Filtrar por precio</span>
+             <select v-model="filtros.precio" class="min-h-11 w-full rounded-lg border border-brand-cream/15 bg-brand-card/80 px-3 text-sm text-brand-cream outline-none transition-colors focus:border-brand-orange focus:ring-1 focus:ring-brand-orange" @change="reiniciarScroll">
+               <option value="todos">Cualquier precio</option>
+               <option value="hasta-100000">Hasta $100.000</option>
+               <option value="100000-300000">$100.000 a $300.000</option>
+               <option value="mas-300000">Más de $300.000</option>
+               <option value="consultar">Consultar precio</option>
+             </select>
+           </label>
+
+           <label>
+             <span class="sr-only">Filtrar por disponibilidad</span>
+             <select v-model="filtros.disponibilidad" class="min-h-11 w-full rounded-lg border border-brand-cream/15 bg-brand-card/80 px-3 text-sm text-brand-cream outline-none transition-colors focus:border-brand-orange focus:ring-1 focus:ring-brand-orange" @change="reiniciarScroll">
+               <option value="todas">Toda la disponibilidad</option>
+               <option value="disponibles">Disponibles</option>
+               <option value="proximamente">Próximamente</option>
+             </select>
+           </label>
+         </div>
+       </div>
 
       <!-- Horizontal scroll container -->
       <div class="relative group/nav">
@@ -134,7 +288,7 @@ const updateScrollState = () => {
            class="flex items-stretch gap-5 md:gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-6 scrollbar-hide"
         >
           <article
-            v-for="tour in toursOrdenados"
+             v-for="tour in toursFiltrados"
             :key="tour.slug"
             class="h-full w-[85vw] sm:w-[80vw] md:w-[calc((100%-2rem)/3)] snap-start flex-shrink-0 flex flex-col bg-brand-card rounded-2xl overflow-hidden group transition-all duration-300 border border-brand-cream/15 hover:border-brand-cream/25 hover:shadow-lg hover:shadow-brand-orange/10"
           >
@@ -149,7 +303,7 @@ const updateScrollState = () => {
                 v-else
                 :src="tour.imagen"
                 :alt="tour.nombre"
-                :loading="tour === toursOrdenados[0] ? 'eager' : 'lazy'"
+                 :loading="tour === toursFiltrados[0] ? 'eager' : 'lazy'"
                 decoding="async"
                 class="w-full h-full object-cover group-hover:scale-105 group-hover:brightness-110 group-hover:saturate-110 transition-all duration-500"
               />
@@ -178,37 +332,38 @@ const updateScrollState = () => {
 
             <!-- Content -->
             <div class="flex flex-1 flex-col p-5">
-              <h3 class="min-h-14 font-heading text-xl md:text-2xl text-brand-white mb-3 leading-tight">
-                {{ tour.nombre }}
-              </h3>
+               <h3 class="min-h-14 font-heading text-xl md:text-2xl text-brand-white mb-3 leading-tight">
+                 {{ tour.nombre }}
+               </h3>
 
-              <div v-if="!esDefinir(tour)" class="min-h-10 line-clamp-2 flex items-start gap-1 mb-4 text-sm text-brand-cream/60 font-sans">
+               <div v-if="!esDefinir(tour)" class="min-h-10 line-clamp-2 flex items-start gap-1 mb-4 text-sm text-brand-cream/60 font-sans">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 text-brand-cream/40">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                 </svg>
                 {{ tour.horarios }}
               </div>
 
-              <div v-if="!esDefinir(tour)" class="mb-5">
-                <div class="flex items-baseline gap-2">
-                  <span class="text-brand-cream/90 font-heading text-2xl">
-                    {{ formatPrecio(tour.precio) || 'Consultar precio' }}
-                  </span>
-                  <span class="text-brand-cream/50 text-xs font-sans">por persona</span>
+               <div v-if="!esDefinir(tour)" class="mb-5 flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="flex items-baseline gap-2">
+                    <span class="text-brand-cream/90 font-heading text-2xl">
+                      {{ formatPrecio(tour.precio) || 'Consultar precio' }}
+                    </span>
+                    <span class="text-brand-cream/50 text-xs font-sans">por persona</span>
+                  </div>
+                  <p v-if="tour.precioDetalle" class="line-clamp-2 text-brand-cream/50 text-xs font-sans mt-1">
+                    {{ tour.precioDetalle }}
+                  </p>
                 </div>
-                <p v-if="tour.precioDetalle" class="line-clamp-2 text-brand-cream/50 text-xs font-sans mt-1">
-                  {{ tour.precioDetalle }}
-                </p>
                 <a
                   v-if="!esDefinir(tour)"
                   :href="crearConsultaTour(tour)"
                   target="_blank"
                   rel="noopener noreferrer"
                   :aria-label="`Consultar por WhatsApp sobre ${tour.nombre}`"
-                  class="mt-2 flex min-h-8 w-full items-center justify-center rounded-lg bg-[#25D366]/80 px-3 py-1.5 text-center text-xs font-semibold leading-tight text-white shadow-sm shadow-[#25D366]/15 transition-all duration-300 hover:bg-[#1ebe5d]"
-                >
-                  <span>Consultar por este recorrido</span>
-                  <svg class="ml-1.5 h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                   class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#25D366]/80 text-white shadow-sm shadow-[#25D366]/15 transition-all duration-300 hover:bg-[#1ebe5d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366]"
+                 >
+                   <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.198.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.347-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884"/>
                   </svg>
                 </a>
@@ -236,8 +391,16 @@ const updateScrollState = () => {
               </a>
             </div>
           </article>
-        </div>
-      </div>
+         </div>
+
+         <div v-if="toursFiltrados.length === 0" class="rounded-2xl border border-dashed border-brand-cream/20 px-5 py-12 text-center">
+           <h3 class="font-heading text-2xl text-brand-white">No encontramos experiencias</h3>
+           <p class="mx-auto mt-2 max-w-md text-sm text-brand-cream/60">Probá cambiar los filtros o buscá otra experiencia.</p>
+           <button type="button" class="mt-5 min-h-11 rounded-lg bg-brand-orange px-5 py-3 text-sm font-semibold text-brand-white transition-colors hover:bg-brand-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange" @click="limpiarFiltros">
+             Limpiar filtros
+           </button>
+         </div>
+       </div>
 
       <!-- Scroll hint mobile -->
        <div class="flex items-center justify-center gap-2 mt-4 md:hidden text-brand-cream/50 text-xs font-sans">
@@ -246,7 +409,8 @@ const updateScrollState = () => {
            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8l4 4m0 0l-4 4m4-4H3" />
          </svg>
        </div>
-    </div>
+
+      </div>
 
     <TourModal
       :tour="selectedTour"

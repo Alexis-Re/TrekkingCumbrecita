@@ -22,12 +22,21 @@ const dificultadClass = computed(() =>
 
 const currentIndex = ref(0)
 const modalRef = ref(null)
+const videoRef = ref(null)
+const videoCargando = ref(false)
+const videoError = ref(false)
 const fechaReserva = ref('')
 const cantidadPersonas = ref(1)
 const fechaLocal = new Date()
 const fechaMinima = [fechaLocal.getFullYear(), String(fechaLocal.getMonth() + 1).padStart(2, '0'), String(fechaLocal.getDate()).padStart(2, '0')].join('-')
 const cantidadMaxima = computed(() => props.tour?.cupoMax || 15)
 const cantidadValida = computed(() => Number.isInteger(cantidadPersonas.value) && cantidadPersonas.value >= 1 && cantidadPersonas.value <= cantidadMaxima.value)
+const medios = computed(() => {
+  if (!props.tour) return []
+  const video = props.tour.video ? [props.tour.video] : []
+  const imagenes = (props.tour.imagenes || []).map((src) => ({ tipo: 'imagen', src }))
+  return [...video, ...imagenes]
+})
 let touchStartX = 0
 let previousActiveElement = null
 
@@ -44,6 +53,8 @@ function reservarPorWhatsApp() {
 watch(() => props.open, (val) => {
   if (val) {
     currentIndex.value = 0
+    videoCargando.value = false
+    videoError.value = false
     fechaReserva.value = ''
     cantidadPersonas.value = 1
     document.body.style.overflow = 'hidden'
@@ -63,17 +74,34 @@ watch(cantidadPersonas, (value) => {
 })
 
 function prev() {
-  if (!props.tour?.imagenes) return
+  if (!medios.value.length) return
   currentIndex.value = currentIndex.value === 0
-    ? props.tour.imagenes.length - 1
+    ? medios.value.length - 1
     : currentIndex.value - 1
 }
 
 function next() {
-  if (!props.tour?.imagenes) return
-  currentIndex.value = currentIndex.value === props.tour.imagenes.length - 1
+  if (!medios.value.length) return
+  currentIndex.value = currentIndex.value === medios.value.length - 1
     ? 0
     : currentIndex.value + 1
+}
+
+function cambiarMedio(index) {
+  currentIndex.value = index
+  videoCargando.value = false
+  videoError.value = false
+}
+
+function reintentarVideo() {
+  videoError.value = false
+  videoCargando.value = true
+  videoRef.value?.load()
+}
+
+function onVideoError() {
+  videoCargando.value = false
+  videoError.value = true
 }
 
 function onTouchStart(e) {
@@ -87,6 +115,8 @@ function onTouchEnd(e) {
 
 function onKeydown(e) {
   if (!props.open) return
+  const elementoActivo = e.target
+  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && elementoActivo?.closest?.('video, input, select, textarea')) return
   if (e.key === 'Escape') emit('close')
   if (e.key === 'Tab') {
     const focusable = [...modalRef.value?.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])') || []]
@@ -105,8 +135,20 @@ function onKeydown(e) {
   if (e.key === 'ArrowRight') next()
 }
 
+function scrollToDocumentacion() {
+  emit('close')
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      window.dispatchEvent(new CustomEvent('documentacion:abrir-preparacion'))
+    })
+  })
+}
+
 onMounted(() => document.addEventListener('keydown', onKeydown))
-onUnmounted(() => document.removeEventListener('keydown', onKeydown))
+onUnmounted(() => {
+  document.removeEventListener('keydown', onKeydown)
+  document.body.style.overflow = ''
+})
 </script>
 
 <template>
@@ -121,7 +163,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
     >
       <div
         v-if="open && tour"
-        class="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8"
+        class="fixed inset-0 z-[100] flex items-center justify-center"
         role="dialog"
         aria-modal="true"
         :aria-label="`Detalles de ${tour.nombre}`"
@@ -142,13 +184,13 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
         >
           <div
             ref="modalRef"
-            class="relative bg-brand-card rounded-2xl w-full max-w-2xl max-h-[85dvh] overflow-hidden border border-brand-cream/10 shadow-2xl"
+            class="relative flex h-[100dvh] w-full max-w-none flex-col overflow-hidden bg-brand-card shadow-2xl"
             @click.stop
           >
             <!-- Close button -->
             <button
               @click="emit('close')"
-              class="absolute top-4 right-[max(1rem,env(safe-area-inset-right))] z-10 w-11 h-11 rounded-full bg-brand-dark/60 backdrop-blur-sm text-brand-cream flex items-center justify-center hover:bg-brand-orange active:scale-95 transition-all duration-200"
+              class="absolute top-[max(1rem,env(safe-area-inset-top))] right-[max(1rem,env(safe-area-inset-right))] z-10 flex h-11 w-11 items-center justify-center rounded-full bg-brand-dark/60 text-brand-cream backdrop-blur-sm transition-all duration-200 hover:bg-brand-orange active:scale-95"
               aria-label="Cerrar detalles"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,36 +199,82 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
             </button>
 
             <!-- Scrollable content -->
-            <div class="overflow-y-auto max-h-[85dvh]">
+            <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain">
               <!-- Gallery carousel -->
               <div
-                v-if="tour.imagenes && tour.imagenes.length > 0"
-                class="relative bg-brand-dark overflow-hidden [touch-action:pan-y] flex items-center justify-center min-h-[300px] md:min-h-[400px] max-h-[55dvh] md:max-h-[60dvh]"
+                v-if="medios.length > 0"
+                class="relative flex h-[58dvh] min-h-[320px] items-center justify-center overflow-hidden bg-brand-dark [touch-action:pan-y] md:h-[68dvh]"
                 @touchstart="onTouchStart"
                 @touchend="onTouchEnd"
               >
                 <img
-                  :src="tour.imagenes[currentIndex]"
-                  :alt="`${tour.nombre} - imagen ${currentIndex + 1} de ${tour.imagenes.length}`"
-                  class="max-w-full max-h-[55dvh] md:max-h-[60dvh] object-contain"
+                  v-if="medios[currentIndex].tipo === 'imagen'"
+                  :src="medios[currentIndex].src"
+                  :alt="`${tour.nombre} - imagen ${currentIndex + 1} de ${medios.length}`"
+                  class="h-full w-full object-contain"
                 />
+                <video
+                  v-else-if="medios[currentIndex].tipo === 'local'"
+                  :src="medios[currentIndex].src"
+                  :poster="medios[currentIndex].poster"
+                  class="h-full w-full object-contain"
+                  controls
+                  playsinline
+                  preload="metadata"
+                  ref="videoRef"
+                  @loadstart="videoCargando = true; videoError = false"
+                  @canplay="videoCargando = false"
+                  @waiting="videoCargando = true"
+                  @playing="videoCargando = false"
+                  @error="onVideoError"
+                  :aria-label="`${tour.nombre} - video ${currentIndex + 1} de ${medios.length}`"
+                ></video>
+                <div
+                  v-if="medios[currentIndex].tipo === 'local' && videoCargando && !videoError"
+                  class="pointer-events-none absolute inset-0 flex items-center justify-center bg-brand-dark/20"
+                  aria-live="polite"
+                >
+                  <span class="h-10 w-10 animate-spin rounded-full border-2 border-brand-cream/25 border-t-brand-orange" aria-label="Cargando video"></span>
+                </div>
+                <div
+                  v-if="medios[currentIndex].tipo === 'local' && videoError"
+                  class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-brand-dark/80 px-6 text-center"
+                  role="alert"
+                >
+                  <p class="text-sm text-brand-cream">No pudimos reproducir este video.</p>
+                  <button
+                    type="button"
+                    class="min-h-11 rounded-lg border border-brand-orange px-4 py-2 text-sm font-semibold text-brand-orange transition-colors duration-300 hover:bg-brand-orange hover:text-brand-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
+                    @click.stop="reintentarVideo"
+                  >
+                    Reintentar
+                  </button>
+                </div>
+                <iframe
+                  v-else-if="medios[currentIndex].tipo === 'youtube'"
+                  :src="medios[currentIndex].src"
+                  :title="`${tour.nombre} - video ${currentIndex + 1} de ${medios.length}`"
+                  class="h-full w-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowfullscreen
+                ></iframe>
 
                 <!-- Arrows -->
                 <button
-                  v-if="tour.imagenes.length > 1"
+                  v-if="medios.length > 1"
                   @click.stop="prev"
-                  class="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-brand-dark/50 backdrop-blur-sm text-brand-cream flex items-center justify-center hover:bg-brand-orange transition-colors duration-200"
-                  aria-label="Imagen anterior"
+                  class="absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-brand-dark/50 text-brand-cream backdrop-blur-sm transition-colors duration-200 hover:bg-brand-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
+                  aria-label="Medio anterior"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
                 <button
-                  v-if="tour.imagenes.length > 1"
+                  v-if="medios.length > 1"
                   @click.stop="next"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-brand-dark/50 backdrop-blur-sm text-brand-cream flex items-center justify-center hover:bg-brand-orange transition-colors duration-200"
-                  aria-label="Imagen siguiente"
+                  class="absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-brand-dark/50 text-brand-cream backdrop-blur-sm transition-colors duration-200 hover:bg-brand-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
+                  aria-label="Medio siguiente"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -195,20 +283,26 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
 
                 <!-- Dots -->
                 <div
-                  v-if="tour.imagenes.length > 1"
+                  v-if="medios.length > 1 && medios[currentIndex].tipo === 'imagen'"
                   class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5"
+                  role="group"
+                  aria-label="Seleccionar medio"
                 >
-                  <span
-                    v-for="(_, i) in tour.imagenes"
+                  <button
+                    v-for="(_, i) in medios"
                     :key="i"
-                    class="w-2.5 h-2.5 rounded-full transition-colors duration-200"
+                    type="button"
+                    class="h-3 w-3 rounded-full transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
                     :class="i === currentIndex ? 'bg-brand-orange' : 'bg-brand-cream/30'"
-                  ></span>
+                    :aria-label="`Ir al medio ${i + 1} de ${medios.length}`"
+                    :aria-current="i === currentIndex ? 'true' : undefined"
+                    @click.stop="cambiarMedio(i)"
+                  ></button>
                 </div>
 
                 <!-- Image counter -->
                 <span class="absolute top-3 left-3 bg-brand-dark/60 backdrop-blur-sm text-brand-cream text-xs px-2 py-1 rounded font-sans">
-                  {{ currentIndex + 1 }} / {{ tour.imagenes.length }}
+                  {{ currentIndex + 1 }} / {{ medios.length }}
                 </span>
               </div>
 
@@ -224,11 +318,23 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
               </div>
 
               <!-- Content -->
-              <div class="p-6 md:p-8">
+              <div class="p-6 pb-[max(2rem,env(safe-area-inset-bottom))] md:p-8">
                 <!-- Header -->
                 <h2 class="font-heading text-3xl md:text-4xl text-brand-white mb-4">
                   {{ tour.nombre }}
                 </h2>
+
+                <button
+                  type="button"
+                  class="mb-6 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-brand-orange/30 bg-brand-orange/10 px-4 py-3 text-center text-sm font-semibold text-brand-orange transition-all duration-300 hover:border-brand-orange hover:bg-brand-orange/20 hover:text-brand-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
+                  aria-label="Ver preparación y documentación necesaria para participar"
+                  @click="scrollToDocumentacion"
+                >
+                  <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5A3.375 3.375 0 0 0 10.125 2.25H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                  </svg>
+                  Ver preparación y documentación
+                </button>
 
                 <div class="flex flex-wrap gap-3 mb-6">
                   <span v-if="tour.duracion !== 'Definir'" class="flex items-center gap-1.5 text-sm text-brand-cream/70 font-sans bg-brand-dark/40 px-3 py-1.5 rounded-full">
