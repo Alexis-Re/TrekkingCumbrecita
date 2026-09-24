@@ -117,9 +117,16 @@ const excursionNocturnaGaleria = [
 ]
 
 const salidaDelCruceGaleria = [
-  ...cumbrecitaGaleria.slice(0, 4),
-  ...yatanGaleria.slice(0, 4),
-  ...champaquiGaleria.slice(0, 4)
+  cumbrecitaGaleria[3],
+  cumbrecitaGaleria[7],
+  yatanGaleria[0],
+  yatanGaleria[3],
+  yatanGaleria[14],
+  lagunitaGaleria[10],
+  lagunitaGaleria[11],
+  champaquiGaleria[11],
+  champaquiGaleria[2],
+  champaquiGaleria[4]
 ]
 
 const gigantesGaleria = [
@@ -192,18 +199,18 @@ export const tours = [
     imagen: cumbrecitaGaleriaCorona[0],
     slug: 'garganta-del-diablo-cerro-corona-pozo-cabras',
     imagenes: cumbrecitaGaleriaCorona,
-    horarios: 'Sábados, domingos y feriados · 08:30',
+    horarios: 'Sábados, domingos y feriados · Salida 09:00',
     incluye: [],
     itinerario: [
       {
         dia: 1,
         titulo: 'Garganta del Diablo y Pozo de las Cabras',
         horas: [
-          { hora: '08:30', evento: 'Salida desde la Panadería de La Cumbrecita' },
-          { hora: '—', evento: 'Visita a la Capilla, Mirador del Indio y vistas de Casas Viejas' },
-          { hora: '—', evento: 'Llegada a la Cascada Garganta del Diablo · descanso' },
-          { hora: '—', evento: 'Regreso por el río' },
-          { hora: '—', evento: 'Visita al Pozo de las Cabras · descanso' },
+          { hora: '09:00', evento: 'Salida desde la Panadería de La Cumbrecita' },
+          { hora: '10:45', evento: 'Visita a la Capilla, Mirador del Indio y vistas de Casas Viejas' },
+          { hora: '12:00', evento: 'Llegada a la Cascada Garganta del Diablo · descanso' },
+          { hora: '13:30', evento: 'Regreso por el río' },
+          { hora: '15:30', evento: 'Visita al Pozo de las Cabras · descanso' },
           { hora: '—', evento: 'Regreso al pueblo y fin de la actividad' }
         ]
       }
@@ -441,7 +448,7 @@ export const tours = [
           { hora: '09:20', evento: 'Traslado por el Camino del Peregrino hasta los puestos serranos' },
           { hora: '10:00', evento: 'Trekking por cascadas escondidas, ollas naturales y puestos serranos abandonados' },
           { hora: '12:00', evento: 'Recorrido de aproximadamente 10 km entre ida y vuelta' },
-          { hora: '13:30', evento: 'Almuerzo' },
+          { hora: '12:30', evento: 'Almuerzo' },
           { hora: '—', evento: 'Merienda, cena y alojamiento' }
         ]
       },
@@ -522,7 +529,7 @@ export const tours = [
     imagen: champaquiGaleriaAlternativa[0],
     slug: 'dos-gigantes-champaqui-totora',
     imagenes: champaquiGaleriaAlternativa,
-    horarios: 'Viernes, sábados, domingos y feriados · 09:15',
+    horarios: 'Viernes, sábados, domingos y feriados · Salida 09:00',
     incluye: [
       'Guía habilitado',
       'Trekking de 3 días / 2 noches',
@@ -542,31 +549,32 @@ export const tours = [
         dia: 1,
         titulo: 'Villa Alpina y Puesto Marcos Domínguez',
         horas: [
-          { hora: '—', evento: 'Encuentro en Villa Alpina' },
-          { hora: '—', evento: 'Trekking por antiguos puestos serranos y el Camino Norte' },
-          { hora: '—', evento: 'Paso por el antiguo cementerio de la zona y llegada al Puesto Marcos Domínguez' },
-          { hora: '—', evento: 'Merienda y alojamiento' },
-          { hora: '—', evento: 'Ascenso nocturno al Cerro La Totora, sujeto a condiciones climáticas' },
-          { hora: '—', evento: 'Cena y alojamiento' }
+          { hora: '09:00', evento: 'Encuentro en Villa Alpina' },
+          { hora: '12:00', evento: 'Trekking por antiguos puestos serranos y el Camino Norte' },
+          { hora: '13:30', evento: 'Paso por el antiguo cementerio de la zona y llegada al Puesto Marcos Domínguez' },
+          { hora: '17:00', evento: 'Merienda y alojamiento' },
+          { hora: '18:30', evento: 'Ascenso nocturno al Cerro La Totora, sujeto a condiciones climáticas' },
+          { hora: '21:30–22:00', evento: 'Cena y alojamiento' }
         ]
       },
       {
         dia: 2,
         titulo: 'Cumbre del Cerro Champaquí',
         horas: [
-          { hora: '—', evento: 'Desayuno y ascenso al Cerro Champaquí' },
-          { hora: '—', evento: 'Llegada a la cumbre y vianda de marcha' },
-          { hora: '—', evento: 'Descenso hacia el puesto con visita a cascadas de la zona' },
-          { hora: '—', evento: 'Merienda, cena y alojamiento' }
+          { hora: '07:30', evento: 'Desayuno y ascenso al Cerro Champaquí' },
+          { hora: '11:30–12:00', evento: 'Llegada a la cumbre y vianda de marcha' },
+          { hora: '15:30', evento: 'Descenso hacia el puesto con visita a cascadas de la zona' },
+          { hora: '17:00', evento: 'Merienda, cena y alojamiento' }
         ]
       },
       {
         dia: 3,
         titulo: 'Regreso a Villa Alpina',
         horas: [
-          { hora: '—', evento: 'Desayuno y regreso a Villa Alpina' },
-          { hora: '—', evento: 'Parada en el Puesto de Moisés López y almuerzo incluido' },
-          { hora: '—', evento: 'Continuación del trekking hasta Villa Alpina y fin de la travesía' }
+          { hora: '07:00', evento: 'Desayuno e inicio del regreso a Villa Alpina' },
+          { hora: '11:00', evento: 'Parada en el Puesto de Moisés López' },
+          { hora: '13:20', evento: 'Almuerzo incluido' },
+          { hora: '16:30', evento: 'Continuación del trekking hasta Villa Alpina y fin de la travesía' }
         ]
       }
     ],
@@ -604,8 +612,8 @@ export const tours = [
     dificultad: 'Alta',
     terreno: 'Alta',
     distancia: 'Alta',
-    precio: 650000,
-    precioDetalle: 'Seña para reservar · 6 cuotas sin tarjeta: 5 × $100.000 + $150.000 el día de la salida · Abonado en su totalidad 10 días antes de la salida · Mula aparte',
+    precio: 1000000,
+    precioDetalle: 'Seña para reservar · 6 cuotas sin tarjeta · Abonado en su totalidad 10 días antes de la salida · Mula aparte',
     disponible: true,
     cupoMax: 8,
     imagen: salidaDelCruceGaleria[0],
@@ -1060,3 +1068,25 @@ export const tours = [
     reunion: 'Casa de Rober Molina, La Cumbrecita'
   }
 ]
+
+// Requisitos mínimos para cualquier salida. Los requisitos específicos de cada
+// tour se conservan y se agregan después de esta base sin duplicarlos.
+const requisitosBase = [
+  'Linterna frontal',
+  'Mini botiquín personal',
+  'Un termo cada 2 personas',
+  'Un impermeable de buena calidad',
+  'En invierno, una muda de ropa térmica'
+]
+
+const requisitosEspeciales = {
+  champaqui: ['Bolsa de dormir']
+}
+
+for (const tour of tours) {
+  tour.requisitos = [...new Set([
+    ...requisitosBase,
+    ...(requisitosEspeciales[tour.slug] || []),
+    ...(tour.requisitos || [])
+  ])]
+}

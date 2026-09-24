@@ -460,7 +460,7 @@ onUnmounted(() => {
 
                 <!-- Placeholder mientras se completa el contenido -->
                 <div
-                  v-if="!tour.itinerario?.length || !tour.incluye?.length"
+                  v-if="tour.slug !== 'garganta-del-diablo-cerro-corona-pozo-cabras' && (!tour.itinerario?.length || !tour.incluye?.length)"
                   class="mb-8 rounded-xl border border-brand-cream/15 bg-brand-dark/40 p-5"
                 >
                   <h3 class="font-heading text-lg text-brand-white mb-2 flex items-center gap-2">
