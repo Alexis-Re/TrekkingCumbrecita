@@ -192,7 +192,7 @@ export const tours = [
     duracion: '6 hs',
     dificultad: 'Media',
     terreno: 'Media',
-    distancia: '12 km aprox.',
+    distancia: 'Media',
     precio: 55000,
     precioDetalle: 'Seña para reservar · 3 cuotas sin interés',
     disponible: true,
@@ -223,7 +223,7 @@ export const tours = [
     duracion: '7 hs',
     dificultad: 'Media',
     terreno: 'Media',
-    distancia: '16 km',
+    distancia: 'Alta',
     precio: 60000,
     precioDetalle: 'Efectivo o transferencia · $70.000 en 3 cuotas sin interés · Se reserva con el 50% de seña',
     imagen: cumbrecitaGaleriaAlternativa[0],
@@ -268,7 +268,7 @@ export const tours = [
     terreno: null,
     distancia: null,
     precio: 370000,
-    precioDetalle: null,
+    precioDetalle: 'Finde largo/feriado: $450.000 · Refugio superior',
     disponible: true,
     imagen: champaquiGaleria[11],
     slug: 'champaqui',
@@ -406,9 +406,24 @@ export const tours = [
     precio: 270000,
     precioDetalle: null,
     disponible: true,
-    imagen: '/assets/tours/default.svg',
+    imagen: '/assets/tours/casita-cristal-cinco-saltos/grupo.webp',
     slug: 'paraiso-guanacos-casita-de-cristal',
-    imagenes: [],
+    imagenes: [
+      '/assets/tours/casita-cristal-cinco-saltos/grupo.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/rober-bandera-casitacristal.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/bandera.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/perdsona-casa.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/paisake.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/casa-paisaje.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/casaantigua.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/construccion.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/contruccion-antigua.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/cascada.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/cascada2.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/cascada3.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/piedras.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/placa-refugio.webp'
+    ],
     horarios: 'Sábados, domingos y feriados · 08:30',
     incluye: [],
     itinerario: [],
@@ -519,7 +534,7 @@ export const tours = [
   },
   {
     nombre: 'Los Dos Gigantes: Cerro Champaquí + Cerro La Totora',
-    duracion: '3 días / 2 noches',
+    duracion: '2 días / 1 noche',
     dificultad: 'Media',
     terreno: 'Media',
     distancia: 'Alta',
@@ -858,7 +873,7 @@ export const tours = [
   },
   {
     nombre: 'Travesía Cumbrecita – Villa Alpina: Cerro Wank + Río Subterráneo + Cascadas Escondidas',
-    duracion: '3 días / 2 noches',
+    duracion: '2 días / 1 noche',
     dificultad: 'Media',
     terreno: 'Media',
     distancia: 'Alta',
@@ -870,9 +885,9 @@ export const tours = [
     imagenes: travesiaCumbrecitaVillaAlpinaGaleria,
     horarios: 'Consultar fechas y horarios',
     incluye: [
-      '2 noches de albergue en Villa Alpina (luz por generador, agua caliente y baño)',
+      '1 noche de albergue en Villa Alpina (luz por generador, agua caliente y baño)',
       'Desayunos, meriendas y cenas',
-      'Almuerzo de cierre el día 3',
+      'Almuerzo de cierre el día 2',
       'Traslado en vehículo al albergue al final del día 1'
     ],
     equipamiento: [
@@ -910,15 +925,6 @@ export const tours = [
           { hora: '15:30', evento: 'Llegada al refugio: tiempo libre' },
           { hora: '17:30', evento: 'Merienda' },
           { hora: '21:00', evento: 'Cena' }
-        ]
-      },
-      {
-        dia: 3,
-        titulo: 'Villa Alpina',
-        horas: [
-          { hora: '07:30', evento: 'Desayuno' },
-          { hora: '08:45', evento: 'Caminata por el lote de Villa Alpina' },
-          { hora: '13:00', evento: 'Almuerzo y cierre de la excursión' }
         ]
       }
     ],
@@ -960,7 +966,7 @@ export const tours = [
           { hora: '13:00', evento: 'Comienza el regreso hacia la Olla de Villa Alpina' },
           { hora: '14:30', evento: 'Llegada a la Olla: paramos a disfrutar hasta las 15:30' },
           { hora: '15:30', evento: 'Retorno hacia los autos' },
-          { hora: '—', evento: 'Cierre de la excursión con empanadas o pizza (no incluye bebidas)' }
+          { hora: '15:30-16:30', evento: 'Cierre de la excursión con empanadas o pizza (no incluye bebidas)' }
         ]
       }
     ],
@@ -1004,12 +1010,12 @@ export const tours = [
         distancia: '12 km aprox. · 8 a 10 hs',
         horas: [
           { hora: '07:30', evento: 'Encuentro en el Parador Santa Rita, Altas Cumbres' },
-          { hora: '—', evento: 'Inicio del trekking por el camino serrano hacia la Casita de Cristal, ubicada aproximadamente a 7 km de la ruta' },
-          { hora: '—', evento: 'Recorrido por paisajes de las Altas Cumbres, puestos abandonados y cascadas' },
-          { hora: '—', evento: 'Parada de aproximadamente 1 hora y media en la Casita de Cristal para disfrutar del lugar y compartir la vianda de marcha' },
-          { hora: '—', evento: 'Regreso pasando por un puesto abandonado hasta el sector de Cinco Saltos' },
-          { hora: '—', evento: 'Opción de continuar hasta la cascada más alta del circuito, según las condiciones del terreno y del grupo' },
-          { hora: '—', evento: 'Regreso al Parador Santa Rita, donde dejamos los vehículos' }
+          { hora: '08:30', evento: 'Inicio del trekking por el camino serrano hacia la Casita de Cristal, ubicada aproximadamente a 7 km de la ruta' },
+          { hora: '09:30', evento: 'Recorrido por paisajes de las Altas Cumbres, puestos abandonados y cascadas' },
+          { hora: '11:00', evento: 'Parada de aproximadamente 1 hora y media en la Casita de Cristal para disfrutar del lugar y compartir la vianda de marcha' },
+          { hora: '14:30', evento: 'Regreso pasando por un puesto abandonado hasta el sector de Cinco Saltos' },
+          { hora: '15:00-15:30', evento: 'Opción de continuar hasta la cascada más alta del circuito, según las condiciones del terreno y del grupo' },
+          { hora: '17:30-18:00', evento: 'Regreso al Parador Santa Rita, donde dejamos los vehículos' }
         ]
       }
     ],
@@ -1039,7 +1045,7 @@ export const tours = [
         titulo: 'La Lagunita y Olla del Río Paso de Garay',
         horas: [
           { hora: '09:00', evento: 'Encuentro en la Casa de Rober, La Cumbrecita · Salida del trekking' },
-          { hora: '—', evento: 'Recorrido hacia La Lagunita y Olla del Río Paso de Garay, pasando por Puesto Viejo y Puesto de Juvencio' },
+          { hora: '09:30', evento: 'Recorrido hacia La Lagunita y Olla del Río Paso de Garay, pasando por Puesto Viejo y Puesto de Juvencio' },
           { hora: '17:00', evento: 'Llegada al refugio (aprox.) · Cena y pernocte' }
         ]
       },
@@ -1051,16 +1057,16 @@ export const tours = [
           { hora: '08:20', evento: 'Salida hacia el Cerro La Ventana' },
           { hora: '11:00', evento: 'Arribo: almuerzo con vianda de marcha, fotos y videos' },
           { hora: '13:00', evento: 'Regreso al refugio · Merienda y descanso' },
-          { hora: '—', evento: 'Cena y pernocte' }
+          { hora: '21:00', evento: 'Cena y pernocte' }
         ]
       },
       {
         dia: 3,
         titulo: 'Garganta del Diablo, Cerro Corona y Nacimiento del Río del Medio',
         horas: [
-          { hora: '—', evento: 'Desayuno en el puesto' },
-          { hora: '—', evento: 'Recorrido por Garganta del Diablo, Cerro Corona y Nacimiento del Río del Medio · Almuerzo en marcha' },
-          { hora: '—', evento: 'Merienda en el puesto' },
+          { hora: '07:30', evento: 'Desayuno en el puesto' },
+          { hora: '09:30', evento: 'Recorrido por Garganta del Diablo, Cerro Corona y Nacimiento del Río del Medio' },
+          { hora: '12:30', evento: 'Almuerzo en marcha' },
           { hora: '16:00', evento: 'Regreso al pueblo (llegada aprox.) · Fin de la actividad' }
         ]
       }
@@ -1089,4 +1095,8 @@ for (const tour of tours) {
     ...(requisitosEspeciales[tour.slug] || []),
     ...(tour.requisitos || [])
   ])]
+
+  if (tour.slug === 'travesia-cumbrecita-villa-alpina') {
+    tour.requisitos = tour.requisitos.filter((requisito) => requisito !== 'Linterna frontal')
+  }
 }

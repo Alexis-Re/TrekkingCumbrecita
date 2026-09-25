@@ -38,7 +38,7 @@ onMounted(() => {
 
 onUnmounted(() => observer?.disconnect())
 
-const esDefinir = (tour) => !tour.disponible
+const esProximamente = (tour) => !tour.disponible
 const esPlaceholder = (tour) => tour.imagen === '/assets/tours/default.svg'
 
 // Orden definido por el dueño; los no listados van al final respetando jerarquía
@@ -93,6 +93,36 @@ const toursFiltrados = computed(() => {
     return coincideNombre && coincideDias && coincideDificultad && coincidePrecio(tour) && coincideDisponibilidad
   })
 })
+
+const filtrosActivos = computed(() => {
+  const activos = []
+  if (filtros.value.busqueda) activos.push({ clave: 'busqueda', etiqueta: `"${filtros.value.busqueda}"` })
+  if (filtros.value.dias !== 'todos') activos.push({ clave: 'dias', etiqueta: filtros.value.dias === 'horas' ? 'Jornada / horas' : `${filtros.value.dias} día${filtros.value.dias === '1' ? '' : 's'}` })
+  if (filtros.value.dificultad !== 'todas') activos.push({ clave: 'dificultad', etiqueta: `Dificultad ${filtros.value.dificultad.toLowerCase()}` })
+  if (filtros.value.precio !== 'todos') {
+    const etiquetasPrecio = {
+      'hasta-100000': 'Hasta $100.000',
+      '100000-300000': '$100.000 a $300.000',
+      'mas-300000': 'Más de $300.000',
+      consultar: 'Consultar precio'
+    }
+    activos.push({ clave: 'precio', etiqueta: etiquetasPrecio[filtros.value.precio] })
+  }
+  if (filtros.value.disponibilidad !== 'todas') activos.push({ clave: 'disponibilidad', etiqueta: filtros.value.disponibilidad === 'disponibles' ? 'Disponibles' : 'Próximamente' })
+  return activos
+})
+
+const quitarFiltro = (clave) => {
+  const valoresIniciales = {
+    busqueda: '',
+    dias: 'todos',
+    dificultad: 'todas',
+    precio: 'todos',
+    disponibilidad: 'todas'
+  }
+  filtros.value[clave] = valoresIniciales[clave]
+  reiniciarScroll()
+}
 
 const limpiarFiltros = () => {
   filtros.value = {
@@ -157,12 +187,24 @@ const updateScrollState = () => {
        </div>
 
        <!-- Filtros -->
-       <div class="mb-8 rounded-2xl border border-brand-cream/15 bg-brand-dark/45 p-4 backdrop-blur-sm md:p-5">
-         <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-           <div>
-             <h3 class="font-heading text-xl text-brand-white">Encontrá tu experiencia</h3>
-             <p class="text-xs text-brand-cream/60">{{ toursFiltrados.length }} de {{ toursOrdenados.length }} experiencias</p>
-           </div>
+        <div class="mb-8 overflow-hidden rounded-2xl border border-brand-cream/20 bg-brand-dark/65 shadow-2xl shadow-brand-secondary/20 backdrop-blur-md md:p-5">
+          <div class="h-1 w-full bg-gradient-to-r from-brand-orange via-brand-gold to-brand-cream/20"></div>
+          <div class="px-4 pb-4 pt-6 md:px-0 md:pb-0 md:pt-5">
+          <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div class="flex items-start gap-3">
+              <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-orange/15 text-brand-orange" aria-hidden="true">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6h16M7 12h10m-7 6h4" />
+                </svg>
+              </span>
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <h3 class="font-heading text-xl text-brand-white">Encontrá tu experiencia</h3>
+                  <span class="rounded-full border border-brand-cream/15 bg-brand-cream/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-cream/80">{{ toursFiltrados.length }} resultados</span>
+                </div>
+                <p class="mt-0.5 text-xs text-brand-cream/60">Combiná los filtros para encontrar tu próxima aventura.</p>
+              </div>
+            </div>
            <div class="flex items-center gap-4 self-start md:self-auto">
              <button
                type="button"
@@ -184,23 +226,23 @@ const updateScrollState = () => {
            </div>
          </div>
 
-         <div class="flex flex-col gap-3 sm:flex-row">
-           <label class="relative flex-1">
-             <span class="sr-only">Buscar por nombre</span>
-             <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-cream/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <div class="flex flex-col gap-3 sm:flex-row">
+            <label class="group relative flex-1">
+              <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-brand-cream/75">Buscar experiencia</span>
+              <svg class="pointer-events-none absolute bottom-3 left-3 h-4 w-4 text-brand-cream/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" />
              </svg>
              <input
                v-model="filtros.busqueda"
                type="search"
                placeholder="Buscar experiencia"
-               class="min-h-11 w-full rounded-lg border border-brand-cream/15 bg-brand-card/80 pl-10 pr-3 text-sm text-brand-white outline-none transition-colors placeholder:text-brand-cream/40 focus:border-brand-orange focus:ring-1 focus:ring-brand-orange"
+                class="min-h-11 w-full rounded-xl border border-brand-cream/15 bg-brand-card/70 pl-10 pr-3 text-sm text-brand-white outline-none transition-all placeholder:text-brand-cream/40 hover:border-brand-cream/35 focus:border-brand-orange focus:bg-brand-card focus:ring-2 focus:ring-brand-orange/20"
                @input="reiniciarScroll"
              />
            </label>
            <button
              type="button"
-             class="min-h-11 rounded-lg border border-brand-cream/15 px-4 text-sm font-semibold text-brand-cream transition-colors hover:border-brand-orange hover:text-brand-orange focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-orange sm:hidden"
+              class="min-h-11 rounded-xl border border-brand-cream/20 bg-brand-cream/5 px-4 text-sm font-semibold text-brand-cream transition-all hover:border-brand-orange hover:bg-brand-orange/10 hover:text-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-orange sm:hidden"
              :aria-expanded="mostrarFiltros"
              aria-controls="filtros-avanzados"
              @click="mostrarFiltros = !mostrarFiltros"
@@ -209,50 +251,70 @@ const updateScrollState = () => {
            </button>
          </div>
 
-         <div v-if="mostrarFiltros" id="filtros-avanzados" class="mt-3 grid gap-3 border-t border-brand-cream/10 pt-3 sm:grid-cols-2 lg:grid-cols-4">
-           <label>
-             <span class="sr-only">Filtrar por duración</span>
-             <select v-model="filtros.dias" class="min-h-11 w-full rounded-lg border border-brand-cream/15 bg-brand-card/80 px-3 text-sm text-brand-cream outline-none transition-colors focus:border-brand-orange focus:ring-1 focus:ring-brand-orange" @change="reiniciarScroll">
+          <div v-if="mostrarFiltros" id="filtros-avanzados" class="mt-4 grid gap-3 border-t border-brand-cream/10 pt-4 sm:grid-cols-2 lg:grid-cols-4">
+            <label class="relative">
+              <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-brand-cream/75">Duración</span>
+              <select v-model="filtros.dias" class="min-h-11 w-full appearance-none rounded-xl border border-brand-cream/15 bg-brand-card/70 px-3 pr-9 text-sm text-brand-cream outline-none transition-all hover:border-brand-cream/35 focus:border-brand-orange focus:bg-brand-card focus:ring-2 focus:ring-brand-orange/20" @change="reiniciarScroll">
                <option value="todos">Cualquier duración</option>
                <option value="horas">Jornada / horas</option>
                <option value="1">1 día</option>
                <option value="2">2 días</option>
                <option value="3">3 días</option>
                <option value="7">7 días</option>
-             </select>
-           </label>
+              </select>
+              <svg class="pointer-events-none absolute right-3 bottom-3 h-4 w-4 text-brand-cream/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6" /></svg>
+            </label>
 
-           <label>
-             <span class="sr-only">Filtrar por dificultad</span>
-             <select v-model="filtros.dificultad" class="min-h-11 w-full rounded-lg border border-brand-cream/15 bg-brand-card/80 px-3 text-sm text-brand-cream outline-none transition-colors focus:border-brand-orange focus:ring-1 focus:ring-brand-orange" @change="reiniciarScroll">
+            <label class="relative">
+              <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-brand-cream/75">Dificultad</span>
+              <select v-model="filtros.dificultad" class="min-h-11 w-full appearance-none rounded-xl border border-brand-cream/15 bg-brand-card/70 px-3 pr-9 text-sm text-brand-cream outline-none transition-all hover:border-brand-cream/35 focus:border-brand-orange focus:bg-brand-card focus:ring-2 focus:ring-brand-orange/20" @change="reiniciarScroll">
                <option value="todas">Cualquier dificultad</option>
                <option value="Baja">Dificultad baja</option>
                <option value="Media">Dificultad media</option>
                <option value="Alta">Dificultad alta</option>
-             </select>
-           </label>
+              </select>
+              <svg class="pointer-events-none absolute right-3 bottom-3 h-4 w-4 text-brand-cream/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6" /></svg>
+            </label>
 
-           <label>
-             <span class="sr-only">Filtrar por precio</span>
-             <select v-model="filtros.precio" class="min-h-11 w-full rounded-lg border border-brand-cream/15 bg-brand-card/80 px-3 text-sm text-brand-cream outline-none transition-colors focus:border-brand-orange focus:ring-1 focus:ring-brand-orange" @change="reiniciarScroll">
+            <label class="relative">
+              <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-brand-cream/75">Precio</span>
+              <select v-model="filtros.precio" class="min-h-11 w-full appearance-none rounded-xl border border-brand-cream/15 bg-brand-card/70 px-3 pr-9 text-sm text-brand-cream outline-none transition-all hover:border-brand-cream/35 focus:border-brand-orange focus:bg-brand-card focus:ring-2 focus:ring-brand-orange/20" @change="reiniciarScroll">
                <option value="todos">Cualquier precio</option>
                <option value="hasta-100000">Hasta $100.000</option>
                <option value="100000-300000">$100.000 a $300.000</option>
                <option value="mas-300000">Más de $300.000</option>
                <option value="consultar">Consultar precio</option>
-             </select>
-           </label>
+              </select>
+              <svg class="pointer-events-none absolute right-3 bottom-3 h-4 w-4 text-brand-cream/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6" /></svg>
+            </label>
 
-           <label>
-             <span class="sr-only">Filtrar por disponibilidad</span>
-             <select v-model="filtros.disponibilidad" class="min-h-11 w-full rounded-lg border border-brand-cream/15 bg-brand-card/80 px-3 text-sm text-brand-cream outline-none transition-colors focus:border-brand-orange focus:ring-1 focus:ring-brand-orange" @change="reiniciarScroll">
+            <label class="relative">
+              <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.16em] text-brand-cream/75">Disponibilidad</span>
+              <select v-model="filtros.disponibilidad" class="min-h-11 w-full appearance-none rounded-xl border border-brand-cream/15 bg-brand-card/70 px-3 pr-9 text-sm text-brand-cream outline-none transition-all hover:border-brand-cream/35 focus:border-brand-orange focus:bg-brand-card focus:ring-2 focus:ring-brand-orange/20" @change="reiniciarScroll">
                <option value="todas">Toda la disponibilidad</option>
                <option value="disponibles">Disponibles</option>
                <option value="proximamente">Próximamente</option>
-             </select>
-           </label>
-         </div>
-       </div>
+              </select>
+              <svg class="pointer-events-none absolute right-3 bottom-3 h-4 w-4 text-brand-cream/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6" /></svg>
+            </label>
+          </div>
+
+          <div v-if="filtrosActivos.length" class="mt-4 flex flex-wrap items-center gap-2 border-t border-brand-cream/10 pt-3">
+            <span class="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-cream/50">Activos</span>
+            <button
+              v-for="filtro in filtrosActivos"
+              :key="filtro.clave"
+              type="button"
+              class="inline-flex items-center gap-1.5 rounded-full border border-brand-orange/35 bg-brand-orange/10 px-2.5 py-1 text-xs font-medium text-brand-cream transition-colors hover:border-brand-orange hover:bg-brand-orange/20 hover:text-brand-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-orange"
+              :aria-label="`Quitar filtro ${filtro.etiqueta}`"
+              @click="quitarFiltro(filtro.clave)"
+            >
+              {{ filtro.etiqueta }}
+              <span class="text-brand-orange" aria-hidden="true">×</span>
+            </button>
+          </div>
+          </div>
+        </div>
 
       <!-- Horizontal scroll container -->
       <div class="relative group/nav">
@@ -265,7 +327,7 @@ const updateScrollState = () => {
           @click="scroll(-1)"
            v-if="canScrollLeft"
           aria-label="Experiencia anterior"
-          class="absolute left-0 md:-left-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-brand-cream/10 backdrop-blur-sm border border-brand-cream/10 flex items-center justify-center text-brand-cream opacity-60 md:opacity-0 md:group-hover/nav:opacity-100 hover:bg-brand-orange hover:border-brand-orange hover:text-brand-white active:scale-95 transition-all duration-300"
+            class="absolute left-0 md:-left-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-brand-cream/10 backdrop-blur-sm border border-brand-cream/10 flex items-center justify-center text-brand-cream opacity-60 md:opacity-0 md:group-hover/nav:opacity-100 focus-visible:opacity-100 hover:bg-brand-orange hover:border-brand-orange hover:text-brand-white active:scale-95 transition-all duration-300"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -275,7 +337,7 @@ const updateScrollState = () => {
           @click="scroll(1)"
            v-if="canScrollRight"
           aria-label="Experiencia siguiente"
-          class="absolute right-0 md:-right-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-brand-cream/10 backdrop-blur-sm border border-brand-cream/10 flex items-center justify-center text-brand-cream opacity-60 md:opacity-0 md:group-hover/nav:opacity-100 hover:bg-brand-orange hover:border-brand-orange hover:text-brand-white active:scale-95 transition-all duration-300"
+            class="absolute right-0 md:-right-5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-brand-cream/10 backdrop-blur-sm border border-brand-cream/10 flex items-center justify-center text-brand-cream opacity-60 md:opacity-0 md:group-hover/nav:opacity-100 focus-visible:opacity-100 hover:bg-brand-orange hover:border-brand-orange hover:text-brand-white active:scale-95 transition-all duration-300"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -309,7 +371,7 @@ const updateScrollState = () => {
               />
               <div class="absolute inset-0 bg-gradient-to-t from-brand-dark/70 via-brand-dark/10 to-transparent"></div>
               <span
-                v-if="esDefinir(tour)"
+                v-if="esProximamente(tour)"
                 class="absolute top-3 left-3 bg-brand-orange text-brand-white text-xs font-bold px-3 py-1 rounded-full font-sans"
               >
                 Próximamente
@@ -336,14 +398,14 @@ const updateScrollState = () => {
                  {{ tour.nombre }}
                </h3>
 
-               <div v-if="!esDefinir(tour)" class="min-h-10 line-clamp-2 flex items-start gap-1 mb-4 text-sm text-brand-cream/60 font-sans">
+                <div v-if="!esProximamente(tour)" class="min-h-10 line-clamp-2 flex items-start gap-1 mb-4 text-sm text-brand-cream/60 font-sans">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 text-brand-cream/40">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                 </svg>
                 {{ tour.horarios }}
               </div>
 
-               <div v-if="!esDefinir(tour)" class="mb-5 flex items-center justify-between gap-3">
+                <div v-if="!esProximamente(tour)" class="mb-5 flex items-center justify-between gap-3">
                 <div class="min-w-0">
                   <div class="flex items-baseline gap-2">
                     <span class="text-brand-cream/90 font-heading text-2xl">
@@ -356,7 +418,6 @@ const updateScrollState = () => {
                   </p>
                 </div>
                 <a
-                  v-if="!esDefinir(tour)"
                   :href="crearConsultaTour(tour)"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -370,25 +431,12 @@ const updateScrollState = () => {
               </div>
 
               <button
-                v-if="!esDefinir(tour)"
+                v-if="!esProximamente(tour)"
                 @click="selectedTour = tour"
                 class="w-full min-h-11 border-2 border-brand-cream/20 text-brand-cream/80 rounded-lg py-3.5 font-sans font-semibold hover:bg-brand-orange hover:border-brand-orange hover:text-brand-white hover:shadow-md hover:shadow-brand-orange/20 transition-all duration-300 text-sm"
               >
                 Conocer la experiencia
               </button>
-              <a
-                v-if="false"
-                :href="crearConsultaTour(tour)"
-                target="_blank"
-                rel="noopener noreferrer"
-                :aria-label="`Consultar por WhatsApp sobre ${tour.nombre}`"
-                class="hidden"
-              >
-                <span>Consultar por este recorrido</span>
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.198.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884"/>
-                </svg>
-              </a>
             </div>
           </article>
          </div>

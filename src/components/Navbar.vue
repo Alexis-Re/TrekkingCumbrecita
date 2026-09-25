@@ -6,7 +6,7 @@ const mobileOpen = ref(false)
 const activeSection = ref('')
 const menuButton = ref(null)
 const firstMenuLink = ref(null)
-let sectionObserver
+let observedSections = []
 
 const links = [
   { label: 'Experiencias', href: '#tours' },
@@ -17,6 +17,15 @@ const links = [
 
 function handleScroll() {
   scrolled.value = window.scrollY > 50
+
+  const marker = Math.min(window.innerHeight * 0.35, 240)
+  let currentSection = ''
+
+  for (const section of observedSections) {
+    if (section.getBoundingClientRect().top <= marker) currentSection = section.id
+  }
+
+  activeSection.value = currentSection
 }
 
 function scrollToTop() {
@@ -25,6 +34,7 @@ function scrollToTop() {
 }
 
 function scrollTo(href) {
+  activeSection.value = href.startsWith('#') ? href.slice(1) : ''
   closeMobile()
   if (href.startsWith('#')) {
     document.getElementById(href.slice(1))?.scrollIntoView({ behavior: 'smooth' })
@@ -54,20 +64,9 @@ function onKeydown(e) {
 onMounted(() => {
   window.addEventListener('scroll', handleScroll, { passive: true })
   document.addEventListener('keydown', onKeydown)
-  sectionObserver = new IntersectionObserver(
-    (entries) => {
-      const visible = entries
-        .filter((entry) => entry.isIntersecting)
-        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
-
-      if (visible[0]) activeSection.value = visible[0].target.id
-    },
-    { rootMargin: '-18% 0px -62% 0px', threshold: 0 },
-  )
-
   for (const id of ['tours', 'identity', 'gallery', 'contacto']) {
     const section = document.getElementById(id)
-    if (section) sectionObserver.observe(section)
+    if (section) observedSections.push(section)
   }
 
   handleScroll()
@@ -76,7 +75,7 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
   document.removeEventListener('keydown', onKeydown)
-  sectionObserver?.disconnect()
+  observedSections = []
   document.body.style.overflow = ''
 })
 </script>
@@ -84,24 +83,27 @@ onUnmounted(() => {
 <template>
   <nav
     aria-label="Navegación principal"
-    class="fixed inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)] transition-all duration-300"
+    class="fixed inset-x-0 top-0 z-50 border-b border-transparent pt-[env(safe-area-inset-top)] transition-all duration-300"
     :class="scrolled
-      ? 'bg-brand-dark/95 backdrop-blur-md shadow-lg shadow-brand-dark/50'
+      ? 'border-brand-cream/10 bg-brand-dark/95 backdrop-blur-md shadow-lg shadow-brand-dark/50'
       : 'bg-gradient-to-b from-brand-dark/60 to-transparent'"
   >
-    <div class="max-w-7xl mx-auto pl-3 pr-3 lg:pl-12 lg:pr-10 flex items-center justify-between min-h-16 md:min-h-[80px] transition-[min-height] duration-300" :class="scrolled ? 'md:min-h-[68px]' : ''">
+    <div class="mx-auto flex min-h-16 max-w-7xl items-center justify-between px-4 transition-[min-height] duration-300 md:min-h-[80px] lg:px-12" :class="scrolled ? 'md:min-h-[68px]' : ''">
 
       <!-- Logo -->
       <a href="#" @click.prevent="scrollToTop" class="flex items-center gap-2 shrink-0" aria-label="Ir al inicio">
         <img
           src="/assets/navbar/logoTC.webp"
           alt="Trekking Cumbrecita"
-          class="h-12 md:h-16 w-auto transition-transform duration-300 hover:scale-110"
+          class="h-11 w-auto transition-all duration-300 hover:scale-105 md:h-14"
         />
       </a>
 
       <!-- Desktop links -->
-      <div class="hidden md:flex items-center gap-6 lg:gap-8">
+      <div
+        class="hidden items-center gap-1 rounded-full border px-2 py-1.5 backdrop-blur-sm transition-all duration-300 md:flex"
+        :class="scrolled ? 'border-brand-cream/10 bg-brand-card/45' : 'border-brand-cream/15 bg-brand-dark/20'"
+      >
         <a
           v-for="link in links"
           :key="link.label"
@@ -109,18 +111,20 @@ onUnmounted(() => {
           :target="link.external ? '_blank' : undefined"
           :rel="link.external ? 'noopener noreferrer' : undefined"
           :aria-current="activeSection === link.href?.slice(1) ? 'location' : undefined"
-          class="relative font-sans text-sm tracking-wide uppercase transition-colors duration-300 py-1"
+          class="relative rounded-full px-3 py-2 font-sans text-xs tracking-[0.12em] uppercase transition-all duration-300 lg:px-4"
           :class="[
             !link.external && activeSection === link.href?.slice(1)
-              ? 'text-brand-orange font-semibold'
-              : 'text-brand-cream/90 hover:text-brand-orange'
+              ? 'bg-brand-orange/15 font-semibold text-brand-orange'
+              : link.href === '#contacto'
+                ? 'bg-brand-orange text-brand-white shadow-sm shadow-brand-orange/20 hover:bg-brand-gold'
+                : 'text-brand-cream/90 hover:bg-brand-cream/10 hover:text-brand-white'
           ]"
           @click.prevent="!link.external && scrollTo(link.href)"
         >
           {{ link.label }}
           <span
             v-if="!link.external && activeSection === link.href?.slice(1)"
-            class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-orange to-brand-gold rounded-full"
+            class="absolute bottom-1 left-3 right-3 h-0.5 rounded-full bg-gradient-to-r from-brand-orange to-brand-gold lg:left-4 lg:right-4"
           ></span>
         </a>
 
@@ -130,22 +134,25 @@ onUnmounted(() => {
       <button
         ref="menuButton"
         @click="toggleMobile"
-        class="md:hidden relative w-11 h-11 flex flex-col items-center justify-center gap-1.5 rounded-full border border-brand-cream/30 bg-brand-dark/40 backdrop-blur-sm active:scale-95 transition-transform duration-200"
+        class="relative flex h-11 w-11 flex-col items-center justify-center gap-1.5 rounded-full border backdrop-blur-sm transition-all duration-300 active:scale-95 md:hidden"
+        :class="mobileOpen
+          ? 'border-brand-orange/60 bg-brand-orange/15 shadow-lg shadow-brand-orange/10'
+          : 'border-brand-cream/30 bg-brand-dark/45 hover:border-brand-orange/50 hover:bg-brand-dark/70'"
         :aria-label="mobileOpen ? 'Cerrar menú' : 'Abrir menú'"
         :aria-expanded="mobileOpen"
         aria-controls="mobile-menu"
       >
         <span
-          class="w-6 h-0.5 bg-brand-cream rounded transition-all duration-300 origin-center"
-          :class="mobileOpen ? 'rotate-45 translate-y-2' : ''"
+          class="h-0.5 w-5 rounded-full bg-brand-cream transition-all duration-300 origin-center"
+          :class="mobileOpen ? 'translate-y-2 rotate-45 bg-brand-orange' : ''"
         ></span>
         <span
-          class="w-6 h-0.5 bg-brand-cream rounded transition-all duration-300"
+          class="h-0.5 w-5 rounded-full bg-brand-cream transition-all duration-300"
           :class="mobileOpen ? 'opacity-0 scale-0' : ''"
         ></span>
         <span
-          class="w-6 h-0.5 bg-brand-cream rounded transition-all duration-300 origin-center"
-          :class="mobileOpen ? '-rotate-45 -translate-y-2' : ''"
+          class="h-0.5 w-5 rounded-full bg-brand-cream transition-all duration-300 origin-center"
+          :class="mobileOpen ? '-translate-y-2 -rotate-45 bg-brand-orange' : ''"
         ></span>
       </button>
     </div>
@@ -170,8 +177,12 @@ onUnmounted(() => {
         id="mobile-menu"
         role="dialog"
         aria-label="Menú de navegación"
-        class="relative z-50 md:hidden bg-brand-dark/95 backdrop-blur-md border-t border-brand-cream/10 rounded-b-2xl shadow-2xl shadow-brand-dark/50 px-6 pt-2 pb-7"
+         class="relative z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto rounded-b-2xl border-t border-brand-cream/10 bg-brand-dark/98 px-5 pb-7 pt-3 shadow-2xl shadow-brand-dark/60 backdrop-blur-md md:hidden"
       >
+        <div class="mb-2 flex items-center justify-between border-b border-brand-cream/10 px-3 pb-3">
+          <span class="font-heading text-lg tracking-wide text-brand-white">Explorá Trekking Cumbrecita</span>
+          <span class="h-1.5 w-1.5 rounded-full bg-brand-orange shadow-sm shadow-brand-orange/60" aria-hidden="true"></span>
+        </div>
         <a
           v-for="(link, i) in links"
           :key="link.label"
@@ -180,12 +191,11 @@ onUnmounted(() => {
           :target="link.external ? '_blank' : undefined"
           :rel="link.external ? 'noopener noreferrer' : undefined"
           :aria-current="activeSection === link.href?.slice(1) ? 'location' : undefined"
-          class="block min-h-12 py-3.5 font-sans text-base tracking-wide uppercase rounded-lg transition-colors duration-300 active:bg-brand-cream/10"
+          class="block min-h-12 rounded-xl py-3.5 font-sans text-sm tracking-[0.12em] uppercase transition-all duration-300 active:bg-brand-cream/10"
           :class="[
-            i > 0 ? 'border-t border-brand-cream/10' : '',
             !link.external && activeSection === link.href?.slice(1)
-              ? 'text-brand-orange font-semibold border-l-2 border-brand-orange pl-3'
-              : 'text-brand-cream/90 hover:text-brand-orange pl-3.5'
+              ? 'bg-brand-orange/10 font-semibold text-brand-orange ring-1 ring-inset ring-brand-orange/20 pl-4'
+              : 'pl-4 text-brand-cream/90 hover:bg-brand-cream/5 hover:text-brand-white'
           ]"
           :style="{ animationDelay: `${i * 60}ms` }"
           @click.prevent="!link.external && scrollTo(link.href)"
@@ -194,7 +204,7 @@ onUnmounted(() => {
         </a>
 
         <!-- Redes sociales -->
-        <div class="flex justify-center gap-4 mt-5" :style="{ animationDelay: `${(links.length + 1) * 60}ms` }">
+        <div class="mt-5 flex justify-center gap-3 border-t border-brand-cream/10 pt-5" :style="{ animationDelay: `${(links.length + 1) * 60}ms` }">
           <a
             href="https://www.instagram.com/trekking_cumbrecita/"
             target="_blank"
