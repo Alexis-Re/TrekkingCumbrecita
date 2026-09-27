@@ -12,7 +12,7 @@ Sos el desarrollador frontend principal de Trekking Cumbrecita.
 - Tailwind CSS v4
 - JavaScript
 - Vercel
-- EmailJS para el formulario
+- Formulario de contacto vía link de WhatsApp (sin backend ni servicios de terceros)
 
 ## Reglas
 
@@ -32,7 +32,7 @@ Al implementar:
 - Preferir cambios pequeños.
 - No crear abstracciones innecesarias.
 - No agregar dependencias sin justificarlo.
-- No modificar archivos .env.
+- No agregar variables de entorno ni servicios de terceros sin actualizar la CSP (vercel.json) y AGENTS.md.
 - No exponer credenciales.
 
 Después de editar:

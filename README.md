@@ -5,7 +5,7 @@ Landing page de Trekking Cumbrecita: senderos y trekking guiado por el Valle de 
 ## Stack
 
 - **Vue 3** (`<script setup>` SFCs) + **Vite 8** + **Tailwind CSS v4**
-- Formulario de contacto con **EmailJS** (`@emailjs/browser`)
+- Canal de contacto vía **WhatsApp** (el formulario arma el mensaje y abre `wa.me`, sin backend ni servicios de terceros)
 - Optimización de imágenes en build con `vite-plugin-image-optimizer` (sharp + svgo)
 
 ## Requisitos
@@ -18,17 +18,7 @@ Landing page de Trekking Cumbrecita: senderos y trekking guiado por el Valle de 
 npm install
 ```
 
-Copiá las variables de entorno y completalas con tus credenciales de EmailJS:
-
-```sh
-cp .env.example .env
-```
-
-Variables necesarias:
-
-- `VITE_EMAILJS_SERVICE_ID`
-- `VITE_EMAILJS_TEMPLATE_ID`
-- `VITE_EMAILJS_PUBLIC_KEY`
+No se requieren variables de entorno.
 
 ## Scripts
 
@@ -36,10 +26,9 @@ Variables necesarias:
 npm run dev        # servidor de desarrollo
 npm run build      # build de producción → dist/
 npm run preview    # previsualizar el build de producción
+npm run check:tours # valida los datos de src/data/tours.js
 ```
 
 ## Deploy (Vercel)
 
-Vercel detecta el proyecto como Vite automáticamente (build `vite build`, output `dist/`).
-
-Antes de deployar, configurá las variables de entorno de EmailJS en **Project Settings → Environment Variables** (las mismas tres de arriba, con prefijo `VITE_`). Sin ellas, el formulario de contacto fallará.
+Vercel detecta el proyecto como Vite automáticamente (build `vite build`, output `dist/`). No necesita variables de entorno.
