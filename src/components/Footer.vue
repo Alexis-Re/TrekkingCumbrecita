@@ -1,5 +1,19 @@
 <script setup>
+import { ref } from 'vue'
+import { crearLinkMailto, copiarEmail } from '../utils/email.js'
+
 const year = new Date().getFullYear()
+
+const linkEmail = crearLinkMailto({ subject: 'Consulta Trekking Cumbrecita' })
+const emailCopiado = ref(false)
+let temporizadorCopiado
+
+async function copiarCorreo() {
+  const ok = await copiarEmail()
+  emailCopiado.value = ok
+  clearTimeout(temporizadorCopiado)
+  if (ok) temporizadorCopiado = setTimeout(() => { emailCopiado.value = false }, 2500)
+}
 
 const navLinks = [
   { label: 'Experiencias', href: '#tours' },
@@ -97,7 +111,7 @@ function scrollTo(href) {
             </li>
             <li>
               <a
-                href="mailto:Cascadaelchorrillo.2018@gmail.com"
+                :href="linkEmail"
                 class="flex items-center gap-2.5 py-1.5 text-brand-cream/70 text-base font-sans hover:text-brand-orange active:text-brand-orange transition-colors duration-300"
               >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
@@ -105,13 +119,22 @@ function scrollTo(href) {
                 </svg>
                 Email
               </a>
+              <button
+                type="button"
+                class="ml-7 py-0.5 text-left text-xs font-sans text-brand-cream/75 hover:text-brand-orange active:text-brand-orange transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-orange"
+                :aria-label="emailCopiado ? 'Email copiado al portapapeles' : 'Copiar email al portapapeles'"
+                aria-live="polite"
+                @click="copiarCorreo"
+              >
+                {{ emailCopiado ? '¡Copiado!' : 'Copiar email' }}
+              </button>
             </li>
           </ul>
         </div>
       </div>
 
       <!-- Barra inferior -->
-      <div class="border-t border-brand-cream/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div id="footer-bottom" class="border-t border-brand-cream/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
         <p class="text-brand-cream/50 text-sm font-sans text-center md:text-left">
           &copy; {{ year }} Trekking Cumbrecita. Todos los derechos reservados.
         </p>

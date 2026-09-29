@@ -42,12 +42,14 @@ onUnmounted(() => {
 <template>
   <section id="documentacion" ref="sectionRef" class="relative scroll-mt-24 overflow-hidden border-y border-brand-cream/10 bg-brand-dark py-10 md:py-14">
     <img
-      src="/assets/documentacion/documento-ilustracion.svg"
+      src="/assets/tours/los-gigantes-cerro-mogote-cajones/grupo-caminando-sol.webp"
       alt=""
       aria-hidden="true"
-      class="pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-center opacity-10 md:opacity-20"
+      loading="lazy"
+      decoding="async"
+      class="pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-center"
     />
-    <div class="absolute inset-0 bg-brand-dark/80 md:bg-brand-dark/75"></div>
+    <div class="absolute inset-0 bg-brand-dark/85"></div>
 
     <div class="relative z-10 mx-auto max-w-5xl px-4 md:px-8 lg:px-16">
       <div

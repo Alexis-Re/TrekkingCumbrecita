@@ -2,8 +2,24 @@
 import { computed, ref } from 'vue'
 import { tours } from '../data/tours.js'
 import WhatsAppIcon from '../components/WhatsAppIcon.vue'
+import DatePicker from '../components/DatePicker.vue'
+import { crearLinkMailto, copiarEmail } from '../utils/email.js'
 
 const WHATSAPP_NUMBER = '5493546453047'
+
+const linkEmail = crearLinkMailto({
+  subject: 'Consulta Trekking Cumbrecita',
+  body: 'Hola Rober,\n\nTe escribo desde la web de Trekking Cumbrecita.\n\n'
+})
+const emailCopiado = ref(false)
+let temporizadorCopiado
+
+async function copiarCorreo() {
+  const ok = await copiarEmail()
+  emailCopiado.value = ok
+  clearTimeout(temporizadorCopiado)
+  if (ok) temporizadorCopiado = setTimeout(() => { emailCopiado.value = false }, 2500)
+}
 
 const opciones = [
   { id: 'reserva', titulo: 'Quiero reservar una salida', descripcion: 'Decime qué experiencia te interesa y para cuándo.', icono: 'calendar' },
@@ -105,7 +121,10 @@ function volver() {
                 <p class="mb-6 font-sans text-sm text-brand-cream/60">Con estos datos te confirmo disponibilidad por WhatsApp.</p>
                 <label class="block font-sans text-sm text-brand-cream/80">Experiencia<select v-model="datos.tour" class="mt-2 min-h-12 w-full rounded-lg border border-brand-cream/15 bg-brand-card px-4 py-3 text-base text-brand-cream focus:border-brand-orange/60 focus:outline-none"><option value="" disabled>Elegí una experiencia</option><option v-for="tour in toursDisponibles" :key="tour.slug" :value="tour.nombre">{{ tour.nombre }}</option></select></label>
                 <div class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
-                  <label class="block font-sans text-sm text-brand-cream/80">Fecha tentativa<input v-model="datos.fecha" :min="fechaMinima" type="date" class="mt-2 min-h-12 w-full rounded-lg border border-brand-cream/15 bg-brand-card px-4 py-3 text-base text-brand-cream focus:border-brand-orange/60 focus:outline-none" /></label>
+                  <div>
+                    <label for="fecha-contacto" class="block font-sans text-sm text-brand-cream/80">Fecha tentativa</label>
+                    <DatePicker id="fecha-contacto" v-model="datos.fecha" :min-date="fechaMinima" surface="card" class="mt-2" />
+                  </div>
                   <label class="block font-sans text-sm text-brand-cream/80">Cantidad de personas<select v-model="datos.personas" class="mt-2 min-h-12 w-full rounded-lg border border-brand-cream/15 bg-brand-card px-4 py-3 text-base text-brand-cream focus:border-brand-orange/60 focus:outline-none"><option v-for="cantidad in 12" :key="cantidad" :value="String(cantidad)">{{ cantidad }} {{ cantidad === 1 ? 'persona' : 'personas' }}</option></select></label>
                 </div>
               </div>
@@ -131,10 +150,17 @@ function volver() {
         <div class="flex flex-col lg:col-span-2">
           <h3 class="font-heading text-3xl uppercase text-brand-white">¿Preferís escribirme directamente?</h3>
           <p class="mb-7 mt-3 font-sans text-sm leading-relaxed text-brand-cream/65">Te respondo por WhatsApp en menos de 1 hora. También podés encontrarme por Instagram o email.</p>
-          <div class="space-y-3">
-            <a href="https://wa.me/5493546453047" target="_blank" rel="noopener noreferrer" class="flex min-h-14 items-center gap-3 rounded-xl border border-brand-cream/15 bg-brand-card/80 px-4 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#25D366]/60"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#25D366]/15 text-[#25D366]"><WhatsAppIcon /></span><span><strong class="block font-sans text-sm text-brand-white">WhatsApp</strong><small class="font-sans text-xs text-brand-cream/50">Respuesta habitual en menos de 1 hora</small></span></a>
-            <a href="mailto:cascadaelchorrillo.2018@gmail.com?subject=Consulta%20Trekking%20Cumbrecita" class="flex min-h-14 items-center gap-3 rounded-xl border border-brand-cream/15 bg-brand-card/80 px-4 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-orange/50"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-orange/15 text-brand-orange"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg></span><span><strong class="block font-sans text-sm text-brand-white">Email</strong><small class="break-all font-sans text-xs text-brand-cream/50">cascadaelchorrillo.2018@gmail.com</small></span></a>
-            <a href="https://www.instagram.com/trekking_cumbrecita/" target="_blank" rel="noopener noreferrer" class="flex min-h-14 items-center gap-3 rounded-xl border border-brand-cream/15 bg-brand-card/80 px-4 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#E1306C]/60"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#E1306C]/15 text-[#E1306C]"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.28-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0 5.838a4 4 0 100 8 4 4 0 000-8zm6.406-1.56a1.44 1.44 0 100 2.88 1.44 1.44 0 000-2.88z" /></svg></span><span><strong class="block font-sans text-sm text-brand-white">Instagram</strong><small class="font-sans text-xs text-brand-cream/50">@trekking_cumbrecita</small></span></a>
+          <div id="contacto-canales" class="space-y-3">
+            <a href="https://wa.me/5493546453047" target="_blank" rel="noopener noreferrer" class="flex min-h-14 items-center gap-3 rounded-xl border border-brand-cream/15 bg-brand-card/80 px-4 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#25D366]/60"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#25D366]/15 text-[#25D366]"><WhatsAppIcon /></span><span><strong class="block font-sans text-sm text-brand-white">WhatsApp</strong><small class="font-sans text-xs text-brand-cream/80">Respuesta habitual en menos de 1 hora</small></span></a>
+            <div class="flex items-stretch gap-3">
+              <a :href="linkEmail" class="flex min-h-14 flex-1 items-center gap-3 rounded-xl border border-brand-cream/15 bg-brand-card/80 px-4 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-orange/50"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-orange/15 text-brand-orange"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg></span><span><strong class="block font-sans text-sm text-brand-white">Email</strong><small v-if="emailCopiado" class="font-sans text-xs text-brand-orange">Email copiado ✓</small><small v-else class="break-words font-sans text-xs text-brand-cream/80">cascadaelchorrillo.2018@<wbr />gmail.com</small></span></a>
+              <button type="button" class="flex min-h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-brand-cream/15 bg-brand-card/80 text-brand-cream/60 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-orange/50 hover:text-brand-orange focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-orange" :aria-label="emailCopiado ? 'Email copiado al portapapeles' : 'Copiar email al portapapeles'" @click="copiarCorreo">
+                <svg v-if="!emailCopiado" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" /></svg>
+                <svg v-else class="h-5 w-5 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.5 12.75l6 6 9-13.5" /></svg>
+              </button>
+            </div>
+            <p aria-live="polite" class="sr-only">{{ emailCopiado ? 'Email copiado al portapapeles' : '' }}</p>
+            <a href="https://www.instagram.com/trekking_cumbrecita/" target="_blank" rel="noopener noreferrer" class="flex min-h-14 items-center gap-3 rounded-xl border border-brand-cream/15 bg-brand-card/80 px-4 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#E1306C]/60"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#E1306C]/15 text-[#E1306C]"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.28-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0 5.838a4 4 0 100 8 4 4 0 000-8zm6.406-1.56a1.44 1.44 0 100 2.88 1.44 1.44 0 000-2.88z" /></svg></span><span><strong class="block font-sans text-sm text-brand-white">Instagram</strong><small class="font-sans text-xs text-brand-cream/80">@trekking_cumbrecita</small></span></a>
           </div>
           <div class="mt-8 border-t border-brand-cream/10 pt-6">
             <p class="mb-3 font-sans text-xs uppercase tracking-wider text-brand-orange">Antes de salir</p>

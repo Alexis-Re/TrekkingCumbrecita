@@ -4,7 +4,12 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 const props = defineProps({
   id: { type: String, default: 'date-picker' },
   modelValue: { type: String, default: '' },
-  minDate: { type: String, required: true }
+  minDate: { type: String, required: true },
+  surface: {
+    type: String,
+    default: 'dark',
+    validator: (valor) => ['dark', 'card'].includes(valor)
+  }
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -14,6 +19,12 @@ const isOpen = ref(false)
 const activeDate = ref(null)
 const monthLabels = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
 const weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+
+const surfaceClass = computed(() => (
+  props.surface === 'card'
+    ? 'bg-brand-card px-4 text-base'
+    : 'bg-brand-dark/60 px-3 text-sm'
+))
 
 function parseDate(value) {
   if (!value) return null
@@ -160,7 +171,8 @@ onUnmounted(() => {
     <button
       :id="id"
       type="button"
-      class="flex min-h-12 w-full items-center gap-3 rounded-lg border border-brand-cream/15 bg-brand-dark/60 px-3 text-left text-sm font-sans text-brand-cream transition-all duration-200 hover:border-brand-cream/35 focus:outline-none focus:ring-2 focus:ring-brand-orange/35"
+      class="flex min-h-12 w-full items-center gap-3 rounded-lg border border-brand-cream/15 text-left font-sans text-brand-cream transition-all duration-200 hover:border-brand-cream/35 focus:outline-none focus:ring-2 focus:ring-brand-orange/35"
+      :class="surfaceClass"
       :aria-expanded="isOpen"
       aria-haspopup="dialog"
       :aria-controls="`${id}-panel`"
@@ -169,7 +181,7 @@ onUnmounted(() => {
       <svg class="h-4 w-4 shrink-0 text-brand-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 3v2.25M17.25 3v2.25M3.75 9.75h16.5M5.25 5.25h13.5a1.5 1.5 0 011.5 1.5v12a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-12a1.5 1.5 0 011.5-1.5z" />
       </svg>
-      <span class="min-w-0 flex-1 capitalize" :class="modelValue ? 'text-brand-cream' : 'text-brand-cream/50'">{{ formattedValue(modelValue) }}</span>
+      <span class="min-w-0 flex-1 truncate capitalize" :class="modelValue ? 'text-brand-cream' : 'text-brand-cream/85'">{{ formattedValue(modelValue) }}</span>
       <svg class="h-4 w-4 shrink-0 text-brand-cream/50 transition-transform duration-200" :class="isOpen ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m6 9 6 6 6-6" />
       </svg>

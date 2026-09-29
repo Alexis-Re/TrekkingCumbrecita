@@ -15,13 +15,18 @@ npm install        # install dependencies
 npm run dev        # start dev server
 npm run build      # production build → dist/
 npm run preview    # preview production build
+npm run check:tours           # validate tours data (scripts/validate-tours.mjs)
+npm run video -- <ruta>.mp4    # compress a video for web (scripts/compress-video.mjs)
 ```
 
-No lint, typecheck, or test commands are configured.
+No lint or typecheck commands are configured; `check:tours` validates tour data consistency.
 
 ## Project structure
 
 ```
+scripts/
+  validate-tours.mjs   # npm run check:tours — tour data sanity checks
+  compress-video.mjs   # npm run video — H.264/AAC + faststart web compression (ffmpeg-static)
 src/
   main.js              # app entry
   App.vue              # root component — renders sections in this order: Navbar, Hero, Tours, Identity, Testimonials, Gallery, Contact, Footer
@@ -51,7 +56,9 @@ public/
 - Font families: `font-sans` (Inter) for body, `font-heading` (Bebas Neue) for headings
 - Tours marked `precio: 'Definir'` render with a "Próximamente" badge/button, use `default.svg`, and do not open the modal
 - `src/data/tours.js` is the single source of truth for tours; per-tour images live in `public/assets/tours/<slug>/`. The Contact form's tour `<select>` filters out tours with `disponible: false`
-- Contact/social links are hardcoded, not centralized: WhatsApp number, email, and Instagram are in `Contact.vue`; Instagram and Facebook are in `Hero.vue`
+- Tour videos: optional `video: { tipo: 'local', src, poster }` field in `tours.js` (also `tipo: 'youtube'` for an embed). The file lives in `public/assets/tours/<slug>/`; `TourModal.vue` shows it as the first media item with `preload="metadata"` and poster. Always compress new videos with `npm run video -- <ruta>` (H.264 + AAC + faststart; default CRF 26, use `--crf 30` for sources already heavily compressed, `--force` for files not tracked by git yet — the script overwrites in place, git is the backup)
+- Images: `vite.config.js` has a build-only plugin (`redimensionar-imagenes-build`) that downscales any `dist/` image whose long edge exceeds 2560 px, running before `vite-plugin-image-optimizer`'s q80 pass. `public/` originals stay untouched — do not pre-resize or hand-optimize photos
+- Contact/social links are hardcoded, not centralized: the email address lives in `src/utils/email.js` (`EMAIL`, plus `crearLinkMailto()` and `copiarEmail()` helpers used by `Contact.vue` and `Footer.vue`); WhatsApp number is in `Contact.vue`; Instagram and Facebook are in `Hero.vue`
 - `composables/` is scaffolding — populate only as the landing page grows
 
 ## Contact flow (WhatsApp, no backend)
@@ -60,6 +67,13 @@ public/
 - User input goes into the message only via `encodeURIComponent` (do not concatenate raw input into URLs)
 - Input caps enforced in markup: `nombre` `maxlength="60"`, `detalle` `maxlength="500"`
 - WhatsApp number is hardcoded in `Contact.vue` (`WHATSAPP_NUMBER`); it is public by design (also present in the JSON-LD of `index.html`)
+- Email contact: a `mailto:` deep link with prefilled subject/body (`crearLinkMailto()` in `src/utils/email.js`) plus a "Copiar email" button that uses the Clipboard API with a `textarea` + `execCommand` fallback — no form service, no CSP change. Encode `mailto` params with `encodeURIComponent` (never `URLSearchParams`, it emits `+` instead of `%20`)
+
+## Media budget (Vercel Hobby)
+
+- Full analysis in `docs/consumo-medios.md`: media inventory, per-visit bandwidth, "1 video per tour" scenario and how many visits fit in Vercel's free **100 GB/month**
+- Rules of thumb: video ≈ 9-10 MB per 60 s (keep every file far below Vercel's 100 MB per-file cap); one full-scroll visit ≈ 15 MB; deploy ≈ 53 MB
+- Verify real usage in the Vercel dashboard → Usage → Fast Data Transfer
 
 ## Security
 

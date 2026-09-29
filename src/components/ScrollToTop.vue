@@ -2,6 +2,9 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 
 const visible = ref(false)
+const canalesVisibles = ref(false)
+const pieVisible = ref(false)
+let observador
 
 function handleScroll() {
   visible.value = window.scrollY > 300
@@ -11,8 +14,31 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-onMounted(() => window.addEventListener('scroll', handleScroll, { passive: true }))
-onUnmounted(() => window.removeEventListener('scroll', handleScroll))
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll, { passive: true })
+
+  // Se oculta mientras las tarjetas de contacto o la barra inferior del footer
+  // están a la vista, para no tapar el botón de copiar email ni el copyright
+  const zonas = [
+    document.getElementById('contacto-canales'),
+    document.getElementById('footer-bottom')
+  ].filter(Boolean)
+
+  if (zonas.length && 'IntersectionObserver' in window) {
+    observador = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.target.id === 'contacto-canales') canalesVisibles.value = entry.isIntersecting
+        if (entry.target.id === 'footer-bottom') pieVisible.value = entry.isIntersecting
+      }
+    })
+    zonas.forEach((zona) => observador.observe(zona))
+  }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+  observador?.disconnect()
+})
 </script>
 
 <template>
@@ -25,7 +51,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
     leave-to-class="opacity-0 scale-75"
   >
     <button
-      v-if="visible"
+      v-if="visible && !canalesVisibles && !pieVisible"
       type="button"
       aria-label="Volver arriba"
       @click="scrollToTop"

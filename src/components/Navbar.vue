@@ -10,6 +10,7 @@ let observedSections = []
 
 const links = [
   { label: 'Experiencias', href: '#tours' },
+  { label: 'Calendario', href: '#calendario' },
   { label: 'Sobre nosotros', href: '#identity' },
   { label: 'Galería', href: '#gallery' },
   { label: 'Contacto', href: '#contacto' }
@@ -64,7 +65,7 @@ function onKeydown(e) {
 onMounted(() => {
   window.addEventListener('scroll', handleScroll, { passive: true })
   document.addEventListener('keydown', onKeydown)
-  for (const id of ['tours', 'identity', 'gallery', 'contacto']) {
+  for (const id of ['tours', 'calendario', 'identity', 'gallery', 'contacto']) {
     const section = document.getElementById(id)
     if (section) observedSections.push(section)
   }

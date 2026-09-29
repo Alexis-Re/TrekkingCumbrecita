@@ -185,7 +185,12 @@ export const tours = [
     nombre: 'Cumbrecita: Río Subterráneo y Cascada Escondida',
     imagen: cumbrecitaGaleria[0],
     slug: 'rio-subterraneo-cascada-escondida',
-    imagenes: cumbrecitaGaleria
+    imagenes: cumbrecitaGaleria,
+    video: {
+      tipo: 'local',
+      src: '/assets/tours/Cumbrecitariosubtecascada/la-cumbrecita.mp4',
+      poster: cumbrecitaGaleria[0]
+    }
   },
   {
     nombre: 'La Cumbrecita: Garganta del Diablo + Cerro Corona + Pozo de las Cabras',
@@ -199,6 +204,11 @@ export const tours = [
     imagen: cumbrecitaGaleriaCorona[0],
     slug: 'garganta-del-diablo-cerro-corona-pozo-cabras',
     imagenes: cumbrecitaGaleriaCorona,
+    video: {
+      tipo: 'local',
+      src: '/assets/tours/garganta-del-diablo-cerro-corona-pozo-cabras/garganta.mp4',
+      poster: cumbrecitaGaleriaCorona[0]
+    },
     horarios: 'Sábados, domingos y feriados · Salida 09:00',
     incluye: [],
     itinerario: [
@@ -229,6 +239,11 @@ export const tours = [
     imagen: cumbrecitaGaleriaAlternativa[0],
     slug: 'cascadas-salvajes-rio-subterraneo',
     imagenes: cumbrecitaGaleriaAlternativa,
+    video: {
+      tipo: 'local',
+      src: '/assets/tours/cascadas-salvajes-rio-subterraneo/cascada-salvaje.mp4',
+      poster: cumbrecitaGaleriaAlternativa[0]
+    },
     horarios: 'Sábados, domingos y feriados · Salida 08:30 · Inicio 08:45',
     requisitos: [
       'Edad de 12 a 60 años con buen estado físico',
@@ -493,6 +508,11 @@ export const tours = [
     imagen: yatanGaleria[1],
     slug: 'cumbrecita-quebrada-yatan-paso-garay',
     imagenes: yatanGaleria,
+    video: {
+      tipo: 'local',
+      src: '/assets/tours/quebrada-yatan/quebrada-del-yatan.mp4',
+      poster: yatanGaleria[1]
+    },
     horarios: 'Consultar fechas · 09:00',
     incluye: [
       'Guía habilitado',
@@ -883,6 +903,11 @@ export const tours = [
     imagen: travesiaCumbrecitaVillaAlpinaGaleria[11],
     slug: 'travesia-cumbrecita-villa-alpina',
     imagenes: travesiaCumbrecitaVillaAlpinaGaleria,
+    video: {
+      tipo: 'local',
+      src: '/assets/tours/Cumbrecitariosubtecascada/la-cumbrecita.mp4',
+      poster: travesiaCumbrecitaVillaAlpinaGaleria[11]
+    },
     horarios: 'Consultar fechas y horarios',
     incluye: [
       '1 noche de albergue en Villa Alpina (luz por generador, agua caliente y baño)',
@@ -986,18 +1011,14 @@ export const tours = [
     imagenes: [
       '/assets/tours/casita-cristal-cinco-saltos/paisake.webp',
       '/assets/tours/casita-cristal-cinco-saltos/casa-paisaje.webp',
-      '/assets/tours/casita-cristal-cinco-saltos/casaantigua.webp',
-      '/assets/tours/casita-cristal-cinco-saltos/construccion.webp',
       '/assets/tours/casita-cristal-cinco-saltos/contruccion-antigua.webp',
       '/assets/tours/casita-cristal-cinco-saltos/bandera.webp',
       '/assets/tours/casita-cristal-cinco-saltos/rober-bandera-casitacristal.webp',
       '/assets/tours/casita-cristal-cinco-saltos/perdsona-casa.webp',
-      '/assets/tours/casita-cristal-cinco-saltos/grupo.webp',
       '/assets/tours/casita-cristal-cinco-saltos/cascada.webp',
       '/assets/tours/casita-cristal-cinco-saltos/cascada2.webp',
       '/assets/tours/casita-cristal-cinco-saltos/cascada3.webp',
-      '/assets/tours/casita-cristal-cinco-saltos/piedras.webp',
-      '/assets/tours/casita-cristal-cinco-saltos/placa-refugio.webp'
+      '/assets/tours/casita-cristal-cinco-saltos/piedras.webp'
     ],
     horarios: 'Salidas de jornada completa · Encuentro 07:30',
     incluye: [
@@ -1033,6 +1054,11 @@ export const tours = [
     imagen: lagunitaGaleria[8],
     slug: 'circuito-cumbrecita-lagunita-ventana-garganta',
     imagenes: lagunitaGaleria,
+    video: {
+      tipo: 'local',
+      src: '/assets/tours/garganta-del-diablo-cerro-corona-pozo-cabras/garganta.mp4',
+      poster: lagunitaGaleria[8]
+    },
     horarios: 'Viernes, Sábados y Domingos · 09:00',
     incluye: [
       'Raciones de marcha (salado y dulce)',
