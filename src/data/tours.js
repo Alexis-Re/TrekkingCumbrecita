@@ -1011,15 +1011,27 @@ export const tours = [
     imagenes: [
       '/assets/tours/casita-cristal-cinco-saltos/paisake.webp',
       '/assets/tours/casita-cristal-cinco-saltos/casa-paisaje.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/cristal-mujer.webp',
       '/assets/tours/casita-cristal-cinco-saltos/contruccion-antigua.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/agachado-piedras.webp',
       '/assets/tours/casita-cristal-cinco-saltos/bandera.webp',
       '/assets/tours/casita-cristal-cinco-saltos/rober-bandera-casitacristal.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/paisaje-persona.webp',
       '/assets/tours/casita-cristal-cinco-saltos/perdsona-casa.webp',
       '/assets/tours/casita-cristal-cinco-saltos/cascada.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/cascada-dobble.webp',
       '/assets/tours/casita-cristal-cinco-saltos/cascada2.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/cascada-de-cote.webp',
       '/assets/tours/casita-cristal-cinco-saltos/cascada3.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/cascada-gente.webp',
+      '/assets/tours/casita-cristal-cinco-saltos/cascada-persona-brazos.webp',
       '/assets/tours/casita-cristal-cinco-saltos/piedras.webp'
     ],
+    video: {
+      tipo: 'local',
+      src: '/assets/tours/casita-cristal-cinco-saltos/cascada-valle.mp4',
+      poster: '/assets/tours/casita-cristal-cinco-saltos/cascada-dobble.webp'
+    },
     horarios: 'Salidas de jornada completa · Encuentro 07:30',
     incluye: [
       'Vianda de marcha'
