@@ -73,7 +73,10 @@ function diasDeSalida(salida) {
 }
 
 // Devuelve las marcas de un mes en el formato que espera CalendarGrid:
-//   { 'YYYY-MM-DD': { salidas: Number, feriado: String } }
+//   { 'YYYY-MM-DD': { salidas: Number, feriado: String, rango?: { inicio, fin } } }
+// `rango` solo aparece en los días cubiertos por una salida multiday y contiene
+// el rango completo (fecha de inicio y fin de la salida), para que la grilla
+// pinte la banda que conecta las celdas.
 // `month` tiene formato 'YYYY-MM'. Si un día tiene dos feriados (fechas solapadas)
 // los nombres se unen con ' · '.
 export function marksDelMes(month) {
@@ -88,11 +91,14 @@ export function marksDelMes(month) {
   }
 
   for (const salida of salidas) {
+    const multiday = Boolean(salida.fin && salida.fin > salida.fecha)
     // Marca todos los días del rango (multiday con `fin`), solo si caen en el mes.
     for (const dia of diasDeSalida(salida)) {
       if (!dia.startsWith(prefijo)) continue
       const slot = (marks[dia] ||= {})
       slot.salidas = (slot.salidas || 0) + 1
+      // Rango completo para que CalendarGrid dibuje la banda de conexión.
+      if (multiday) slot.rango ||= { inicio: salida.fecha, fin: salida.fin }
     }
   }
 

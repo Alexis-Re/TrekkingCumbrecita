@@ -144,6 +144,10 @@ onUnmounted(() => observer?.disconnect())
               Salidas confirmadas
             </span>
             <span class="inline-flex items-center gap-2">
+              <span class="h-2.5 w-5 rounded-full bg-brand-orange/35" aria-hidden="true"></span>
+              Salida de varios días
+            </span>
+            <span class="inline-flex items-center gap-2">
               <span class="h-2 w-2 rounded-full bg-brand-cream/60" aria-hidden="true"></span>
               Feriados
             </span>

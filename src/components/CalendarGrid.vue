@@ -5,7 +5,7 @@ const props = defineProps({
   modelValue: { type: String, default: '' },
   month: { type: String, required: true },
   minDate: { type: String, default: '' },
-  // Mapa de fechas 'YYYY-MM-DD' -> { salidas: Number, feriado: String }
+  // Mapa de fechas 'YYYY-MM-DD' -> { salidas: Number, feriado: String, rango?: { inicio, fin } }
   marks: { type: Object, default: () => ({}) }
 })
 
@@ -64,6 +64,52 @@ function isBeforeMinimum(date) {
   return Boolean(props.minDate) && toDateKey(date) < props.minDate
 }
 
+function shiftDay(date, delta) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + delta)
+}
+
+// Día cubierto por una salida multiday (rango con duración real).
+function enRango(date) {
+  const rango = markFor(date)?.rango
+  return Boolean(rango && rango.inicio < rango.fin)
+}
+
+function mismaRango(a, b) {
+  return Boolean(a && b && a.inicio === b.inicio && a.fin === b.fin)
+}
+
+// ¿La banda continúa desde/el día anterior dentro de la misma fila y mes visible?
+function conectaIzq(date) {
+  if (!enRango(date) || date.getDay() === 1) return false // lunes: inicia fila
+  const previo = shiftDay(date, -1)
+  if (isBeforeMinimum(previo)) return false
+  if (!toDateKey(previo).startsWith(props.month)) return false
+  return mismaRango(markFor(date).rango, markFor(previo)?.rango)
+}
+
+// ¿La banda continúa hacia el día siguiente dentro de la misma fila y mes visible?
+function conectaDer(date) {
+  if (!enRango(date) || date.getDay() === 0) return false // domingo: cierra fila
+  const siguiente = shiftDay(date, 1)
+  if (!toDateKey(siguiente).startsWith(props.month)) return false
+  return mismaRango(markFor(date).rango, markFor(siguiente)?.rango)
+}
+
+function bandaVisible(date) {
+  return Boolean(date) && enRango(date) && !isBeforeMinimum(date)
+}
+
+function bandaClase(date) {
+  // La banda se extiende solo hacia la derecha para cubrir el gap (`gap-1`);
+  // si se extendiera desde ambos lados, las capas translúcidas se solaparían
+  // en el gap y quedaría una costura más brillante.
+  return [
+    'left-0',
+    conectaIzq(date) ? '' : 'rounded-l-full',
+    conectaDer(date) ? '-right-1' : 'right-0 rounded-r-full',
+  ]
+}
+
 function isSelected(date) {
   return Boolean(date) && toDateKey(date) === props.modelValue
 }
@@ -79,10 +125,18 @@ function dayClass(date) {
   return 'text-brand-cream hover:bg-brand-orange/20 hover:text-brand-white'
 }
 
+function fechaCorta(valor) {
+  return new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short' })
+    .format(parseDate(valor))
+    .replace('.', '')
+}
+
 function ariaLabel(date) {
   let label = new Intl.DateTimeFormat('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }).format(date)
   const mark = markFor(date)
   if (mark?.salidas) label += `, ${mark.salidas} ${mark.salidas === 1 ? 'salida disponible' : 'salidas disponibles'}`
+  if (mark?.rango && mark.rango.inicio < mark.rango.fin)
+    label += `, día de una salida del ${fechaCorta(mark.rango.inicio)} al ${fechaCorta(mark.rango.fin)}`
   if (mark?.feriado) label += `, feriado${mark.feriado ? ` (${mark.feriado})` : ''}`
   return label
 }
@@ -110,11 +164,17 @@ function selectDate(date) {
     </div>
 
     <div class="grid grid-cols-7 gap-1" role="grid" :aria-label="`Calendario de ${monthTitle}`">
-      <span v-for="(date, index) in calendarDays" :key="date ? toDateKey(date) : `empty-${index}`" class="aspect-square" role="gridcell">
+      <span v-for="(date, index) in calendarDays" :key="date ? toDateKey(date) : `empty-${index}`" class="relative aspect-square" role="gridcell">
+        <span
+          v-if="bandaVisible(date)"
+          class="pointer-events-none absolute inset-y-1 z-0 bg-brand-orange/35"
+          :class="bandaClase(date)"
+          aria-hidden="true"
+        ></span>
         <button
           v-if="date"
           type="button"
-          class="flex h-full w-full flex-col items-center justify-center gap-0.5 rounded-lg font-sans text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-orange/70"
+          class="relative flex h-full w-full flex-col items-center justify-center gap-0.5 rounded-lg font-sans text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-orange/70"
           :class="dayClass(date)"
           :disabled="isBeforeMinimum(date)"
           :aria-label="ariaLabel(date)"
