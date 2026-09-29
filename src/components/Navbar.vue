@@ -84,9 +84,9 @@ onUnmounted(() => {
 <template>
   <nav
     aria-label="Navegación principal"
-    class="fixed inset-x-0 top-0 z-50 border-b border-transparent pt-[env(safe-area-inset-top)] transition-all duration-300"
+    class="fixed inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)] transition-all duration-300"
     :class="scrolled
-      ? 'border-brand-cream/10 bg-brand-dark/95 backdrop-blur-md shadow-lg shadow-brand-dark/50'
+      ? 'bg-brand-dark/95 backdrop-blur-md shadow-lg shadow-brand-dark/50'
       : 'bg-gradient-to-b from-brand-dark/60 to-transparent'"
   >
     <div class="mx-auto flex min-h-16 max-w-7xl items-center justify-between px-4 transition-[min-height] duration-300 md:min-h-[80px] lg:px-12" :class="scrolled ? 'md:min-h-[68px]' : ''">
