@@ -12,38 +12,14 @@ import { feriadosDe } from './feriados.js'
 // El nombre, imagen y precio se resuelven desde `src/data/tours.js` por `slug`,
 // así no se duplica información entre archivos.
 //
-// ⚠️ OCTUBRE 2026: fechas reales confirmadas. El resto de los meses (septiembre
-// 2026 → marzo 2027) son DATOS DE EJEMPLO: 2 salidas por mes, una apoyada en un
-// feriado. Reemplazar por las fechas reales confirmadas.
+// ⚠️ Cargar solo fechas REALES confirmadas. Los meses sin salidas quedan vacíos
+// a propósito: la sección muestra "Todavía no hay salidas cargadas para este mes".
+// Nunca agregar fechas de ejemplo.
 export const salidas = [
-  // Septiembre 2026 (sin feriados nacionales)
-  { fecha: '2026-09-29', slug: 'rio-subterraneo-cascada-escondida' },
-  { fecha: '2026-09-30', slug: 'garganta-del-diablo-cerro-corona-pozo-cabras' },
-
   // Octubre 2026 — feriado: 12/10 (Día del Respeto a la Diversidad Cultural, lunes)
   { fecha: '2026-10-10', fin: '2026-10-12', slug: 'champaqui' },
   { fecha: '2026-10-16', fin: '2026-10-18', slug: 'cumbrecita-quebrada-yatan-paso-garay' },
   { fecha: '2026-10-24', fin: '2026-10-25', slug: 'travesia-cumbrecita-villa-alpina' },
-
-  // Noviembre 2026 — feriado: 23/11 (Soberanía trasladada al lunes)
-  { fecha: '2026-11-14', slug: 'champaqui' },
-  { fecha: '2026-11-23', slug: 'paraiso-guanacos-casita-de-cristal' },
-
-  // Diciembre 2026 — feriado: 07/12 (turístico) y 08/12
-  { fecha: '2026-12-05', slug: 'los-gigantes-cerro-mogote-cajones' },
-  { fecha: '2026-12-07', slug: 'cumbrecita-quebrada-yatan-paso-garay' },
-
-  // Enero 2027 — feriado: 01/01
-  { fecha: '2027-01-09', slug: 'dos-gigantes-champaqui-totora' },
-  { fecha: '2027-01-01', slug: 'salida-del-cruce' },
-
-  // Febrero 2027 — feriado: 09/02 (Carnaval)
-  { fecha: '2027-02-06', slug: 'altas-cumbres-nacientes-mina-clavero' },
-  { fecha: '2027-02-09', slug: 'excursion-nocturna-cumbrecita-villa-alpina' },
-
-  // Marzo 2027 — feriado: 25/03 (Jueves Santo)
-  { fecha: '2027-03-13', slug: 'travesia-cumbrecita-villa-alpina' },
-  { fecha: '2027-03-25', slug: 'casita-de-cristal-cinco-saltos' }
 ]
 
 // Salidas de un mes ('YYYY-MM'), ordenadas por fecha.

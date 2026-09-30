@@ -1,13 +1,14 @@
 <script setup>
 import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import { tours } from '../data/tours.js'
-import { formatPrecio } from '../utils/format.js'
+import { formatPrecio, AVISO_TARIFA_DIFERENCIAL } from '../utils/format.js'
 import TourModal from '../components/TourModal.vue'
 import TourPlaceholder from '../components/TourPlaceholder.vue'
 import { crearConsultaTour } from '../utils/whatsapp.js'
+import { useTourModal } from '../composables/useTourModal.js'
 
 const scrollContainer = ref(null)
-const selectedTour = ref(null)
+const { tourAbierto, fechaSalida, abrirTour, cerrarTour } = useTourModal()
 const canScrollLeft = ref(false)
 const canScrollRight = ref(true)
 const sectionRef = ref(null)
@@ -416,6 +417,9 @@ const updateScrollState = () => {
                   <p v-if="tour.precioDetalle" class="line-clamp-2 text-brand-cream/50 text-xs font-sans mt-1">
                     {{ tour.precioDetalle }}
                   </p>
+                  <p class="text-brand-orange/80 text-xs font-sans mt-1">
+                    {{ AVISO_TARIFA_DIFERENCIAL }}
+                  </p>
                 </div>
                 <a
                   :href="crearConsultaTour(tour)"
@@ -432,7 +436,7 @@ const updateScrollState = () => {
 
               <button
                 v-if="!esProximamente(tour)"
-                @click="selectedTour = tour"
+                @click="abrirTour(tour)"
                 class="w-full min-h-11 border-2 border-brand-cream/20 text-brand-cream/80 rounded-lg py-3.5 font-sans font-semibold hover:bg-brand-orange hover:border-brand-orange hover:text-brand-white hover:shadow-md hover:shadow-brand-orange/20 transition-all duration-300 text-sm"
               >
                 Conocer la experiencia
@@ -461,9 +465,10 @@ const updateScrollState = () => {
       </div>
 
     <TourModal
-      :tour="selectedTour"
-      :open="!!selectedTour"
-      @close="selectedTour = null"
+      :tour="tourAbierto"
+      :open="!!tourAbierto"
+      :fecha-salida="fechaSalida"
+      @close="cerrarTour"
     />
   </section>
 </template>

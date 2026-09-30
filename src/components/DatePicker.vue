@@ -5,6 +5,9 @@ const props = defineProps({
   id: { type: String, default: 'date-picker' },
   modelValue: { type: String, default: '' },
   minDate: { type: String, required: true },
+  // Mapa opcional 'YYYY-MM-DD' → nombre de feriado. Si no se pasa (Contact.vue)
+  // el calendario queda exactamente igual que antes.
+  feriados: { type: Object, default: () => ({}) },
   surface: {
     type: String,
     default: 'dark',
@@ -46,6 +49,20 @@ const selectedDate = computed(() => parseDate(props.modelValue))
 const visibleMonth = ref(startOfMonth(selectedDate.value || minDateObject.value || new Date()))
 
 const monthTitle = computed(() => `${monthLabels[visibleMonth.value.getMonth()]} ${visibleMonth.value.getFullYear()}`)
+
+// Solo si el mes visible tiene algún feriado, así la leyenda no queda
+// pendulando en meses sin feriados.
+const hayFeriados = computed(() => calendarDays.value.some((date) => date && feriadoDe(toDateKey(date))))
+
+function feriadoDe(value) {
+  return props.feriados[value]
+}
+
+function ariaLabelDe(value) {
+  const base = formattedValue(value)
+  const feriado = feriadoDe(value)
+  return feriado ? `${base}, feriado: ${feriado}` : base
+}
 
 const calendarDays = computed(() => {
   const year = visibleMonth.value.getFullYear()
@@ -207,10 +224,10 @@ onUnmounted(() => {
           <button
             v-if="date"
             type="button"
-            class="h-full w-full rounded-lg text-sm font-sans transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-orange/70"
+            class="flex h-full w-full flex-col items-center justify-center rounded-lg text-sm font-sans transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-orange/70"
             :class="isSelected(date) ? 'bg-brand-orange font-bold text-brand-white shadow-md shadow-brand-orange/20' : isBeforeMinimum(date) ? 'cursor-not-allowed text-brand-cream/20' : isToday(date) ? 'border border-brand-gold text-brand-gold hover:bg-brand-orange/20' : 'text-brand-cream hover:bg-brand-orange/20 hover:text-brand-white'"
             :disabled="isBeforeMinimum(date)"
-            :aria-label="formattedValue(toDateKey(date))"
+            :aria-label="ariaLabelDe(toDateKey(date))"
             :aria-selected="isSelected(date)"
             :data-date="toDateKey(date)"
             :data-selected="isSelected(date) ? 'true' : undefined"
@@ -219,9 +236,20 @@ onUnmounted(() => {
             @keydown="onDayKeydown($event, date)"
           >
             {{ date.getDate() }}
+            <span
+              v-if="feriadoDe(toDateKey(date))"
+              class="mt-0.5 block h-1 w-1 rounded-full"
+              :class="isBeforeMinimum(date) ? 'bg-brand-cream/30' : isSelected(date) ? 'bg-brand-white' : 'bg-brand-orange'"
+              aria-hidden="true"
+            ></span>
           </button>
         </span>
       </div>
+
+      <p v-if="hayFeriados" class="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-brand-cream/60">
+        <span class="h-1.5 w-1.5 rounded-full bg-brand-orange" aria-hidden="true"></span>
+        Feriado
+      </p>
 
       <button type="button" class="mt-4 w-full border-t border-brand-cream/10 pt-3 text-center text-xs font-semibold text-brand-gold transition-colors hover:text-brand-orange" @click="selectDate(parseDate(minDate))">
         Desde hoy

@@ -1,13 +1,20 @@
 <script setup>
 import { ref, watch, nextTick, onMounted, onUnmounted, computed } from 'vue'
-import { formatPrecio } from '../utils/format.js'
+import { formatPrecio, AVISO_TARIFA_DIFERENCIAL, ETIQUETA_TARIFA_DIFERENCIAL } from '../utils/format.js'
 import { crearMensajeReserva } from '../utils/whatsapp.js'
+import { detalleFeriado } from '../utils/fechas.js'
+import { feriadosDe } from '../data/feriados.js'
+import { salidas } from '../data/calendario.js'
+import { evaluarRecargo, precioConRecargo } from '../utils/recargo.js'
 import TourPlaceholder from './TourPlaceholder.vue'
 import DatePicker from './DatePicker.vue'
 
 const props = defineProps({
   tour: { type: Object, default: null },
-  open: { type: Boolean, default: false }
+  open: { type: Boolean, default: false },
+  // Rango de la salida que abrió el modal desde el calendario:
+  // { fecha: 'YYYY-MM-DD', fin?: 'YYYY-MM-DD' } | null
+  fechaSalida: { type: Object, default: null }
 })
 
 const emit = defineEmits(['close'])
@@ -31,11 +38,70 @@ const fechaLocal = new Date()
 const fechaMinima = [fechaLocal.getFullYear(), String(fechaLocal.getMonth() + 1).padStart(2, '0'), String(fechaLocal.getDate()).padStart(2, '0')].join('-')
 const cantidadMaxima = computed(() => props.tour?.cupoMax || 15)
 const cantidadValida = computed(() => Number.isInteger(cantidadPersonas.value) && cantidadPersonas.value >= 1 && cantidadPersonas.value <= cantidadMaxima.value)
+
+// Recargo de feriados/findes largos: solo aplica cuando la fecha viene del
+// calendario (fechaSalida). Se evalúa una vez al abrir, sobre el rango completo.
+const recargo = computed(() =>
+  props.fechaSalida ? evaluarRecargo(props.fechaSalida.fecha, props.fechaSalida.fin) : { aplica: false, motivos: [] },
+)
+const precioFinal = computed(() => {
+  if (props.tour?.precio == null) return null
+  return recargo.value.aplica ? precioConRecargo(props.tour.precio) : props.tour.precio
+})
+const textoMotivo = (motivo) => (motivo.tipo === 'feriado' ? `Feriado: ${motivo.nombre}` : `Finde largo (por ${motivo.nombre})`)
 const medios = computed(() => {
   if (!props.tour) return []
   const video = props.tour.video ? [props.tour.video] : []
   const imagenes = (props.tour.imagenes || []).map((src) => ({ tipo: 'imagen', src }))
   return [...video, ...imagenes]
+})
+
+// Mapa 'YYYY-MM-DD' → nombre de feriado para pintarlos en el DatePicker
+// (año de hoy + 2, que es el horizonte de reservas que usa el calendario).
+const mapaFeriados = computed(() => {
+  const mapa = {}
+  const anioInicial = Number(fechaMinima.slice(0, 4))
+  for (let anio = anioInicial; anio <= anioInicial + 2; anio++) {
+    for (const feriado of feriadosDe(anio)) mapa[feriado.fecha] = feriado.nombre
+  }
+  return mapa
+})
+
+// ¿Hay una salida de ESTE tour que cubra `fecha`? (calendario.js)
+function salidaDelDia(fecha) {
+  if (!props.tour) return false
+  return salidas.some(
+    (salida) =>
+      salida.slug === props.tour.slug &&
+      fecha >= salida.fecha &&
+      fecha <= (salida.fin || salida.fecha)
+  )
+}
+
+// Info del día elegido. Siempre se muestra, aunque no haya feriado ni salida.
+const infoDia = computed(() => {
+  if (!fechaReserva.value || !props.tour) return null
+  const clave = fechaReserva.value
+  const info = detalleFeriado(clave, props.tour.duracion)
+  const [anio, mes, dia] = clave.split('-').map(Number)
+  const nombreDia = new Intl.DateTimeFormat('es-AR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long'
+  }).format(new Date(anio, mes - 1, dia))
+  const fechaLarga = nombreDia.charAt(0).toUpperCase() + nombreDia.slice(1)
+  const feriadoDelDia = info.feriados.find((feriado) => feriado.fecha === clave)
+
+  return {
+    fechaLarga,
+    feriadoDelDia: feriadoDelDia?.nombre || null,
+    feriadosRango: info.hayFeriado && !feriadoDelDia
+      ? info.feriados.map((feriado) => `${feriado.fecha.split('-').reverse().slice(0, 2).join('/')} (${feriado.nombre})`).join(', ')
+      : null,
+    esPuente: info.esPuente,
+    feriadoPuente: info.esPuente && feriadoDelDia ? feriadoDelDia.nombre : null,
+    salida: salidaDelDia(clave)
+  }
 })
 let touchStartX = 0
 let previousActiveElement = null
@@ -58,6 +124,8 @@ watch(() => props.open, (val) => {
     fechaReserva.value = ''
     cantidadPersonas.value = 1
     document.body.style.overflow = 'hidden'
+    // Viene del calendario: precargamos la fecha de la salida para reservar.
+    fechaReserva.value = props.fechaSalida?.fecha ?? ''
     previousActiveElement = document.activeElement
     nextTick(() => modalRef.value?.querySelector('button')?.focus())
   } else {
@@ -368,10 +436,34 @@ onUnmounted(() => {
                 </div>
 
                 <div class="mb-8">
-                  <div class="flex items-baseline gap-2">
-                    <span class="text-brand-orange font-heading text-3xl">{{ formatPrecio(tour.precio) }}</span>
-                    <span class="text-brand-cream/50 text-sm font-sans">por persona</span>
-                  </div>
+                  <!-- Con recargo (fecha desde el calendario): mostramos base tachada + final -->
+                  <template v-if="recargo.aplica && tour.precio != null">
+                    <div class="flex flex-wrap items-baseline gap-2">
+                      <span class="text-brand-cream/45 font-heading text-xl line-through">{{ formatPrecio(tour.precio) }}</span>
+                      <span class="text-brand-orange font-heading text-3xl">{{ formatPrecio(precioFinal) }}</span>
+                      <span class="text-brand-cream/50 text-sm font-sans">por persona</span>
+                    </div>
+                    <span class="mt-2 inline-flex items-center gap-1.5 rounded-full border border-brand-orange/40 bg-brand-orange/15 px-3 py-1 text-xs font-sans font-semibold text-brand-orange">
+                      {{ ETIQUETA_TARIFA_DIFERENCIAL }} · feriados y findes largos
+                    </span>
+                    <ul class="mt-2 space-y-1">
+                      <li v-for="motivo in recargo.motivos" :key="`${motivo.tipo}-${motivo.nombre}`" class="text-brand-cream/65 text-sm font-sans">
+                        · {{ textoMotivo(motivo) }}
+                      </li>
+                    </ul>
+                  </template>
+
+                  <!-- Sin recargo: precio base + aclaración -->
+                  <template v-else>
+                    <div class="flex items-baseline gap-2">
+                      <span class="text-brand-orange font-heading text-3xl">{{ formatPrecio(tour.precio) }}</span>
+                      <span class="text-brand-cream/50 text-sm font-sans">por persona</span>
+                    </div>
+                    <p class="text-brand-orange/80 mt-1 text-xs font-sans">
+                      {{ AVISO_TARIFA_DIFERENCIAL }}
+                    </p>
+                  </template>
+
                   <p v-if="tour.precioDetalle" class="text-brand-cream/55 text-sm font-sans mt-1">
                     {{ tour.precioDetalle }}
                   </p>
@@ -543,7 +635,17 @@ onUnmounted(() => {
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                     <div>
                       <label for="fecha-reserva-final" class="block text-brand-cream/80 text-xs font-semibold font-sans mb-1.5">Fecha preferida</label>
-                      <DatePicker id="fecha-reserva-final" v-model="fechaReserva" :min-date="fechaMinima" />
+                      <DatePicker id="fecha-reserva-final" v-model="fechaReserva" :min-date="fechaMinima" :feriados="mapaFeriados" />
+                      <p v-if="infoDia" class="mt-2 text-[11px] leading-relaxed font-sans text-brand-cream/60" aria-live="polite">
+                        {{ infoDia.fechaLarga }}
+                        <template v-if="infoDia.esPuente">
+                          · Tour completo en fin de semana largo<template v-if="infoDia.feriadoPuente"> (feriado: {{ infoDia.feriadoPuente }})</template>
+                        </template>
+                        <template v-else-if="infoDia.feriadoDelDia"> · Feriado: {{ infoDia.feriadoDelDia }}</template>
+                        <template v-else-if="infoDia.feriadosRango"> · El tour pasa por el feriado {{ infoDia.feriadosRango }}</template>
+                        <template v-else> · Sin feriados</template>
+                        · <span :class="infoDia.salida ? 'font-semibold text-brand-green' : 'text-brand-cream/50'">{{ infoDia.salida ? 'Salida confirmada' : 'Sin salida confirmada' }}</span>
+                      </p>
                     </div>
                     <div>
                       <label for="cantidad-personas-final" class="block text-brand-cream/80 text-xs font-semibold font-sans mb-1.5">Cantidad de personas</label>

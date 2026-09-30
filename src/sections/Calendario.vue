@@ -4,6 +4,11 @@ import CalendarGrid from '../components/CalendarGrid.vue'
 import { salidas, salidasDelMes, marksDelMes } from '../data/calendario.js'
 import { feriadosDe } from '../data/feriados.js'
 import { tours } from '../data/tours.js'
+import { formatPrecio, ETIQUETA_TARIFA_DIFERENCIAL } from '../utils/format.js'
+import { evaluarRecargo, precioConRecargo } from '../utils/recargo.js'
+import { useTourModal } from '../composables/useTourModal.js'
+
+const { abrirTour } = useTourModal()
 
 const pad = (numero) => String(numero).padStart(2, '0')
 
@@ -25,16 +30,34 @@ const sectionRef = ref(null)
 const isVisible = ref(false)
 let observer = null
 
-const mes = ref(`${hoy.getFullYear()}-${pad(hoy.getMonth() + 1)}`)
-const fechaSeleccionada = ref(claveDe(hoy))
+const hoyClave = claveDe(hoy)
+// Abre en la primera salida que aún no pasó (o en hoy si está en curso),
+// así el calendario nunca arranca en un mes vacío.
+const proximaSalida = salidas.find((salida) => (salida.fin ?? salida.fecha) >= hoyClave)
+const fechaInicial = proximaSalida ? (proximaSalida.fecha > hoyClave ? proximaSalida.fecha : hoyClave) : hoyClave
+
+const mes = ref(fechaInicial.slice(0, 7))
+const fechaSeleccionada = ref(fechaInicial)
 
 const tourPorSlug = new Map(tours.map((tour) => [tour.slug, tour]))
 
 const marks = computed(() => marksDelMes(mes.value))
 
-const salidasMes = computed(() =>
-  salidasDelMes(mes.value).map((salida) => ({ ...salida, tour: tourPorSlug.get(salida.slug) })),
-)
+// Agrega tour + evaluación del recargo (+18,4% en feriados / findes largos)
+// calculado sobre el rango completo de la salida (fecha → fin).
+const enriquecer = (salida) => {
+  const tour = tourPorSlug.get(salida.slug)
+  return { ...salida, tour, recargo: evaluarRecargo(salida.fecha, salida.fin) }
+}
+
+// Precio a mostrar: final con recargo cuando aplica, si no el base.
+function precioDe(salida) {
+  const base = salida.tour?.precio
+  if (base == null) return null
+  return salida.recargo.aplica ? precioConRecargo(base) : base
+}
+
+const salidasMes = computed(() => salidasDelMes(mes.value).map(enriquecer))
 
 const feriadosMes = computed(() => {
   const anio = Number(mes.value.slice(0, 4))
@@ -48,7 +71,7 @@ const salidasDelDia = computed(() =>
       const fin = salida.fin ?? salida.fecha
       return salida.fecha <= fechaSeleccionada.value && fechaSeleccionada.value <= fin
     })
-    .map((salida) => ({ ...salida, tour: tourPorSlug.get(salida.slug) })),
+    .map(enriquecer),
 )
 
 const feriadosDelDia = computed(() => {
@@ -120,6 +143,7 @@ onUnmounted(() => observer?.disconnect())
         <h2 class="mb-3 font-heading text-3xl uppercase text-brand-white md:text-5xl">Calendario de salidas</h2>
         <p class="text-sm leading-relaxed text-brand-cream/70 md:text-base">
           Fechas confirmadas y feriados nacionales: elegí un día en el calendario y sumate a la próxima aventura.
+          Las salidas en feriados o findes largos aplican tarifa diferencial.
         </p>
       </div>
 
@@ -151,6 +175,12 @@ onUnmounted(() => observer?.disconnect())
               <span class="h-2 w-2 rounded-full bg-brand-cream/60" aria-hidden="true"></span>
               Feriados
             </span>
+            <span class="inline-flex items-center gap-2">
+              <span class="rounded-full bg-brand-orange/15 px-2 py-0.5 text-[10px] font-semibold text-brand-orange" aria-hidden="true">
+                {{ ETIQUETA_TARIFA_DIFERENCIAL }}
+              </span>
+              Feriados y findes largos
+            </span>
           </div>
         </div>
 
@@ -174,14 +204,27 @@ onUnmounted(() => observer?.disconnect())
                 class="flex items-start gap-2 text-sm text-brand-white"
               >
                 <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-gold" aria-hidden="true"></span>
-                <span>
-                  {{ salida.tour?.nombre ?? salida.slug }}
-                  <a
-                    href="#tours"
-                    class="ml-1 font-semibold text-brand-orange underline decoration-brand-orange/40 underline-offset-2 transition-colors hover:text-brand-gold"
+                <span class="min-w-0 flex-1">
+                  <span class="block font-semibold">{{ salida.tour?.nombre ?? salida.slug }}</span>
+                  <span class="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                    <span class="font-heading text-lg leading-none text-brand-orange">
+                      {{ formatPrecio(precioDe(salida)) || 'Consultar precio' }}
+                    </span>
+                    <span class="text-brand-cream/50 text-xs font-sans">por persona</span>
+                    <span
+                      v-if="salida.recargo.aplica"
+                      class="rounded-full bg-brand-orange/15 px-2 py-0.5 text-[10px] font-sans font-semibold text-brand-orange"
+                    >
+                      {{ ETIQUETA_TARIFA_DIFERENCIAL }} · feriado/finde largo
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    class="mt-1 font-sans text-xs font-semibold text-brand-orange underline decoration-brand-orange/40 underline-offset-2 transition-colors hover:text-brand-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
+                    @click="abrirTour(salida.tour, { fecha: salida.fecha, fin: salida.fin })"
                   >
                     ver tour
-                  </a>
+                  </button>
                 </span>
               </li>
               <li
@@ -220,9 +263,10 @@ onUnmounted(() => observer?.disconnect())
 
             <ul v-if="salidasMes.length" class="space-y-2">
               <li v-for="salida in salidasMes" :key="`${salida.fecha}-${salida.slug}`">
-                <a
-                  href="#tours"
-                  class="group flex items-center gap-3 rounded-xl border border-brand-cream/15 bg-brand-dark/40 px-3 py-2.5 transition-all duration-300 hover:border-brand-orange/50 hover:bg-brand-orange/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
+                <button
+                  type="button"
+                  class="group flex w-full items-center gap-3 rounded-xl border border-brand-cream/15 bg-brand-dark/40 px-3 py-2.5 text-left transition-all duration-300 hover:border-brand-orange/50 hover:bg-brand-orange/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
+                  @click="abrirTour(salida.tour, { fecha: salida.fecha, fin: salida.fin })"
                 >
                   <span
                     class="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-lg bg-brand-orange/15 text-brand-orange"
@@ -242,6 +286,14 @@ onUnmounted(() => observer?.disconnect())
                     </span>
                     <span v-else class="block text-xs text-brand-cream/60">{{ diaSemanaCorto(salida.fecha) }}, {{ diaCorto(salida.fecha) }}</span>
                   </span>
+                  <span class="shrink-0 text-right">
+                    <span class="block font-heading text-base leading-none text-brand-white">
+                      {{ formatPrecio(precioDe(salida)) || 'Consultar' }}
+                    </span>
+                    <span v-if="salida.recargo.aplica" class="mt-1 block text-[10px] font-sans font-semibold text-brand-orange">
+                      {{ ETIQUETA_TARIFA_DIFERENCIAL }}
+                    </span>
+                  </span>
                   <svg
                     class="h-4 w-4 shrink-0 text-brand-orange transition-transform duration-300 group-hover:translate-x-0.5"
                     fill="none"
@@ -251,7 +303,7 @@ onUnmounted(() => observer?.disconnect())
                   >
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="m9 5 7 7-7 7" />
                   </svg>
-                </a>
+                </button>
               </li>
             </ul>
 

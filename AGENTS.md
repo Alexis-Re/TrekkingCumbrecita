@@ -33,7 +33,7 @@ src/
   style.css            # Tailwind import + custom theme tokens
   sections/            # page-level layout sections (Hero.vue, Tours.vue, Identity.vue, Testimonials.vue, Gallery.vue, Contact.vue)
   components/          # reusable components (Navbar.vue, Footer.vue, TourModal.vue, Lightbox.vue, ScrollToTop.vue)
-  composables/         # Vue composables (scaffold — empty)
+  composables/         # Vue composables (useTourModal.js — shared state of TourModal.vue)
   data/                # static data (tours.js, testimonios.js)
   assets/              # empty (scaffold leftovers removed)
 public/
@@ -59,7 +59,8 @@ public/
 - Tour videos: optional `video: { tipo: 'local', src, poster }` field in `tours.js` (also `tipo: 'youtube'` for an embed). The file lives in `public/assets/tours/<slug>/`; `TourModal.vue` shows it as the first media item with `preload="metadata"` and poster. Always compress new videos with `npm run video -- <ruta>` (H.264 + AAC + faststart; default CRF 26, use `--crf 30` for sources already heavily compressed, `--force` for files not tracked by git yet — the script overwrites in place, git is the backup)
 - Images: `vite.config.js` has a build-only plugin (`redimensionar-imagenes-build`) that downscales any `dist/` image whose long edge exceeds 2560 px, running before `vite-plugin-image-optimizer`'s q80 pass. `public/` originals stay untouched — do not pre-resize or hand-optimize photos
 - Contact/social links are hardcoded, not centralized: the email address lives in `src/utils/email.js` (`EMAIL`, plus `crearLinkMailto()` and `copiarEmail()` helpers used by `Contact.vue` and `Footer.vue`); WhatsApp number is in `Contact.vue`; Instagram and Facebook are in `Hero.vue`
-- `composables/` is scaffolding — populate only as the landing page grows
+- `composables/` holds shared view state; today only `useTourModal.js` (singleton `tourAbierto` + `fechaSalida`) — `Tours.vue` mounts `<TourModal>` and `Calendario.vue` opens it with the salida's date range
+- Price surcharge (18,4%): `src/utils/recargo.js` is the single source — `evaluarRecargo(fecha, fin)` returns `{ aplica, motivos }` when any day of the range is a holiday **or** touches a long-weekend window (holiday on Friday → vie-sáb-dom; on Monday → sáb-dom-lun), and `precioConRecargo(precio)` applies `RECARGO = 0.184` once and rounds to the nearest hundred. The surcharge is applied to the price but **never shown as a percentage in the UI** — the visible copy says "tarifa diferencial" instead (texts centralized in `src/utils/format.js`: `AVISO_TARIFA_DIFERENCIAL` for cards/modal, `ETIQUETA_TARIFA_DIFERENCIAL` for badges). Shown in `Calendario.vue` (intro copy, legend pill, day panel badge, month list) and in `TourModal.vue` only when `fechaSalida` comes from the calendar; the WhatsApp message never includes it. Cards in `Tours.vue` show base price + `AVISO_TARIFA_DIFERENCIAL`
 
 ## Contact flow (WhatsApp, no backend)
 

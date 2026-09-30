@@ -283,7 +283,7 @@ export const tours = [
     terreno: null,
     distancia: null,
     precio: 370000,
-    precioDetalle: 'Finde largo/feriado: $450.000 · Refugio superior',
+    precioDetalle: 'Refugio superior',
     disponible: true,
     imagen: champaquiGaleria[11],
     slug: 'champaqui',
@@ -1009,23 +1009,20 @@ export const tours = [
     imagen: '/assets/tours/casita-cristal-cinco-saltos/paisake.webp',
     slug: 'casita-de-cristal-cinco-saltos',
     imagenes: [
-      '/assets/tours/casita-cristal-cinco-saltos/paisake.webp',
-      '/assets/tours/casita-cristal-cinco-saltos/casa-paisaje.webp',
+      // El video abre la galería del modal: la posición 1 del contador es el video
+      // y la posición N corresponde a la imagen N-1 de esta lista.
       '/assets/tours/casita-cristal-cinco-saltos/cristal-mujer.webp',
       '/assets/tours/casita-cristal-cinco-saltos/contruccion-antigua.webp',
-      '/assets/tours/casita-cristal-cinco-saltos/agachado-piedras.webp',
       '/assets/tours/casita-cristal-cinco-saltos/bandera.webp',
       '/assets/tours/casita-cristal-cinco-saltos/rober-bandera-casitacristal.webp',
       '/assets/tours/casita-cristal-cinco-saltos/paisaje-persona.webp',
-      '/assets/tours/casita-cristal-cinco-saltos/perdsona-casa.webp',
       '/assets/tours/casita-cristal-cinco-saltos/cascada.webp',
       '/assets/tours/casita-cristal-cinco-saltos/cascada-dobble.webp',
       '/assets/tours/casita-cristal-cinco-saltos/cascada2.webp',
       '/assets/tours/casita-cristal-cinco-saltos/cascada-de-cote.webp',
       '/assets/tours/casita-cristal-cinco-saltos/cascada3.webp',
       '/assets/tours/casita-cristal-cinco-saltos/cascada-gente.webp',
-      '/assets/tours/casita-cristal-cinco-saltos/cascada-persona-brazos.webp',
-      '/assets/tours/casita-cristal-cinco-saltos/piedras.webp'
+      '/assets/tours/casita-cristal-cinco-saltos/cascada-persona-brazos.webp'
     ],
     video: {
       tipo: 'local',
