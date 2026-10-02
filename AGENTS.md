@@ -29,12 +29,12 @@ scripts/
   compress-video.mjs   # npm run video — H.264/AAC + faststart web compression (ffmpeg-static)
 src/
   main.js              # app entry
-  App.vue              # root component — renders sections in this order: Navbar, Hero, Tours, Identity, Testimonials, Gallery, Contact, Footer
+  App.vue              # root component — renders sections in this order: Navbar, Hero, Tours, Calendario, Documentacion, Identity, Gallery, Contact, Footer
   style.css            # Tailwind import + custom theme tokens
-  sections/            # page-level layout sections (Hero.vue, Tours.vue, Identity.vue, Testimonials.vue, Gallery.vue, Contact.vue)
+  sections/            # page-level layout sections (Hero.vue, Tours.vue, Identity.vue, Gallery.vue, Contact.vue)
   components/          # reusable components (Navbar.vue, Footer.vue, TourModal.vue, Lightbox.vue, ScrollToTop.vue)
   composables/         # Vue composables (useTourModal.js — shared state of TourModal.vue)
-  data/                # static data (tours.js, testimonios.js)
+  data/                # static data (tours.js, calendario.js, socialProof.js)
   assets/              # empty (scaffold leftovers removed)
 public/
   assets/              # static assets served as-is
@@ -53,6 +53,8 @@ public/
 - Hero background image is an `<img>` tag in `Hero.vue`, not CSS `background-image`
 - Tours section background: `public/assets/tours/tours-background.webp` (also `<img>` tag)
 - Animations use Tailwind utility classes with `transition-all duration-300` / `duration-500`
+- Section seams: overlays must start/end with an opaque `from-brand-dark` / `to-brand-dark` so neighbouring sections dissolve into each other, and section boundaries must not use `border-t` / `border-y` hairlines. `MountainDivider.vue` paints the warm ridge between sections (mounted in `App.vue`, also at the top of `Footer.vue`); its straight base is dissolved by the `.ridge-mask` CSS mask in `style.css` — the mask and `flip`'s `rotate-180` have to stay on the same `<svg>` so the fade always points at the base
+- Motion: `style.css` has a global `prefers-reduced-motion` block (near-zero transitions/animations, `scroll-behavior: auto`); `Hero.vue` also keeps its parallax at 0 under that preference
 - Font families: `font-sans` (Inter) for body, `font-heading` (Bebas Neue) for headings
 - Tours marked `precio: 'Definir'` render with a "Próximamente" badge/button, use `default.svg`, and do not open the modal
 - `src/data/tours.js` is the single source of truth for tours; per-tour images live in `public/assets/tours/<slug>/`. The Contact form's tour `<select>` filters out tours with `disponible: false`

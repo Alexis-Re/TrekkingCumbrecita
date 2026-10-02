@@ -1,5 +1,4 @@
 import { tours } from './tours.js'
-import { testimonios } from './testimonios.js'
 
 const experienciasDisponibles = tours.filter((t) => t.disponible).length
 
@@ -14,8 +13,6 @@ export const badges = [
   { icono: 'seguro', label: 'Seguro médico incluido' },
   { icono: 'radio', label: 'Comunicación VHF' }
 ]
-
-export const testimonioDestacado = testimonios[0]
 
 export const avatars = [
   { src: '/assets/tours/champaqui/grupo-bandera-champa.webp', alt: 'Grupo en la cumbre del Champaquí' },

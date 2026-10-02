@@ -5,7 +5,6 @@ import Tours from './sections/Tours.vue'
 import Calendario from './sections/Calendario.vue'
 import Documentacion from './sections/Documentacion.vue'
 import Identity from './sections/Identity.vue'
-import Testimonials from './sections/Testimonials.vue'
 import Gallery from './sections/Gallery.vue'
 import Contact from './sections/Contact.vue'
 import Footer from './components/Footer.vue'
@@ -19,16 +18,15 @@ import MountainDivider from './components/MountainDivider.vue'
     <Navbar />
     <Hero />
     <Tours />
-    <MountainDivider color="brand-dark" />
+    <MountainDivider />
     <Calendario />
-    <MountainDivider color="brand-dark" />
+    <MountainDivider />
     <Documentacion />
-    <MountainDivider color="brand-dark" />
+    <MountainDivider />
     <Identity />
-    <MountainDivider color="brand-dark" flip />
-    <Testimonials />
-    <MountainDivider color="brand-dark" />
+    <MountainDivider flip />
     <Gallery />
+    <MountainDivider />
     <Contact />
     <Footer />
     <ScrollToTop />
