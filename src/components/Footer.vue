@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { crearLinkMailto, copiarEmail } from '../utils/email.js'
+import MountainDivider from './MountainDivider.vue'
 
 const year = new Date().getFullYear()
 
@@ -30,12 +31,8 @@ function scrollTo(href) {
 <template>
   <footer class="relative bg-brand-dark overflow-hidden">
     <!-- Mountain divider top -->
-    <div class="relative w-full h-[40px] md:h-[60px] overflow-hidden bg-brand-dark">
-      <svg class="absolute bottom-0 left-0 w-full" viewBox="0 0 1440 60" preserveAspectRatio="none" fill="none">
-        <path d="M0 0L48 8C96 16 192 32 288 36C384 40 480 32 576 26C672 20 768 16 864 20C960 24 1056 36 1152 38C1248 40 1344 32 1392 28L1440 24V60H0Z" class="fill-brand-dark" />
-      </svg>
-    </div>
-    <div class="relative border-t border-brand-cream/10 topo-pattern">
+    <MountainDivider />
+    <div class="relative topo-pattern">
     <img
       src="/assets/tours/Cumbrecitariosubtecascada/grupo-paisaje.altura.webp"
       alt=""

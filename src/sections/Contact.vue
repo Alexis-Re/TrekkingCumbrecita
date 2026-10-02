@@ -77,9 +77,9 @@ function volver() {
 </script>
 
 <template>
-  <section id="contacto" class="relative overflow-hidden border-t border-brand-cream/10 py-20 md:py-28">
+  <section id="contacto" class="relative overflow-hidden py-20 md:py-28">
     <img src="/assets/tours/pueblo-escondido/cascada.webp" alt="" loading="lazy" decoding="async" class="absolute inset-0 h-full w-full object-cover" />
-    <div class="absolute inset-0 bg-gradient-to-b from-brand-dark/80 via-brand-dark/75 to-brand-dark"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-brand-dark via-brand-dark/75 to-brand-dark"></div>
 
     <div class="relative mx-auto max-w-7xl px-5 md:px-10 lg:px-20">
       <div class="mb-12 max-w-2xl md:mb-16">

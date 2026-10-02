@@ -14,7 +14,13 @@ const scrollToBadgeTarget = (target) => {
 const parallaxY = ref(0)
 const loaded = ref(false)
 
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+
 function handleScroll() {
+  if (prefersReducedMotion.matches) {
+    parallaxY.value = 0
+    return
+  }
   const maxShift = window.innerHeight * 0.2
   parallaxY.value = Math.min(window.scrollY * 0.35, maxShift)
 }

@@ -57,20 +57,12 @@ body {
   color: var(--color-brand-white);
 }
 
-/* Divider de sierra entre secciones */
-.mountain-divider {
-  position: relative;
-  width: 100%;
-  height: 60px;
-  overflow: hidden;
-}
-
-.mountain-divider svg {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+/* Crestas de sierra entre secciones: disuelve el borde recto de la base
+   para no dejar una costura dura contra la sección siguiente.
+   En modo flip el <svg> rota 180°, por lo que esta máscara queda hacia arriba en pantalla. */
+.ridge-mask {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
 }
 
 /* Patrón topográfico sutil */
@@ -89,4 +81,20 @@ body {
 
 *:focus:not(:focus-visible) {
   outline: none;
+}
+
+/* Respeta la preferencia del usuario de reducir movimiento */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
 }

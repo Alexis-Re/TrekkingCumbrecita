@@ -174,7 +174,7 @@ const updateScrollState = () => {
       decoding="async"
       class="absolute inset-0 w-full h-full object-cover"
     />
-    <div class="absolute inset-0 bg-brand-dark/85"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-brand-dark via-brand-dark/75 to-brand-dark"></div>
     <div class="relative max-w-7xl mx-auto px-5 md:px-10 lg:px-20">
       <!-- Header -->
       <div class="mb-10 md:mb-14 transition-all duration-700" :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'">
