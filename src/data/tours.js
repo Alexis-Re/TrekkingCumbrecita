@@ -65,6 +65,9 @@ const travesiaCumbrecitaVillaAlpinaGaleria = [
   '/assets/tours/travesia-cumbrecita-villa-alpina/13-rober-pareja-cascada.webp'
 ]
 
+// Mismas fotos de la Travesía, en otro orden (la portada no debe repetirse con esa card)
+const villaAlpina2CascadasOllaGaleria = reordenarGaleria(travesiaCumbrecitaVillaAlpinaGaleria, 1, true)
+
 const champaquiGaleria = [
   '/assets/tours/champaqui/grupo-bandera-champa.webp',
   '/assets/tours/champaqui/grupo-bandera-champa (2).webp',
@@ -210,7 +213,12 @@ export const tours = [
       poster: cumbrecitaGaleriaCorona[0]
     },
     horarios: 'Sábados, domingos y feriados · Salida 09:00',
-    incluye: [],
+    incluye: [
+      'Guía habilitado',
+      'Seguro médico',
+      'Vianda de marcha',
+      'Comunicación por radio VHF'
+    ],
     itinerario: [
       {
         dia: 1,
@@ -440,7 +448,16 @@ export const tours = [
       '/assets/tours/casita-cristal-cinco-saltos/placa-refugio.webp'
     ],
     horarios: 'Sábados, domingos y feriados · 08:30',
-    incluye: [],
+    incluye: [
+      'Guía habilitado',
+      'Seguro médico',
+      'Alojamiento',
+      'Merienda del día 1',
+      'Cena',
+      'Desayuno',
+      'Vianda de marcha',
+      'Merienda del día 2'
+    ],
     itinerario: [],
     reunion: 'Parador Julio Cesar'
   },
@@ -637,7 +654,14 @@ export const tours = [
       '/assets/tours/altas-cumbres-nacientes-mina-clavero/arco-piedra-bandera.webp'
     ],
     horarios: 'Viernes, sábados, domingos y feriados · 08:30',
-    incluye: [],
+    incluye: [
+      'Guía habilitado',
+      'Seguro médico',
+      'Alojamiento',
+      'Desayunos, meriendas y cenas',
+      'Viandas de marcha',
+      'Comunicación por radio VHF'
+    ],
     itinerario: [],
     reunion: 'Parador Julio Cesar, Villa Cura Brochero'
   },
@@ -851,9 +875,14 @@ export const tours = [
     precio: 360000,
     precioDetalle: 'Modalidad Premium (refugio): $360.000 · Opción cabañas: consultar',
     disponible: true,
-    imagen: '/assets/tours/default.svg',
+    imagen: '/assets/tours/running-camp-montana/running-camp-portada.webp',
     slug: 'running-camp-montana',
     imagenes: [],
+    video: {
+      tipo: 'local',
+      src: '/assets/tours/running-camp-montana/running-camp.mp4',
+      poster: '/assets/tours/running-camp-montana/running-camp-poster.webp'
+    },
     horarios: 'Consultar fechas y horarios',
     incluye: [
       'Entrenamientos guiados todos los días (entre 15 y 20 km diarios)',
@@ -965,9 +994,9 @@ export const tours = [
     precioDetalle: 'Se reserva con seña del 50% · Cupos limitados a 15 personas',
     disponible: true,
     cupoMax: 15,
-    imagen: '/assets/tours/default.svg',
+    imagen: villaAlpina2CascadasOllaGaleria[0],
     slug: 'villa-alpina-2-cascadas-olla',
-    imagenes: [],
+    imagenes: villaAlpina2CascadasOllaGaleria,
     horarios: 'Sábados, domingos y feriados · Encuentro 07:30',
     incluye: [
       'Estacionamiento',
@@ -1131,7 +1160,7 @@ for (const tour of tours) {
     ...(tour.requisitos || [])
   ])]
 
-  if (tour.slug === 'travesia-cumbrecita-villa-alpina') {
+  if (['travesia-cumbrecita-villa-alpina', 'running-camp-montana'].includes(tour.slug)) {
     tour.requisitos = tour.requisitos.filter((requisito) => requisito !== 'Linterna frontal')
   }
 }

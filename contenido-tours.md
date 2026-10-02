@@ -37,7 +37,7 @@ imagenes:     galería opcional en la misma carpeta
 
 ### Cargados (solo falta imagen/galería)
 - [~] `salida-del-cruce` — La Salida del Cruce · 7 días / 6 noches · $650.000 — completo en contenido, falta portada y galería en `public/assets/tours/salida-del-cruce/`
-- [~] `running-camp-montana` — Running Camp en la Montaña · 3 días / 2 noches · $360.000 — falta: portada/galería, punto de encuentro real, precio de la opción cabañas, horarios de los entrenamientos (días 1 y 2)
+- [~] `running-camp-montana` — Running Camp en la Montaña · 3 días / 2 noches · $360.000 — falta: portada/galería, punto de encuentro real, precio de la opción cabañas, horarios de los entrenamientos (días 1 y 2). Ya tiene video en la carpeta (`running-camp.mp4` + `running-camp-poster.webp`)
 
 ## Bases para copiar estructura (ya completos)
 
