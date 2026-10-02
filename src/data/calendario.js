@@ -23,8 +23,11 @@ export const salidas = [
 ]
 
 // Salidas de un mes ('YYYY-MM'), ordenadas por fecha.
-export function salidasDelMes(month) {
-  return salidas.filter((salida) => salida.fecha.startsWith(month)).sort((a, b) => a.fecha.localeCompare(b.fecha))
+// `slug` opcional: filtra las salidas de un tour específico (null = todas).
+export function salidasDelMes(month, slug = null) {
+  return salidas
+    .filter((salida) => salida.fecha.startsWith(month) && (!slug || salida.slug === slug))
+    .sort((a, b) => a.fecha.localeCompare(b.fecha))
 }
 
 // Claves 'YYYY-MM-DD' que cubre una salida: todos los días de `fecha` a `fin`
@@ -55,7 +58,10 @@ function diasDeSalida(salida) {
 // pinte la banda que conecta las celdas.
 // `month` tiene formato 'YYYY-MM'. Si un día tiene dos feriados (fechas solapadas)
 // los nombres se unen con ' · '.
-export function marksDelMes(month) {
+// `slug` opcional: marca solo las salidas de un tour específico (usado por el
+// TourModal para mostrar únicamente las fechas de ese tour). Los feriados
+// nunca se filtran.
+export function marksDelMes(month, slug = null) {
   const [anio, mes] = month.split('-').map(Number)
   const prefijo = `${anio}-${String(mes).padStart(2, '0')}`
   const marks = {}
@@ -67,6 +73,7 @@ export function marksDelMes(month) {
   }
 
   for (const salida of salidas) {
+    if (slug && salida.slug !== slug) continue
     const multiday = Boolean(salida.fin && salida.fin > salida.fecha)
     // Marca todos los días del rango (multiday con `fin`), solo si caen en el mes.
     for (const dia of diasDeSalida(salida)) {

@@ -2,12 +2,11 @@
 import { ref, watch, nextTick, onMounted, onUnmounted, computed } from 'vue'
 import { formatPrecio, AVISO_TARIFA_DIFERENCIAL, ETIQUETA_TARIFA_DIFERENCIAL } from '../utils/format.js'
 import { crearMensajeReserva } from '../utils/whatsapp.js'
-import { detalleFeriado } from '../utils/fechas.js'
-import { feriadosDe } from '../data/feriados.js'
-import { salidas } from '../data/calendario.js'
+import { detalleFeriado, diasDeTour, rangoTour } from '../utils/fechas.js'
+import { salidas, marksDelMes } from '../data/calendario.js'
 import { evaluarRecargo, precioConRecargo } from '../utils/recargo.js'
 import TourPlaceholder from './TourPlaceholder.vue'
-import DatePicker from './DatePicker.vue'
+import CalendarGrid from './CalendarGrid.vue'
 
 const props = defineProps({
   tour: { type: Object, default: null },
@@ -39,11 +38,31 @@ const fechaMinima = [fechaLocal.getFullYear(), String(fechaLocal.getMonth() + 1)
 const cantidadMaxima = computed(() => props.tour?.cupoMax || 15)
 const cantidadValida = computed(() => Number.isInteger(cantidadPersonas.value) && cantidadPersonas.value >= 1 && cantidadPersonas.value <= cantidadMaxima.value)
 
-// Recargo de feriados/findes largos: solo aplica cuando la fecha viene del
-// calendario (fechaSalida). Se evalúa una vez al abrir, sobre el rango completo.
-const recargo = computed(() =>
-  props.fechaSalida ? evaluarRecargo(props.fechaSalida.fecha, props.fechaSalida.fin) : { aplica: false, motivos: [] },
-)
+// Recargo de feriados/findes largos: se recalcula cada vez que cambia la fecha
+// elegida, con el mismo criterio que la sección Calendario.
+//
+// Rango evaluado:
+// - si la fecha cae dentro de una salida confirmada de ESTE tour → rango real
+//   de la salida (fecha → fin), igual que enriquecer() de Calendario.vue.
+// - si no → el rango que cubre la duración del tour (misma regla que
+//   detalleFeriado, que alimenta el mensaje de WhatsApp).
+function rangoParaRecargo(fecha) {
+  const salida = salidas.find(
+    (salida) =>
+      salida.slug === props.tour?.slug &&
+      fecha >= salida.fecha &&
+      fecha <= (salida.fin || salida.fecha),
+  )
+  if (salida) return { inicio: salida.fecha, fin: salida.fin }
+  const rango = rangoTour(fecha, diasDeTour(props.tour?.duracion) ?? 1)
+  return { inicio: rango[0], fin: rango[rango.length - 1] }
+}
+
+const recargo = computed(() => {
+  if (!fechaReserva.value || !props.tour) return { aplica: false, motivos: [] }
+  const { inicio, fin } = rangoParaRecargo(fechaReserva.value)
+  return evaluarRecargo(inicio, fin)
+})
 const precioFinal = computed(() => {
   if (props.tour?.precio == null) return null
   return recargo.value.aplica ? precioConRecargo(props.tour.precio) : props.tour.precio
@@ -56,16 +75,19 @@ const medios = computed(() => {
   return [...video, ...imagenes]
 })
 
-// Mapa 'YYYY-MM-DD' → nombre de feriado para pintarlos en el DatePicker
-// (año de hoy + 2, que es el horizonte de reservas que usa el calendario).
-const mapaFeriados = computed(() => {
-  const mapa = {}
-  const anioInicial = Number(fechaMinima.slice(0, 4))
-  for (let anio = anioInicial; anio <= anioInicial + 2; anio++) {
-    for (const feriado of feriadosDe(anio)) mapa[feriado.fecha] = feriado.nombre
-  }
-  return mapa
-})
+// Calendario de salidas (CalendarGrid) filtrado a ESTE tour.
+// `mesVisible` tiene formato 'YYYY-MM' y se inicializa con la fecha
+// preseleccionada (salida del calendario o próxima salida del tour).
+const pad = (numero) => String(numero).padStart(2, '0')
+const mesVisible = ref(fechaMinima.slice(0, 7))
+
+const marksTourDelMes = computed(() => marksDelMes(mesVisible.value, props.tour?.slug ?? null))
+
+function cambiarMes(delta) {
+  const [anio, mesActual] = mesVisible.value.split('-').map(Number)
+  const nuevoMes = new Date(anio, mesActual - 1 + delta, 1)
+  mesVisible.value = `${nuevoMes.getFullYear()}-${pad(nuevoMes.getMonth() + 1)}`
+}
 
 // ¿Hay una salida de ESTE tour que cubra `fecha`? (calendario.js)
 function salidaDelDia(fecha) {
@@ -116,16 +138,29 @@ function reservarPorWhatsApp() {
   window.open(crearMensajeReserva(props.tour, fechaReserva.value, cantidadPersonas.value), '_blank', 'noopener,noreferrer')
 }
 
+// Próxima salida confirmada de ESTE tour (la que aún no pasó), para abrir el
+// modal desde la card con una fecha real y no en blanco.
+function proximaSalidaDelTour() {
+  if (!props.tour) return null
+  return salidas.find(
+    (salida) =>
+      salida.slug === props.tour.slug &&
+      (salida.fin ?? salida.fecha) >= fechaMinima,
+  ) ?? null
+}
+
 watch(() => props.open, (val) => {
   if (val) {
     currentIndex.value = 0
     videoCargando.value = false
     videoError.value = false
-    fechaReserva.value = ''
     cantidadPersonas.value = 1
     document.body.style.overflow = 'hidden'
-    // Viene del calendario: precargamos la fecha de la salida para reservar.
-    fechaReserva.value = props.fechaSalida?.fecha ?? ''
+    // Viene del calendario: usamos la fecha de la salida. Desde la card:
+    // precargamos la próxima salida confirmada de este tour (si tiene).
+    fechaReserva.value = props.fechaSalida?.fecha ?? proximaSalidaDelTour()?.fecha ?? ''
+    // Abrimos el CalendarGrid en el mes de la fecha preseleccionada.
+    if (fechaReserva.value) mesVisible.value = fechaReserva.value.slice(0, 7)
     previousActiveElement = document.activeElement
     nextTick(() => modalRef.value?.querySelector('button')?.focus())
   } else {
@@ -208,6 +243,16 @@ function scrollToDocumentacion() {
   nextTick(() => {
     requestAnimationFrame(() => {
       window.dispatchEvent(new CustomEvent('documentacion:abrir-preparacion'))
+    })
+  })
+}
+
+// Cierra el modal y lleva a la sección Calendario (salidas confirmadas).
+function irAlCalendario() {
+  emit('close')
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      document.getElementById('calendario')?.scrollIntoView({ behavior: 'smooth' })
     })
   })
 }
@@ -469,44 +514,6 @@ onUnmounted(() => {
                   </p>
                 </div>
 
-                <!-- Reserva rápida -->
-                <div class="hidden mb-8 rounded-xl border border-[#25D366]/25 bg-[#25D366]/5 p-4 md:p-5">
-                  <h3 class="font-heading text-xl text-brand-white mb-1">Reservá tu lugar</h3>
-                  <p class="text-brand-cream/65 text-sm font-sans mb-4">
-                    Elegí una fecha y te escribimos por WhatsApp para confirmar disponibilidad.
-                  </p>
-
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                    <div>
-                      <label for="fecha-reserva" class="block text-brand-cream/80 text-xs font-semibold font-sans mb-1.5">
-                        Fecha preferida
-                      </label>
-                    </div>
-                    <div>
-                      <label for="cantidad-personas" class="block text-brand-cream/80 text-xs font-semibold font-sans mb-1.5">
-                        Cantidad de personas
-                      </label>
-                      <span v-if="tour.cupoMax" class="block text-brand-cream/45 text-[11px] font-sans mt-1">
-                        Cupo máximo: {{ tour.cupoMax }} personas
-                      </span>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    :disabled="!fechaReserva || !cantidadValida"
-                    @click="reservarPorWhatsApp"
-                    class="w-full min-h-12 rounded-lg bg-[#25D366] px-4 py-3 font-sans font-bold text-white shadow-lg shadow-[#25D366]/15 transition-all duration-300 hover:bg-[#1ebe5d] hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
-                  >
-                    <span class="inline-flex items-center justify-center gap-2">
-                      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.198.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884"/>
-                      </svg>
-                      Reservar por WhatsApp
-                    </span>
-                  </button>
-                </div>
-
                 <!-- Itinerary -->
                 <div v-if="tour.itinerario && tour.itinerario.length > 0" class="mb-8">
                   <h3 class="font-heading text-xl text-brand-white mb-4 flex items-center gap-2">
@@ -627,47 +634,108 @@ onUnmounted(() => {
                   </div>
                 </div>
 
-                <div class="mt-6 rounded-xl border border-[#25D366]/25 bg-[#25D366]/5 p-4 md:p-5">
-                  <h3 class="font-heading text-xl text-brand-white mb-1">Reservá tu lugar</h3>
+                <div class="mx-auto mt-6 w-full max-w-xl rounded-xl border border-[#25D366]/25 bg-[#25D366]/5 p-4 md:p-5">
+                  <h3 class="font-heading text-xl text-brand-white mb-1">Elegí tu fecha</h3>
                   <p class="text-brand-cream/65 text-sm font-sans mb-4">
-                    Elegí una fecha y cantidad para consultar disponibilidad por WhatsApp.
+                    Los puntos dorados marcan las salidas confirmadas de este tour. Cantidad de personas y botón de reserva están siempre abajo, a la vista.
                   </p>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                    <div>
-                      <label for="fecha-reserva-final" class="block text-brand-cream/80 text-xs font-semibold font-sans mb-1.5">Fecha preferida</label>
-                      <DatePicker id="fecha-reserva-final" v-model="fechaReserva" :min-date="fechaMinima" :feriados="mapaFeriados" />
-                      <p v-if="infoDia" class="mt-2 text-[11px] leading-relaxed font-sans text-brand-cream/60" aria-live="polite">
-                        {{ infoDia.fechaLarga }}
-                        <template v-if="infoDia.esPuente">
-                          · Tour completo en fin de semana largo<template v-if="infoDia.feriadoPuente"> (feriado: {{ infoDia.feriadoPuente }})</template>
-                        </template>
-                        <template v-else-if="infoDia.feriadoDelDia"> · Feriado: {{ infoDia.feriadoDelDia }}</template>
-                        <template v-else-if="infoDia.feriadosRango"> · El tour pasa por el feriado {{ infoDia.feriadosRango }}</template>
-                        <template v-else> · Sin feriados</template>
-                        · <span :class="infoDia.salida ? 'font-semibold text-brand-green' : 'text-brand-cream/50'">{{ infoDia.salida ? 'Salida confirmada' : 'Sin salida confirmada' }}</span>
-                      </p>
-                    </div>
-                    <div>
-                      <label for="cantidad-personas-final" class="block text-brand-cream/80 text-xs font-semibold font-sans mb-1.5">Cantidad de personas</label>
-                      <div id="cantidad-personas-final" class="flex min-h-12 items-center overflow-hidden rounded-lg border border-brand-cream/15 bg-brand-dark/60 transition-colors focus-within:border-[#25D366]/70 focus-within:ring-1 focus-within:ring-[#25D366]/30" role="group" aria-label="Cantidad de personas">
-                        <button type="button" class="flex h-12 w-12 shrink-0 items-center justify-center border-r border-brand-cream/10 text-xl text-brand-cream/80 transition-colors hover:bg-brand-cream/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30" :disabled="cantidadPersonas <= 1" aria-label="Disminuir cantidad de personas" @click="ajustarCantidad(-1)">−</button>
-                        <output class="flex-1 text-center text-base font-semibold text-brand-cream" aria-live="polite" :aria-label="`${cantidadPersonas} ${cantidadPersonas === 1 ? 'persona' : 'personas'}`">{{ cantidadPersonas }}</output>
-                        <button type="button" class="flex h-12 w-12 shrink-0 items-center justify-center border-l border-brand-cream/10 text-xl text-brand-cream/80 transition-colors hover:bg-brand-cream/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30" :disabled="cantidadPersonas >= cantidadMaxima" aria-label="Aumentar cantidad de personas" @click="ajustarCantidad(1)">+</button>
-                      </div>
-                      <span class="block text-brand-cream/45 text-[11px] font-sans mt-1">Hasta {{ cantidadMaxima }} personas</span>
-                    </div>
+
+                  <!-- Mismo calendario de la sección Calendario, filtrado a este tour -->
+                  <CalendarGrid
+                    v-model="fechaReserva"
+                    :month="mesVisible"
+                    :min-date="fechaMinima"
+                    :marks="marksTourDelMes"
+                    @change-month="cambiarMes"
+                  />
+
+                  <div
+                    class="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-brand-cream/10 pt-3 text-[11px] text-brand-cream/70"
+                  >
+                    <span class="inline-flex items-center gap-1.5">
+                      <span class="h-2 w-2 rounded-full bg-brand-gold" aria-hidden="true"></span>
+                      Salida confirmada
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                      <span class="h-2.5 w-5 rounded-full bg-brand-orange/35" aria-hidden="true"></span>
+                      Salida de varios días
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                      <span class="h-2 w-2 rounded-full bg-brand-cream/60" aria-hidden="true"></span>
+                      Feriado
+                    </span>
                   </div>
+
+                  <p v-if="infoDia" class="mt-3 text-[11px] leading-relaxed font-sans text-brand-cream/60" aria-live="polite">
+                    {{ infoDia.fechaLarga }}
+                    <template v-if="infoDia.esPuente">
+                      · Tour completo en fin de semana largo<template v-if="infoDia.feriadoPuente"> (feriado: {{ infoDia.feriadoPuente }})</template>
+                    </template>
+                    <template v-else-if="infoDia.feriadoDelDia"> · Feriado: {{ infoDia.feriadoDelDia }}</template>
+                    <template v-else-if="infoDia.feriadosRango"> · El tour pasa por el feriado {{ infoDia.feriadosRango }}</template>
+                    <template v-else> · Sin feriados</template>
+                    · <span :class="infoDia.salida ? 'font-semibold text-brand-green' : 'text-brand-cream/50'">{{ infoDia.salida ? 'Salida confirmada' : 'Sin salida confirmada' }}</span>
+                  </p>
+
+                  <button
+                    type="button"
+                    class="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-brand-cream/20 px-4 py-2.5 text-sm font-sans font-semibold text-brand-gold transition-colors duration-300 hover:border-brand-orange hover:bg-brand-orange/10 hover:text-brand-orange focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
+                    @click="irAlCalendario"
+                  >
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 3v2.25M17.25 3v2.25M3.75 9.75h16.5M5.25 5.25h13.5a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-12a1.5 1.5 0 0 1 1.5-1.5z" />
+                    </svg>
+                    Ver calendario completo de salidas
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Barra sticky de reserva: precio + personas + CTA, siempre visible -->
+            <div class="shrink-0 border-t border-brand-cream/15 bg-brand-card px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:px-8">
+              <div class="flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="flex items-baseline gap-2">
+                    <span class="font-heading text-2xl leading-none text-brand-orange">{{ formatPrecio(precioFinal) || 'Consultar' }}</span>
+                    <span class="text-brand-cream/50 text-xs font-sans">por persona</span>
+                  </div>
+                  <span
+                    v-if="recargo.aplica"
+                    class="mt-1 inline-flex items-center gap-1 rounded-full bg-brand-orange/15 px-2 py-0.5 text-[10px] font-sans font-semibold text-brand-orange"
+                  >
+                    {{ ETIQUETA_TARIFA_DIFERENCIAL }}
+                  </span>
+                  <span v-else-if="!fechaReserva" class="mt-1 block text-[11px] font-sans text-brand-gold">
+                    Elegí una fecha en el calendario para reservar
+                  </span>
                 </div>
 
-                <button
-                  type="button"
-                  :disabled="!fechaReserva || !cantidadValida"
-                  @click="reservarPorWhatsApp"
-                  class="mt-6 w-full min-h-12 rounded-lg bg-[#25D366] px-4 py-3 font-sans font-bold text-white transition-all duration-300 hover:bg-[#1ebe5d] disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  Reservar esta experiencia por WhatsApp
-                </button>
+                <div class="shrink-0">
+                  <div
+                    class="flex min-h-11 items-center overflow-hidden rounded-lg border border-brand-cream/15 bg-brand-dark/60 transition-colors focus-within:border-[#25D366]/70 focus-within:ring-1 focus-within:ring-[#25D366]/30"
+                    role="group"
+                    :aria-label="`Cantidad de personas, hasta ${cantidadMaxima}`"
+                  >
+                    <button type="button" class="flex h-11 w-11 shrink-0 items-center justify-center border-r border-brand-cream/10 text-xl text-brand-cream/80 transition-colors hover:bg-brand-cream/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30" :disabled="cantidadPersonas <= 1" aria-label="Disminuir cantidad de personas" @click="ajustarCantidad(-1)">−</button>
+                    <output class="w-9 text-center text-base font-semibold text-brand-cream" aria-live="polite" :aria-label="`${cantidadPersonas} ${cantidadPersonas === 1 ? 'persona' : 'personas'}`">{{ cantidadPersonas }}</output>
+                    <button type="button" class="flex h-11 w-11 shrink-0 items-center justify-center border-l border-brand-cream/10 text-xl text-brand-cream/80 transition-colors hover:bg-brand-cream/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30" :disabled="cantidadPersonas >= cantidadMaxima" aria-label="Aumentar cantidad de personas" @click="ajustarCantidad(1)">+</button>
+                  </div>
+                </div>
               </div>
+
+              <button
+                type="button"
+                :disabled="!fechaReserva || !cantidadValida"
+                @click="reservarPorWhatsApp"
+                class="mt-3 w-full min-h-12 rounded-lg bg-[#25D366] px-4 py-3 font-sans font-bold text-white transition-all duration-300 hover:bg-[#1ebe5d] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <span class="inline-flex items-center justify-center gap-2">
+                  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.198.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884" />
+                  </svg>
+                  Reservar por WhatsApp
+                </span>
+              </button>
             </div>
           </div>
         </Transition>

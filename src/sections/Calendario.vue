@@ -41,7 +41,24 @@ const fechaSeleccionada = ref(fechaInicial)
 
 const tourPorSlug = new Map(tours.map((tour) => [tour.slug, tour]))
 
-const marks = computed(() => marksDelMes(mes.value))
+// Chips de filtro por tour: derivados de los slugs que tienen salidas cargadas
+// (sin duplicar datos). null = "Todas".
+const filtroSlug = ref(null)
+const toursConSalidas = [...new Set(salidas.map((salida) => salida.slug))].map((slug) => ({
+  slug,
+  nombre: tourPorSlug.get(slug)?.nombre ?? slug,
+}))
+
+// ¿La salida pasa por el filtro activo?
+const pasaFiltro = (salida) => !filtroSlug.value || salida.slug === filtroSlug.value
+
+// Tour activo en el filtro (null = Todas), para textos de estado vacío.
+const tourFiltrado = computed(() =>
+  filtroSlug.value ? tourPorSlug.get(filtroSlug.value) ?? null : null,
+)
+
+// Marcas del mes, acotadas al tour filtrado (los feriados no se filtran).
+const marks = computed(() => marksDelMes(mes.value, filtroSlug.value))
 
 // Agrega tour + evaluación del recargo (+18,4% en feriados / findes largos)
 // calculado sobre el rango completo de la salida (fecha → fin).
@@ -57,7 +74,7 @@ function precioDe(salida) {
   return salida.recargo.aplica ? precioConRecargo(base) : base
 }
 
-const salidasMes = computed(() => salidasDelMes(mes.value).map(enriquecer))
+const salidasMes = computed(() => salidasDelMes(mes.value, filtroSlug.value).map(enriquecer))
 
 const feriadosMes = computed(() => {
   const anio = Number(mes.value.slice(0, 4))
@@ -71,6 +88,7 @@ const salidasDelDia = computed(() =>
       const fin = salida.fin ?? salida.fecha
       return salida.fecha <= fechaSeleccionada.value && fechaSeleccionada.value <= fin
     })
+    .filter(pasaFiltro)
     .map(enriquecer),
 )
 
@@ -121,7 +139,7 @@ onUnmounted(() => observer?.disconnect())
 </script>
 
 <template>
-  <section id="calendario" ref="sectionRef" class="relative overflow-hidden bg-brand-dark py-12 md:py-16">
+  <section id="calendario" ref="sectionRef" class="relative overflow-hidden bg-brand-dark py-16 md:py-20">
     <img
       src="/assets/tours/casita-cristal-cinco-saltos/paisake.webp"
       alt=""
@@ -129,7 +147,7 @@ onUnmounted(() => observer?.disconnect())
       decoding="async"
       class="absolute inset-0 h-full w-full object-cover"
     />
-    <div class="absolute inset-0 bg-brand-dark/85"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-brand-dark via-brand-dark/75 to-brand-dark"></div>
     <div class="topo-pattern pointer-events-none absolute inset-0" aria-hidden="true"></div>
 
     <div class="relative z-10 mx-auto max-w-6xl px-4 md:px-8">
@@ -145,6 +163,38 @@ onUnmounted(() => observer?.disconnect())
           Fechas confirmadas y feriados nacionales: elegí un día en el calendario y sumate a la próxima aventura.
           Las salidas en feriados o findes largos aplican tarifa diferencial.
         </p>
+      </div>
+
+      <!-- Filtro por tour: solo se marcan/listan las salidas del tour elegido -->
+      <div
+        class="mb-5 flex flex-wrap items-center justify-center gap-2"
+        role="group"
+        aria-label="Filtrar salidas por tour"
+      >
+        <button
+          type="button"
+          class="rounded-full border px-3.5 py-1.5 text-xs font-sans font-semibold transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange md:text-sm"
+          :class="filtroSlug === null
+            ? 'border-brand-orange bg-brand-orange text-brand-white shadow-md shadow-brand-orange/20'
+            : 'border-brand-cream/20 text-brand-cream/70 hover:border-brand-orange/50 hover:text-brand-white'"
+          :aria-pressed="filtroSlug === null"
+          @click="filtroSlug = null"
+        >
+          Todas
+        </button>
+        <button
+          v-for="tour in toursConSalidas"
+          :key="tour.slug"
+          type="button"
+          class="rounded-full border px-3.5 py-1.5 text-xs font-sans font-semibold transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange md:text-sm"
+          :class="filtroSlug === tour.slug
+            ? 'border-brand-orange bg-brand-orange text-brand-white shadow-md shadow-brand-orange/20'
+            : 'border-brand-cream/20 text-brand-cream/70 hover:border-brand-orange/50 hover:text-brand-white'"
+          :aria-pressed="filtroSlug === tour.slug"
+          @click="filtroSlug = tour.slug"
+        >
+          {{ tour.nombre }}
+        </button>
       </div>
 
       <div class="grid gap-5 lg:grid-cols-2">
@@ -223,7 +273,7 @@ onUnmounted(() => observer?.disconnect())
                     class="mt-1 font-sans text-xs font-semibold text-brand-orange underline decoration-brand-orange/40 underline-offset-2 transition-colors hover:text-brand-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-orange"
                     @click="abrirTour(salida.tour, { fecha: salida.fecha, fin: salida.fin })"
                   >
-                    ver tour
+                    Reservar esta salida
                   </button>
                 </span>
               </li>
@@ -249,7 +299,12 @@ onUnmounted(() => observer?.disconnect())
             </ul>
 
             <p v-if="!salidasDelDia.length && !feriadosDelDia.length" class="text-sm leading-relaxed text-brand-cream/70">
-              Sin salidas agendadas ni feriados este día. Revisá otros días del mes.
+              <template v-if="tourFiltrado">
+                {{ tourFiltrado.nombre }} no sale este día. Probá con otro día o sacá el filtro para ver todas las salidas.
+              </template>
+              <template v-else>
+                Sin salidas agendadas ni feriados este día. Revisá otros días del mes.
+              </template>
             </p>
           </article>
 
@@ -308,10 +363,22 @@ onUnmounted(() => observer?.disconnect())
             </ul>
 
             <p v-else class="text-sm leading-relaxed text-brand-cream/70">
-              Todavía no hay salidas cargadas para este mes.
-              <a href="#tours" class="font-semibold text-brand-orange underline underline-offset-2 hover:text-brand-gold">
-                Ver todos los tours
-              </a>
+              <template v-if="tourFiltrado">
+                {{ tourFiltrado.nombre }} no tiene salidas cargadas para este mes.
+                <button
+                  type="button"
+                  class="font-semibold text-brand-orange underline underline-offset-2 hover:text-brand-gold"
+                  @click="filtroSlug = null"
+                >
+                  Ver todas las salidas
+                </button>
+              </template>
+              <template v-else>
+                Todavía no hay salidas cargadas para este mes.
+                <a href="#tours" class="font-semibold text-brand-orange underline underline-offset-2 hover:text-brand-gold">
+                  Ver todos los tours
+                </a>
+              </template>
             </p>
           </article>
 
