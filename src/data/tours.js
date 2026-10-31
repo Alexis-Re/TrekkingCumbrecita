@@ -1094,7 +1094,7 @@ export const tours = [
     imagenes: lagunitaGaleria,
     video: {
       tipo: 'local',
-      src: '/assets/tours/garganta-del-diablo-cerro-corona-pozo-cabras/garganta.mp4',
+      src: '/assets/tours/circuito-cumbrecita-lagunita-ventana-garganta/circuito-la-cumbrecita.mp4',
       poster: lagunitaGaleria[8]
     },
     horarios: 'Viernes, Sábados y Domingos · 09:00',
