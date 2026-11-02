@@ -1,5 +1,6 @@
 // Validación de congruencia de tours: node scripts/validate-tours.mjs
 import { tours } from '../src/data/tours.js'
+import { salidas, TIPO_SALIDA_DIA } from '../src/data/calendario.js'
 import { existsSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -73,7 +74,50 @@ for (const t of tours) {
   if ('cupoMax' in t && (typeof t.cupoMax !== 'number' || t.cupoMax < 1)) errores.push(`${id}: cupoMax debe ser número positivo`)
 }
 
-console.log(`Tours: ${tours.length} | disponibles: ${tours.filter((t) => t.disponible).length}`)
+const slugsValidos = new Set(slugs)
+const salidasUnicas = new Set()
+
+function fechaISOValida(fecha) {
+  if (typeof fecha !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return false
+  const [anio, mes, dia] = fecha.split('-').map(Number)
+  return new Date(Date.UTC(anio, mes - 1, dia)).toISOString().slice(0, 10) === fecha
+}
+
+for (const salida of salidas) {
+  if (!salida || typeof salida !== 'object') {
+    errores.push('calendario: cada salida debe ser un objeto')
+    continue
+  }
+
+  const fechaValida = fechaISOValida(salida.fecha)
+  if (!fechaValida) errores.push(`calendario: fecha inválida: "${salida.fecha}"`)
+
+  if (salida.tipo != null && salida.tipo !== TIPO_SALIDA_DIA) {
+    errores.push(`calendario ${salida.fecha}: tipo de salida desconocido: "${salida.tipo}"`)
+  }
+
+  if (salida.tipo === TIPO_SALIDA_DIA) {
+    if (salida.slug != null) errores.push(`calendario ${salida.fecha}: salida genérica no debe tener slug de tour`)
+    if (salida.fin != null) errores.push(`calendario ${salida.fecha}: salida de un día no debe tener fecha "fin"`)
+  } else if (!slugsValidos.has(salida.slug)) {
+    errores.push(`calendario ${salida.fecha}: tour inexistente para slug "${salida.slug}"`)
+  }
+
+  if (salida.fin != null) {
+    if (!fechaISOValida(salida.fin)) {
+      errores.push(`calendario ${salida.fecha}: fecha fin inválida: "${salida.fin}"`)
+    } else if (fechaValida && salida.fin < salida.fecha) {
+      errores.push(`calendario ${salida.fecha}: fecha fin anterior a la fecha de inicio`)
+    }
+  }
+
+  const tipoOslug = salida.tipo === TIPO_SALIDA_DIA ? TIPO_SALIDA_DIA : salida.slug
+  const claveUnica = `${salida.fecha}:${tipoOslug}`
+  if (salidasUnicas.has(claveUnica)) errores.push(`calendario ${salida.fecha}: salida duplicada (${tipoOslug})`)
+  salidasUnicas.add(claveUnica)
+}
+
+console.log(`Tours: ${tours.length} | disponibles: ${tours.filter((t) => t.disponible).length} | salidas de calendario: ${salidas.length}`)
 if (advertencias.length) console.log('\nAdvertencias:\n  ' + advertencias.join('\n  '))
 if (errores.length) {
   console.error('\nErrores:\n  ' + errores.join('\n  '))

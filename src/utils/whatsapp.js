@@ -57,3 +57,8 @@ export function crearConsultaTour(tour) {
   const mensaje = `Hola Rober, quiero consultar por el trekking ${tour.nombre}.`
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`
 }
+
+export function crearConsultaSalidaDia(fecha) {
+  const mensaje = `Hola Rober, quiero consultar por una salida de un día para el ${fechaCompleta(fecha)}. ¿Qué recorrido se realiza y cuál es el precio?`
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`
+}

@@ -571,7 +571,7 @@ export const tours = [
   },
   {
     nombre: 'Los Dos Gigantes: Cerro Champaquí + Cerro La Totora',
-    duracion: '2 días / 1 noche',
+    duracion: '3 días / 2 noches',
     dificultad: 'Media',
     terreno: 'Media',
     distancia: 'Alta',
