@@ -5,7 +5,7 @@ const props = defineProps({
   modelValue: { type: String, default: '' },
   month: { type: String, required: true },
   minDate: { type: String, default: '' },
-  // Mapa de fechas 'YYYY-MM-DD' -> { salidas: Number, feriado: String, rango?: { inicio, fin } }
+  // Mapa de fechas -> { salidas, salidasConfirmadas, salidasPosibles, feriado, rango? }
   marks: { type: Object, default: () => ({}) }
 })
 
@@ -134,7 +134,12 @@ function fechaCorta(valor) {
 function ariaLabel(date) {
   let label = new Intl.DateTimeFormat('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }).format(date)
   const mark = markFor(date)
-  if (mark?.salidas) label += `, ${mark.salidas} ${mark.salidas === 1 ? 'salida disponible' : 'salidas disponibles'}`
+  if (mark?.salidasConfirmadas) {
+    label += `, ${mark.salidasConfirmadas} ${mark.salidasConfirmadas === 1 ? 'salida confirmada' : 'salidas confirmadas'}`
+  }
+  if (mark?.salidasPosibles) {
+    label += `, ${mark.salidasPosibles} ${mark.salidasPosibles === 1 ? 'posible salida de un día' : 'posibles salidas de un día'}`
+  }
   if (mark?.rango && mark.rango.inicio < mark.rango.fin)
     label += `, día de una salida del ${fechaCorta(mark.rango.inicio)} al ${fechaCorta(mark.rango.fin)}`
   if (mark?.feriado) label += `, feriado${mark.feriado ? ` (${mark.feriado})` : ''}`
@@ -184,7 +189,16 @@ function selectDate(date) {
         >
           <span>{{ date.getDate() }}</span>
           <span v-if="markFor(date)" class="flex items-center gap-1" aria-hidden="true">
-            <span v-if="markFor(date).salidas" class="h-1.5 w-1.5 rounded-full" :class="isSelected(date) ? 'bg-brand-white' : 'bg-brand-gold'"></span>
+            <span
+              v-if="markFor(date).salidasConfirmadas"
+              class="h-1.5 w-1.5 rounded-full"
+              :class="isSelected(date) ? 'bg-brand-white' : 'bg-brand-gold'"
+            ></span>
+            <span
+              v-if="markFor(date).salidasPosibles"
+              class="h-2 w-2 rounded-full border"
+              :class="isSelected(date) ? 'border-brand-white' : 'border-brand-orange'"
+            ></span>
             <span v-if="markFor(date).feriado" class="h-1.5 w-1.5 rounded-full" :class="isSelected(date) ? 'bg-brand-white/70' : 'bg-brand-cream/60'"></span>
           </span>
         </button>

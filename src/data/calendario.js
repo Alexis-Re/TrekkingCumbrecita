@@ -76,7 +76,7 @@ function diasDeSalida(salida) {
 }
 
 // Devuelve las marcas de un mes en el formato que espera CalendarGrid:
-//   { 'YYYY-MM-DD': { salidas: Number, feriado: String, rango?: { inicio, fin } } }
+//   { 'YYYY-MM-DD': { salidas, salidasConfirmadas, salidasPosibles, feriado, rango? } }
 // `rango` solo aparece en los días cubiertos por una salida multiday y contiene
 // el rango completo (fecha de inicio y fin de la salida), para que la grilla
 // pinte la banda que conecta las celdas.
@@ -104,6 +104,8 @@ export function marksDelMes(month, filtro = null) {
       if (!dia.startsWith(prefijo)) continue
       const slot = (marks[dia] ||= {})
       slot.salidas = (slot.salidas || 0) + 1
+      const tipoMarca = salida.tipo === TIPO_SALIDA_DIA ? 'salidasPosibles' : 'salidasConfirmadas'
+      slot[tipoMarca] = (slot[tipoMarca] || 0) + 1
       // Rango completo para que CalendarGrid dibuje la banda de conexión.
       if (multiday) slot.rango ||= { inicio: salida.fecha, fin: salida.fin }
     }

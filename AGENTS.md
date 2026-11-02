@@ -5,7 +5,7 @@
 - **Vue 3** (`<script setup>` SFCs) + **Vite 8** + **Tailwind CSS v4**
 - Tailwind v4 uses `@import "tailwindcss"` and `@theme {}` in `src/style.css` — there is no `tailwind.config.js`
 - Custom design tokens live in `src/style.css:3-14`; use these class names (`text-brand-dark`, `bg-brand-orange`, `font-heading`, etc.), not arbitrary values
-- Only runtime dependency besides Vue: none (no EmailJS — the contact flow is a WhatsApp deep link, no backend/third-party form service)
+- Runtime dependencies besides Vue: `@vercel/analytics` (initialized once in `src/main.js` to record visits); no EmailJS — the contact flow is a WhatsApp deep link, no backend/form service
 - `README.md` covers setup/deploy for this project; do not rely on it for code conventions
 
 ## Commands
@@ -59,8 +59,8 @@ public/
 - Tours marked `precio: 'Definir'` render with a "Próximamente" badge/button, use `default.svg`, and do not open the modal
 - `src/data/tours.js` is the single source of truth for tours; per-tour images live in `public/assets/tours/<slug>/`. The Contact form's tour `<select>` filters out tours with `disponible: false`
 - Tour videos: optional `video: { tipo: 'local', src, poster }` field in `tours.js` (also `tipo: 'youtube'` for an embed). The file lives in `public/assets/tours/<slug>/`; `TourModal.vue` shows it as the first media item with `preload="metadata"` and poster. Always compress new videos with `npm run video -- <ruta>` (H.264 + AAC + faststart; default CRF 26, use `--crf 30` for sources already heavily compressed, `--force` for files not tracked by git yet — the script overwrites in place, git is the backup)
-- Images: `vite.config.js` has a build-only plugin (`redimensionar-imagenes-build`) that downscales any `dist/` image whose long edge exceeds 2560 px, running before `vite-plugin-image-optimizer`'s q80 pass. `public/` originals stay untouched — do not pre-resize or hand-optimize photos
-- Contact/social links are hardcoded, not centralized: the email address lives in `src/utils/email.js` (`EMAIL`, plus `crearLinkMailto()` and `copiarEmail()` helpers used by `Contact.vue` and `Footer.vue`); WhatsApp number is in `Contact.vue`; Instagram and Facebook are in `Hero.vue`
+- Images: `vite.config.js` has a build-only plugin (`redimensionar-imagenes-build`) that downscales any `dist/` image whose long edge exceeds 2560 px, running before `vite-plugin-image-optimizer`'s q80 pass. `public/` originals stay untouched — do not convert, pre-resize or hand-optimize photos. The generic image-conversion advice in `landing-scaffold` applies to new projects, not this one
+- Contact/social links are hardcoded, not centralized: the email address lives in `src/utils/email.js` (`EMAIL`, plus `crearLinkMailto()` and `copiarEmail()` helpers used by `Contact.vue` and `Footer.vue`); WhatsApp number is duplicated in `Contact.vue` (contact wizard) and `src/utils/whatsapp.js` (tour links/reservations), so keep both copies synchronized; Instagram and Facebook are in `Hero.vue`
 - `composables/` holds shared view state; today only `useTourModal.js` (singleton `tourAbierto` + `fechaSalida`) — `Tours.vue` mounts `<TourModal>` and `Calendario.vue` opens it with the salida's date range
 - Price surcharge (18,4%): `src/utils/recargo.js` is the single source — `evaluarRecargo(fecha, fin)` returns `{ aplica, motivos }` when any day of the range is a holiday **or** touches a long-weekend window (holiday on Friday → vie-sáb-dom; on Monday → sáb-dom-lun), and `precioConRecargo(precio)` applies `RECARGO = 0.184` once and rounds to the nearest hundred. The surcharge is applied to the price but **never shown as a percentage in the UI** — the visible copy says "tarifa diferencial" instead (texts centralized in `src/utils/format.js`: `AVISO_TARIFA_DIFERENCIAL` for cards/modal, `ETIQUETA_TARIFA_DIFERENCIAL` for badges). Shown in `Calendario.vue` (intro copy, legend pill, day panel badge, month list) and in `TourModal.vue` only when `fechaSalida` comes from the calendar; the WhatsApp message never includes it. Cards in `Tours.vue` show base price + `AVISO_TARIFA_DIFERENCIAL`
 
@@ -69,7 +69,7 @@ public/
 - `Contact.vue` is a 2-step wizard; on submit it only builds a `https://wa.me/<number>?text=...` deep link (`encodeURIComponent`) and opens it — nothing is sent from the app, no API calls, no data stored
 - User input goes into the message only via `encodeURIComponent` (do not concatenate raw input into URLs)
 - Input caps enforced in markup: `nombre` `maxlength="60"`, `detalle` `maxlength="500"`
-- WhatsApp number is hardcoded in `Contact.vue` (`WHATSAPP_NUMBER`); it is public by design (also present in the JSON-LD of `index.html`)
+- WhatsApp number is hardcoded in `Contact.vue` and `src/utils/whatsapp.js` (`WHATSAPP_NUMBER`); both copies and the JSON-LD in `index.html` must stay synchronized. It is public by design
 - Email contact: a `mailto:` deep link with prefilled subject/body (`crearLinkMailto()` in `src/utils/email.js`) plus a "Copiar email" button that uses the Clipboard API with a `textarea` + `execCommand` fallback — no form service, no CSP change. Encode `mailto` params with `encodeURIComponent` (never `URLSearchParams`, it emits `+` instead of `%20`)
 
 ## Media budget (Vercel Hobby)
@@ -80,6 +80,6 @@ public/
 
 ## Security
 
-- Security headers + CSP live in `vercel.json` (HSTS is set at the Vercel/domain level). CSP `connect-src` is `'self'` only; allowlist Google Fonts (`fonts.googleapis.com` / `fonts.gstatic.com`) and Cloudflare Insights (`static.cloudflareinsights.com`) in `script-src`. If adding a new external service, update the CSP accordingly
+- Security headers + CSP live in `vercel.json` (HSTS is set at the Vercel/domain level). CSP `connect-src` is `'self'` only; allowlist Google Fonts (`fonts.googleapis.com` / `fonts.gstatic.com`) and Cloudflare Insights (`static.cloudflareinsights.com`) in `script-src`. Vercel Analytics uses same-origin `/_vercel/insights/*` routes, so it requires no external CSP allowlist. If adding another external service, update the CSP accordingly
 - No env vars are used: there are no `.env` / `.env.example` files and no `import.meta.env` reads. Do not reintroduce third-party form services (EmailJS, etc.) without updating the CSP and this file
 - Old EmailJS credentials were once hardcoded in git history (commit `27c02f5`) and in `.env`; they are considered compromised and must be revoked in the EmailJS dashboard — never reuse them

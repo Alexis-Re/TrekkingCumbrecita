@@ -258,6 +258,10 @@ onUnmounted(() => observer?.disconnect())
               Salidas confirmadas
             </span>
             <span class="inline-flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full border border-brand-orange" aria-hidden="true"></span>
+              Posibles salidas de un día
+            </span>
+            <span class="inline-flex items-center gap-2">
               <span class="h-2.5 w-5 rounded-full bg-brand-orange/35" aria-hidden="true"></span>
               Salida de varios días
             </span>

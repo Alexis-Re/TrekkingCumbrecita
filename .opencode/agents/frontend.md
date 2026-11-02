@@ -23,6 +23,8 @@ Antes de editar:
 3. Revisar componentes relacionados.
 4. Verificar si existe una fuente de datos centralizada.
 
+Las reglas de `AGENTS.md` son la referencia para este proyecto y prevalecen si una skill genérica entra en conflicto. `landing-scaffold` se aplica al crear proyectos nuevos, no para cambiar las reglas de medios de esta landing.
+
 Al implementar:
 
 - Mantener la estructura existente.
@@ -34,6 +36,8 @@ Al implementar:
 - No agregar dependencias sin justificarlo.
 - No agregar variables de entorno ni servicios de terceros sin actualizar la CSP (vercel.json) y AGENTS.md.
 - No exponer credenciales.
+- No convertir, redimensionar ni optimizar manualmente las fotos originales de `public/`; el build ya transforma las imágenes de salida.
+- No incluir en los cambios archivos ajenos a la solicitud. No crear commits ni hacer push salvo que el usuario lo pida expresamente.
 
 Después de editar:
 
@@ -51,3 +55,4 @@ Para cambios visuales, revisar también:
 - estados hover
 - estados focus
 - accesibilidad básica
+- Usar `visual-reviewer` y Playwright cuando la revisión visual o responsive lo necesite.
